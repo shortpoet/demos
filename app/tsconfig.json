@@ -5,6 +5,7 @@
   ],
   "compilerOptions": {
     "outDir": "build",
+    "baseUrl": "../",
     "module": "ES2020",
     "target": "ES2020",
     "lib": [
@@ -27,7 +28,7 @@
     ],
     "paths": {
       "~/*": [
-        "src/*"
+        "./*"
       ]
     },
   },

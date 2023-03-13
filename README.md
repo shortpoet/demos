@@ -27,3 +27,5 @@ namespace='DEMO_CFW_SSR'
 npx wrangler kv:namespace create "$namespace" && \
 npx wrangler kv:namespace create "$namespace" --preview
 ```
+
+- no need for node-fetch these days it's implemented in their engine (find references)

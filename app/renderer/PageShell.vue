@@ -6,8 +6,11 @@
       </a>
       <Link href="/">Home</Link>
       <Link href="/about">About</Link>
+      <Link href="/star-wars">Star Wars</Link>
     </div>
-    <div class="content"><slot /></div>
+    <div class="content">
+      <slot />
+    </div>
   </div>
 </template>
 
@@ -20,9 +23,11 @@ body {
   margin: 0;
   font-family: sans-serif;
 }
+
 * {
   box-sizing: border-box;
 }
+
 a {
   text-decoration: none;
 }
@@ -34,12 +39,14 @@ a {
   max-width: 900px;
   margin: auto;
 }
+
 .content {
   padding: 20px;
   border-left: 2px solid #eee;
   padding-bottom: 50px;
   min-height: 100vh;
 }
+
 .navigation {
   padding: 20px;
   flex-shrink: 0;
@@ -48,6 +55,7 @@ a {
   align-items: center;
   line-height: 1.8em;
 }
+
 .logo {
   margin-top: 20px;
   margin-bottom: 10px;

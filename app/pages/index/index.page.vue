@@ -3,10 +3,12 @@
   This page is:
   <ul>
     <li>Rendered to HTML.</li>
-    <li>Interactive. <Counter /></li>
+    <li>Interactive.
+      <Counter />
+    </li>
   </ul>
 </template>
 
 <script lang="ts" setup>
-import Counter from './Counter.vue'
+import Counter from '~/components/Counter.vue'
 </script>
