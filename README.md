@@ -1,5 +1,14 @@
 # demos
 
+## tags
+
+```bash
+git tag -a 1.0-Base_Config -m "Vite + SSR + Typescript + Cloudflare Workers"
+git push --follow-tags
+git tag -d 1.0-Base_Config
+git push --delete origin 1.0-Base_Config
+```
+
 ## Wrangler
 
 - add other commands to package json to support wrangler
