@@ -3,7 +3,7 @@
     "dev": "npm run server",
     "prod": "npm run build && npm run server:prod",
     "build": "vite build",
-    "server": "ts-node ./server/index.ts",
+    "server": "PORT=3333 ts-node ./server/index.ts",
     "server:prod": "cross-env NODE_ENV=production ts-node ./server/index.ts"
   },
   "dependencies": {
