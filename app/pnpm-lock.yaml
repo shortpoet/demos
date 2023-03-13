@@ -1,6 +1,7 @@
 lockfileVersion: 5.4
 
 specifiers:
+  '@brillout/test-e2e': ^0.4.17
   '@cloudflare/kv-asset-handler': ^0.3.0
   '@cloudflare/workers-types': ^4.20230307.0
   '@types/compression': ^1.7.2
@@ -38,6 +39,7 @@ dependencies:
   vue: 3.2.47
 
 devDependencies:
+  '@brillout/test-e2e': 0.4.17
   '@cloudflare/kv-asset-handler': 0.3.0
   '@cloudflare/workers-types': 4.20230307.0
   '@types/node': 18.15.2
@@ -85,6 +87,25 @@ packages:
 
   /@brillout/part-regex/0.1.2:
     resolution: {integrity: sha512-3b/5PLhJ4xMF/cyY1aJXIMQT0TONFFgUX3tH2wfdrHe78OYe8igl0iaHkJ3kzgN0V+x562Of2AoMwThtLaAj5Q==}
+    dev: true
+
+  /@brillout/test-e2e/0.4.17:
+    resolution: {integrity: sha512-bZ3yYwDIbrdK38ZglRT8tPFiBYQn4c/xi8AkQYdIwbd5t12JFUbvRxLjyvkSYYQxF+AChQfvL9C9+BMXpmUsMg==}
+    hasBin: true
+    dependencies:
+      '@brillout/part-regex': 0.1.2
+      chai: 4.3.7
+      esbuild: 0.16.17
+      fast-glob: 3.2.12
+      node-fetch: 2.6.9
+      picocolors: 1.0.0
+      pixelmatch: 5.3.0
+      playwright-chromium: 1.31.2
+      pngjs: 6.0.0
+      source-map-support: 0.5.21
+      strip-ansi: 6.0.1
+    transitivePeerDependencies:
+      - encoding
     dev: true
 
   /@brillout/vite-plugin-import-build/0.2.12:
