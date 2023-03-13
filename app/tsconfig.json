@@ -2,22 +2,23 @@
   "include": [
     "**/*",
     "**/*.vue",
+    "test/.testRun.ts",
   ],
   "compilerOptions": {
     "outDir": "build",
     "baseUrl": "../",
-    "module": "ES2020",
-    "target": "ES2020",
+    "module": "NodeNext",
+    "target": "esnext",
     "lib": [
       "DOM",
       "DOM.Iterable",
-      "es2020"
+      "ESNext"
     ],
     "strict": true,
     "esModuleInterop": true,
     "jsx": "preserve",
     "skipLibCheck": true,
-    "moduleResolution": "node",
+    "moduleResolution": "nodenext",
     "resolveJsonModule": true,
     "noUnusedLocals": true,
     "strictNullChecks": true,
@@ -25,6 +26,7 @@
     "forceConsistentCasingInFileNames": true,
     "types": [
       "vite/client",
+      "node"
     ],
     "paths": {
       "~/*": [
@@ -38,6 +40,10 @@
     "compilerOptions": {
       "target": "ESNext",
       "module": "ESNext",
+      "types": [
+        "vite/client",
+        "node"
+      ],
     }
   },
   "exclude": [

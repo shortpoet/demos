@@ -5,6 +5,10 @@
     "w:dev": "wrangler dev --experimental-local --experimental-local-remote-kv",
     "w:prev": "pnpm build --mode preview && wrangler dev --experimental-local --experimental-local-remote-kv",
     "w:pub": "pnpm build --mode uat && wrangler publish",
+    "========= Test": "",
+    "test": "pnpm run test:e2e && pnpm run w:test:e2e",
+    "test:e2e": "ts-node ./test/.test-dev.test.ts",
+    "w:test:e2e": "ts-node ./test/.test-wrangler.test.ts",
     "========= Server": "",
     "s:dev": "pnpm run server",
     "s:prod": "pnpm run build && npm run server:prod",
@@ -14,7 +18,6 @@
   "dependencies": {
     "@types/compression": "^1.7.2",
     "@types/express": "^4.17.14",
-    "@types/node": "^18.11.9",
     "@vitejs/plugin-vue": "^4.0.0",
     "@vue/compiler-sfc": "^3.2.33",
     "@vue/server-renderer": "^3.2.33",
@@ -23,16 +26,18 @@
     "express": "^4.18.1",
     "sirv": "^2.0.2",
     "ts-node": "^10.9.1",
-    "typescript": "^4.9.4",
     "vite": "^4.0.3",
     "vite-plugin-ssr": "^0.4.93",
     "vue": "^3.2.33"
   },
   "type": "module",
   "devDependencies": {
+    "@brillout/test-e2e": "^0.4.17",
     "@cloudflare/kv-asset-handler": "^0.3.0",
     "@cloudflare/workers-types": "^4.20230307.0",
+    "@types/node": "^18.15.1",
     "miniflare": "^2.12.1",
+    "typescript": "5.1.0-dev.20230313",
     "wrangler": "^2.12.2"
   }
 }
