@@ -37,6 +37,7 @@
     "@cloudflare/workers-types": "^4.20230307.0",
     "@types/node": "^18.15.1",
     "miniflare": "^2.12.1",
+    "test-e2e": "file:/Users/Shared/source/repos/oss/test-e2e",
     "typescript": "5.1.0-dev.20230313",
     "wrangler": "^2.12.2"
   }

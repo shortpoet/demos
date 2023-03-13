@@ -8,7 +8,7 @@ node_compat = true
 bucket = "./app/build/client"
 
 [dev]
-port = 3333
+port = 3000
 
 [vars]
 ENVIRONMENT = "dev"

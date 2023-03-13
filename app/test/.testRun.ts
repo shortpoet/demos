@@ -1,3 +1,5 @@
+// testRun("npm run w:prev", { hasStarWarsPage: true });
+
 export { testRun };
 
 import {
@@ -18,10 +20,10 @@ import {
 // urlBaseChange('http://127.0.0.1:3000')
 
 function testRun(
-  cmd: "npm run dev" | "npm run w:prev",
+  cmd: "npm run dev" | "npm run w:preview" | "npm run s:dev",
   { hasStarWarsPage }: { hasStarWarsPage: boolean }
 ) {
-  const isWrangler = cmd === "npm run w:prev";
+  const isWrangler = cmd === "npm run w:preview";
 
   // - `CLOUDFLARE_ACCOUNT_ID`/`CLOUDFLARE_API_TOKEN` not available for:
   //   - Vite's ecosystem CI

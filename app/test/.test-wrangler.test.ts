@@ -1,2 +1,2 @@
 import { testRun } from "./.testRun";
-testRun("npm run w:prev", { hasStarWarsPage: true });
+testRun("npm run w:preview", { hasStarWarsPage: true });

@@ -9,6 +9,10 @@ git tag -d 1.0-Base_Config
 git push --delete origin 1.0-Base_Config
 ```
 
+## test-e2e
+
+- port 3000 is hardcoded in the lib (setup.ts L264)
+
 ## Wrangler
 
 - add other commands to package json to support wrangler
