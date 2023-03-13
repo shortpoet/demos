@@ -23,5 +23,11 @@
     "vite-plugin-ssr": "^0.4.93",
     "vue": "^3.2.33"
   },
-  "type": "module"
+  "type": "module",
+  "devDependencies": {
+    "@cloudflare/kv-asset-handler": "^0.3.0",
+    "@cloudflare/workers-types": "^4.20230307.0",
+    "miniflare": "^2.12.1",
+    "wrangler": "^2.12.2"
+  }
 }
