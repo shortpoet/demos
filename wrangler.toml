@@ -1,0 +1,20 @@
+main="./app/worker/index.ts"
+name = "demos"
+compatibility_date = "2022-05-03"
+workers_dev = true
+node_compat = true
+
+[site]
+bucket = "./app/build/client"
+
+[dev]
+port = 3000
+
+[vars]
+ENVIRONMENT = "dev"
+LOG_LEVEL = "debug"
+
+kv_namespaces = [
+  # DEMOS_preview
+  { binding = "DEMOS", id = "", preview_id = "" }
+]
