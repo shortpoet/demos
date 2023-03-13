@@ -2,7 +2,9 @@
   "scripts": {
     "dev": "vite --open",
     "build": "vite build",
-    "preview:w": "wrangler dev",
+    "w:dev": "wrangler dev --experimental-local --experimental-local-remote-kv",
+    "w:prev": "pnpm build --mode preview && wrangler dev --experimental-local --experimental-local-remote-kv",
+    "w:pub": "pnpm build --mode uat && wrangler publish",
     "========= Server": "",
     "s:dev": "pnpm run server",
     "s:prod": "pnpm run build && npm run server:prod",
