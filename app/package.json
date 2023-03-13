@@ -1,9 +1,12 @@
 {
   "scripts": {
-    "dev": "npm run server",
-    "prod": "npm run build && npm run server:prod",
+    "dev": "vite --open",
     "build": "vite build",
-    "server": "PORT=3333 ts-node ./server/index.ts",
+    "preview:w": "wrangler dev",
+    "========= Server": "",
+    "s:dev": "pnpm run server",
+    "s:prod": "pnpm run build && npm run server:prod",
+    "server": "cross-env PORT=3333 ts-node ./server/index.ts",
     "server:prod": "cross-env NODE_ENV=production ts-node ./server/index.ts"
   },
   "dependencies": {
