@@ -39,6 +39,7 @@
     "@cloudflare/kv-asset-handler": "^0.3.0",
     "@cloudflare/workers-types": "^4.20230307.0",
     "@types/node": "^18.15.1",
+    "@vitest/coverage-c8": "^0.29.2",
     "@vue/test-utils": "^2.3.1",
     "cypress": "^12.7.0",
     "jsdom": "^21.1.1",

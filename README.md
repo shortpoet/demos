@@ -5,8 +5,15 @@
 ```bash
 git tag -a 0.1-Base_Config -m "VPS Examples: Vite + SSR + Typescript + Cloudflare Workers"
 git push --follow-tags
-git tag -d 1.0-Base_Config
-git push --delete origin 1.0-Base_Config
+# git tag -d 1.0-Base_Config
+# git push --delete origin 1.0-Base_Config
+```
+
+```bash
+git tag -a 1.0-Base_Config -m "Vite + SSR + Typescript + Cloudflare Workers + Vitest/Cypress"
+git push --follow-tags
+# git tag -d 1.0-Base_Config
+# git push --delete origin 1.0-Base_Config
 ```
 
 ## test-e2e
