@@ -1,13 +1,8 @@
 {
-  "include": [
-    "**/*",
-    "**/*.vue",
-    "test/.testRun.ts",
-  ],
   "compilerOptions": {
     "outDir": "build",
-    "baseUrl": ".",
-    "module": "NodeNext",
+    "baseUrl": "../",
+    "module": "ESNext",
     "target": "esnext",
     "lib": [
       "DOM",
@@ -18,7 +13,7 @@
     "esModuleInterop": true,
     "jsx": "preserve",
     "skipLibCheck": true,
-    "moduleResolution": "nodenext",
+    "moduleResolution": "node",
     "resolveJsonModule": true,
     "noUnusedLocals": true,
     "strictNullChecks": true,
