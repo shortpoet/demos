@@ -35,7 +35,7 @@ export default ({ mode }: { mode: string }) => {
 
     resolve: {
       alias: {
-        "~/": `${path.resolve(__dirname, "app/src")}/`,
+        "~/": `${path.resolve(__dirname, "src")}/`,
       },
     },
 
