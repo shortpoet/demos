@@ -7,6 +7,7 @@
       <Link href="/">Home</Link>
       <Link href="/about">About</Link>
       <Link href="/star-wars">Star Wars</Link>
+      <Link href="/auth">Auth</Link>
     </div>
     <div class="content">
       <slot />
