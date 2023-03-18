@@ -1,6 +1,6 @@
 import $ from "jquery";
 
-export { ConsoleOptions, AuthConsole, HTMLConsole };
+export { ConsoleOptions, AuthConsole, HTMLConsole, useConsole };
 
 interface ConsoleOptions {
   selector: string;
@@ -80,4 +80,9 @@ HTMLConsole.prototype.dump = function (o: any, className: string) {
 
   this.ele.find("details").removeAttr("open");
   this.ele.find("details").last().attr("open", true);
+};
+
+const useConsole = (selector: string) => {
+  const htmlConsole = new HTMLConsole({ selector });
+  return { htmlConsole };
 };

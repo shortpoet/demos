@@ -1,7 +1,7 @@
 <script lang="ts">
 import { useHead } from '@vueuse/head';
 import $ from "jquery";
-import { AuthConsole } from '../../composables/auth';
+import { AuthConsole } from '../../composables/console';
 import Cookies from 'js-cookie';
 // import { ref } from 'vue';
 
@@ -18,7 +18,7 @@ export default {
           defer: true,
           onload: async () => {
             console.log('auth0 loaded');
-            const { HTMLConsole, AuthConsole } = await import('../../composables/auth');
+            const { HTMLConsole } = await import('../../composables/console');
             const htmlConsole = new HTMLConsole({
               selector: '#console'
             });

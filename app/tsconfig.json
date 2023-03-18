@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "outDir": "build",
-    "baseUrl": "../",
+    "baseUrl": "..",
     "module": "ESNext",
     "target": "esnext",
     "lib": [
@@ -25,7 +25,7 @@
     ],
     "paths": {
       "~/*": [
-        "src/*"
+        "app/src/*"
       ]
     },
   },
