@@ -22,7 +22,7 @@ import { computed } from 'vue';
 import Link from '~/components/Link.vue';
 import { useAuth, defaultOptions } from '~/composables/auth';
 
-import logoUrl from '/public/logo.svg';
+import logoUrl from '/logo.svg';
 
 console.log('logoUrl', logoUrl);
 

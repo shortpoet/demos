@@ -4,10 +4,10 @@ import $ from "jquery";
 import { AuthConsole } from '../../composables/console';
 import Cookies from 'js-cookie';
 // import { ref } from 'vue';
-let htmlConsole: AuthConsole;
+// let htmlConsole: AuthConsole;
 let REDIRECT_URL: string;
 // import { GithubUser } from '~/types'
-export { onLoad, htmlConsole, REDIRECT_URL };
+export { onLoad, REDIRECT_URL, setConfig, writeUserData };
 export default {
   setup() {
     // this triggers oauth refresh i want
@@ -22,7 +22,7 @@ export default {
           onload: async () => {
             console.log('auth0 loaded');
             const { HTMLConsole } = await import('../../composables/console');
-            htmlConsole = new HTMLConsole({
+            const htmlConsole = new HTMLConsole({
               selector: '#console'
             });
             if (typeof window !== "undefined") {
@@ -92,7 +92,7 @@ function setConfig(REDIRECT_URL: string) {
     leeway: 60,
   };
 
-  console.log('webAuthConfig', webAuthConfig);
+  // console.log('webAuthConfig', webAuthConfig);
 
   window.webAuth = new window.auth0.WebAuth(webAuthConfig);
 
@@ -134,12 +134,27 @@ function setConfig(REDIRECT_URL: string) {
   });
 }
 // let user: GithubUser
+function writeUserData(user: any) {
+  console.log('writeUserData');
+  const { name, nickname, picture } = user;
+  const $user = $('#user-profile');
+  if (!user) {
+    return $user.html(`<h2>User not logged in</h2>`);
+  }
+  $user.html(`
+    <img src="${picture}" alt="${name}" />
+    <h2>${name}</h2>
+    <p>${nickname}</p>
+  `);
+}
 
 function onLoad(htmlConsole: AuthConsole, REDIRECT_URL: string) {
   console.log('onLoad');
   // let organization: string | null = null;
 
   window.webAuth.parseHash(function (err: any, data: any) {
+    console.log('parseHash');
+    console.log('err, data');
     console.log(err, data);
     if (err) {
       htmlConsole.dumpCallback(err, null);
@@ -155,39 +170,38 @@ function onLoad(htmlConsole: AuthConsole, REDIRECT_URL: string) {
           data.accessToken,
           htmlConsole.dumpCallback.bind(htmlConsole)
         );
-
       }
     }
 
     window.location.hash = '';
   });
 
-  function getUserInfo(htmlConsole: AuthConsole, accessToken: string) {
+  // function getUserInfo(htmlConsole: AuthConsole, accessToken: string) {
 
-    window.webAuth.client.userInfo(
+  //   window.webAuth.client.userInfo(
 
-      Cookies.get('auth0_access_token'),
-      htmlConsole.dumpCallback.bind(htmlConsole)
-      // accessToken,
-      // function (err, user) {
-      //   if (err) {
-      //     console.log("renewAuth userinfo err");
-      //     console.log(err);
-      //   }
-      //   // setIdToken(authResult.idToken || "");
-      //   // setAccessToken(authResult.accessToken || "");
-      //   // Now you have the user's information
-      //   console.log("user");
-      //   console.log(user);
-      //   // setCurrentUser(user);
-      //   // setLoggedIn(true);
-      //   return authResul
-      // }
-    );
+  //     Cookies.get('auth0_access_token'),
+  //     htmlConsole.dumpCallback.bind(htmlConsole)
+  //     // accessToken,
+  //     // function (err, user) {
+  //     //   if (err) {
+  //     //     console.log("renewAuth userinfo err");
+  //     //     console.log(err);
+  //     //   }
+  //     //   // setIdToken(authResult.idToken || "");
+  //     //   // setAccessToken(authResult.accessToken || "");
+  //     //   // Now you have the user's information
+  //     //   console.log("user");
+  //     //   console.log(user);
+  //     //   // setCurrentUser(user);
+  //     //   // setLoggedIn(true);
+  //     //   return authResul
+  //     // }
+  //   );
 
-  }
-  console.log('getUserInfo');
-  getUserInfo(htmlConsole, Cookies.get('auth0_access_token') || '');
+  // }
+  // console.log('getUserInfo');
+  // getUserInfo(htmlConsole, Cookies.get('auth0_access_token') || '');
 
   $('#clear-console').click(function () {
     $('#clear-console').removeClass('icon-budicon-498');
@@ -344,14 +358,37 @@ function onLoad(htmlConsole: AuthConsole, REDIRECT_URL: string) {
   $('.login-github').click(function (e) {
     e.preventDefault();
 
-    var config = { connection: 'github', };
+    var config = {
+      connection: 'github', redirectURI: REDIRECT_URL,
+    };
 
     // if (organization) {
     //   config.organization = organization;
     // }
 
-    window.webAuth.authorize(config);
+    window.webAuth.authorize(config, htmlConsole.dumpCallback.bind(htmlConsole));
   });
+
+  $('.popup-login-github').click(function (e) {
+    e.preventDefault();
+
+    var options = {
+      connection: 'github',
+      redirectURI: REDIRECT_URL,
+      owp: true,
+      // organization: ''
+    };
+
+    // if (organization) {
+    //   options.organization = organization;
+    // }
+
+    window.webAuth.popup.authorize(
+      options,
+      htmlConsole.dumpCallback.bind(htmlConsole)
+    );
+  });
+
 
   $('.popup-login-facebook').click(function (e) {
     e.preventDefault();
@@ -409,24 +446,6 @@ function onLoad(htmlConsole: AuthConsole, REDIRECT_URL: string) {
     );
   });
 
-  $('.popup-login-github').click(function (e) {
-    e.preventDefault();
-
-    var options = {
-      connection: 'github',
-      redirectURI: REDIRECT_URL,
-      // organization: ''
-    };
-
-    // if (organization) {
-    //   options.organization = organization;
-    // }
-
-    window.webAuth.popup.authorize(
-      options,
-      htmlConsole.dumpCallback.bind(htmlConsole)
-    );
-  });
 
   $('.logout').click(function (e) {
     e.preventDefault();
@@ -529,6 +548,10 @@ code details.error {
     <div class="row">
       <div class="col-xs-12">
         <h1>Auth0.JS playground</h1>
+      </div>
+      <div class="user-container">
+        <h2>User</h2>
+        <div id="user-profile" class="user-profile"></div>
       </div>
       <div class="col-xs-6">
         <h2>Actions</h2>
