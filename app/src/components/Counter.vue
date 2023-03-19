@@ -1,5 +1,5 @@
 <template>
-  <button data-cy="counter-btn" class="counter-btn" type="button" @click="state.count++">Counter {{ state.count
+  <button btn data-cy="counter-btn" class="counter-btn" type="button" @click="state.count++">Counter {{ state.count
   }}</button>
 </template>
 

@@ -23,6 +23,10 @@ export default defineConfig({
       "icon-btn",
       "inline-block cursor-pointer select-none opacity-75 transition duration-200 ease-in-out hover:opacity-100 hover:text-teal-600",
     ],
+    [
+      "form-control",
+      "block w-full px-3 py-2 my-1 text-sm leading-tight text-gray-700 border border-gray-300 rounded appearance-none focus:outline-none focus:shadow-outline",
+    ],
   ],
   presets: [
     presetUno(),

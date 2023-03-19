@@ -4,7 +4,9 @@ import $ from "jquery";
 import { AuthConsole } from '../../composables/console';
 import Cookies from 'js-cookie';
 // import { ref } from 'vue';
-
+let htmlConsole: AuthConsole;
+let REDIRECT_URL: string;
+export { onLoad, htmlConsole, REDIRECT_URL };
 export default {
   setup() {
     // this triggers oauth refresh i want
@@ -19,16 +21,14 @@ export default {
           onload: async () => {
             console.log('auth0 loaded');
             const { HTMLConsole } = await import('../../composables/console');
-            const htmlConsole = new HTMLConsole({
+            htmlConsole = new HTMLConsole({
               selector: '#console'
             });
             if (typeof window !== "undefined") {
-
-              const REDIRECT_URL = import.meta.env.VITE_AUTH0_CALLBACK_URL || window.location.origin;
+              REDIRECT_URL = `${import.meta.env.VITE_APP_URL}/auth0/callback` || window.location.origin;
               setConfig(REDIRECT_URL);
               onLoad(htmlConsole, REDIRECT_URL);
             }
-
           },
         },
       ],
@@ -134,6 +134,7 @@ function setConfig(REDIRECT_URL: string) {
 }
 
 function onLoad(htmlConsole: AuthConsole, REDIRECT_URL: string) {
+  console.log('onLoad');
   let organization: string | null = null;
 
   window.webAuth.parseHash(function (err: any, data: any) {
@@ -512,7 +513,7 @@ code details.error {
             <input class="form-control login-password update-user-password" value="" />
           </p>
           <p>
-            <input type="button" class="btn btn-default login-db" value="login" />
+            <input type="button" class="btn p-1 m-1 btn-default login-db" value="login" />
           </p>
         </div>
 
@@ -525,7 +526,7 @@ code details.error {
               <input class="form-control passwordless-login-username update-user-email" value="" type="email" />
             </p>
             <p>
-              <input type="button" class="btn btn-default passwordless-login-db" value="login" />
+              <input type="button" class="btn p-1 m-1 btn-default passwordless-login-db" value="login" />
             </p>
           </div>
           <div>
@@ -533,7 +534,7 @@ code details.error {
               <input class="form-control passwordless-login-code" value="" />
             </p>
             <p>
-              <input type="button" class="btn btn-default passwordless-login-verify" value="verify" />
+              <input type="button" class="btn p-1 m-1 btn-default passwordless-login-verify" value="verify" />
             </p>
           </div>
         </div>
@@ -553,8 +554,8 @@ code details.error {
             <input class="form-control popup-login-password update-user-password" value="" />
           </p>
           <p>
-            <input type="button" class="btn btn-default popup-login-db-preload" value="preload" />
-            <input type="button" class="btn btn-default popup-login-db" value="login" />
+            <input type="button" class="btn p-1 m-1 btn-default popup-login-db-preload" value="preload" />
+            <input type="button" class="btn p-1 m-1 btn-default popup-login-db" value="login" />
           </p>
         </div>
 
@@ -573,7 +574,7 @@ code details.error {
             <input class="form-control client-login-password update-user-password" value="" placeholder="User password" />
           </p>
           <p>
-            <input type="button" class="btn btn-default client-login-db" value="login" />
+            <input type="button" class="btn p-1 m-1 btn-default client-login-db" value="login" />
           </p>
         </div>
 
@@ -582,10 +583,10 @@ code details.error {
         <div>
           <h4>Login with /authorize:</h4>
           <p>
-            <input type="button" class="btn btn-default btn-sm login-hosted" value="Hosted login page" />
-            <input type="button" class="btn btn-default btn-sm login-facebook" value="Facebook" />
-            <input type="button" class="btn btn-default btn-sm login-twitter" value="Twitter" />
-            <input type="button" class="btn btn-default btn-sm login-github" value="Github" />
+            <input type="button" class="btn p-1 m-1 btn-default btn-sm login-hosted" value="Hosted login page" />
+            <input type="button" class="btn p-1 m-1 btn-default btn-sm login-facebook" value="Facebook" />
+            <input type="button" class="btn p-1 m-1 btn-default btn-sm login-twitter" value="Twitter" />
+            <input type="button" class="btn p-1 m-1 btn-default btn-sm login-github" value="Github" />
           </p>
         </div>
 
@@ -593,31 +594,31 @@ code details.error {
 
         <div>
           <h4>Login with /authorize (popup):</h4>
-          <input type="button" class="btn btn-default btn-sm popup-login-hosted" value="Hosted login page" />
-          <input type="button" class="btn btn-default btn-sm popup-login-facebook" value="Facebook" />
-          <input type="button" class="btn btn-default btn-sm popup-login-twitter" value="Twitter" />
-          <input type="button" class="btn btn-default btn-sm popup-login-github" value="Github" />
+          <input type="button" class="btn p-1 m-1 btn-default btn-sm popup-login-hosted" value="Hosted login page" />
+          <input type="button" class="btn p-1 m-1 btn-default btn-sm popup-login-facebook" value="Facebook" />
+          <input type="button" class="btn p-1 m-1 btn-default btn-sm popup-login-twitter" value="Twitter" />
+          <input type="button" class="btn p-1 m-1 btn-default btn-sm popup-login-github" value="Github" />
         </div>
 
         <hr />
 
         <div>
           <h4>Renew authentication:</h4>
-          <input type="button" class="btn btn-default renew-auth" value="Renew" />
+          <input type="button" class="btn p-1 m-1 btn-default renew-auth" value="Renew" />
         </div>
 
         <hr />
 
         <div>
           <h4>Call token endpoint</h4>
-          <input type="button" value="Get token" class="btn btn-default token-endpoint" />
+          <input type="button" value="Get token" class="btn p-1 m-1 btn-default token-endpoint" />
         </div>
 
         <hr />
 
         <div>
           <h4>Check if you have an active session:</h4>
-          <input type="button" class="btn btn-default web-message-check-session" value="Check session" />
+          <input type="button" class="btn p-1 m-1 btn-default web-message-check-session" value="Check session" />
         </div>
 
         <hr />
@@ -626,14 +627,14 @@ code details.error {
           <h4>
             Get information about the last successful authorization request
           </h4>
-          <input type="button" class="btn btn-default getssodata" value="Get SSO data" />
+          <input type="button" class="btn p-1 m-1 btn-default getssodata" value="Get SSO data" />
         </div>
 
         <hr />
 
         <div>
           <h4>SSO Logout:</h4>
-          <input type="button" class="btn btn-default logout" value="Logout" />
+          <input type="button" class="btn p-1 m-1 btn-default logout" value="Logout" />
         </div>
 
         <hr />
@@ -664,17 +665,17 @@ code details.error {
           <div style="display: flex">
             <input type="text" class="form-control update-organization" id="config-organization"
               style="margin-right: 10px;" />
-            <input type="button" class="btn btn-default" id="clear-org" value="Clear" />
+            <input type="button" class="btn p-1 m-1 btn-default" id="clear-org" value="Clear" />
           </div>
 
           <h4>User Invitation</h4>
           <p>Paste in an invitation URL and be logged in</p>
           <div>
-            <input type="button" value="Test User Invitation" class="btn btn-default" id="invoke-invite" />
+            <input type="button" value="Test User Invitation" class="btn p-1 m-1 btn-default" id="invoke-invite" />
           </div>
 
           <br />
-          <input type="button" class="btn btn-default" id="config-update" value="Update" />
+          <input type="button" class="btn p-1 m-1 btn-default" id="config-update" value="Update" />
         </div>
       </div>
 

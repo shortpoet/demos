@@ -6,7 +6,8 @@
 
 <script lang="ts">
 import { useHead } from '@vueuse/head';
-
+import { navigate } from 'vite-plugin-ssr/client/router';
+import { onLoad, htmlConsole, REDIRECT_URL } from './index.page.vue';
 export default {
   setup() {
     // this triggers oauth refresh i want
@@ -19,7 +20,11 @@ export default {
           async: true,
           defer: true,
           onload: async () => {
-            parent.postMessage(window.location.hash, 'http://localhost:3000/')
+            console.log('$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$')
+            console.log('callback loaded')
+            parent.postMessage(window.location.hash, 'http://localhost:3000/auth0')
+            navigate('/auth0')
+            // onLoad(htmlConsole, REDIRECT_URL)
           },
         },
       ],
