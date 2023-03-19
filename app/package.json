@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "dev": "export VITE_AUTH0_CLIENT_ID=$(pass Cloud/auth0/cloudflare-workers-vue/client_id) && export VITE_AUTH0_DOMAIN=$(pass Cloud/auth0/shortpoet/domain) && vite --open",
+    "dev": "export VITE_AUTH0_CLIENT_ID=$(pass Cloud/auth0/demo-cfw-ssr/client_id) && export VITE_AUTH0_DOMAIN=$(pass Cloud/auth0/shortpoet/domain) && vite --open",
     "build": "vite build",
     "w:dev": "wrangler dev --experimental-local --experimental-local-remote-kv",
     "w:prev": "pnpm build --mode preview && wrangler dev --experimental-local --experimental-local-remote-kv",

@@ -123,7 +123,7 @@ const useAuth = async ({
           onRedirectCallback(appState);
         }
       } catch (err) {
-        console.error(error);
+        console.error(`error: ${err}`);
         error.value = err;
       } finally {
         loading.value = false;
