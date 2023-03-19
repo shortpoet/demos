@@ -54,6 +54,8 @@ export default {
         };
         onLogout.value = (event: any) => {
           logout();
+          // isLoggedIn.value = a.value;
+          // user.value = u.value;
         };
       }
     })();

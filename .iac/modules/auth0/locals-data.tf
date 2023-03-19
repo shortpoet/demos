@@ -8,7 +8,7 @@ locals {
     "https://${local.application_name}.shortpoet.workers.dev",
   ]
 
-  logout_suffixes = ["api", "auth/logout", "auth0/logout", ""]
+  logout_suffixes = ["auth/logout", "auth0/logout", "api", ""]
 
   allowed_logout_urls = flatten([
     for base_url in local.base_urls : [

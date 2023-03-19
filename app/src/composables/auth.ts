@@ -224,7 +224,14 @@ const useAuth = async ({
         isLoggedIn.value = await auth0Client.isAuthenticated();
       }
     },
-    logout: async (o) => {
+    logout: async (
+      o: LogoutOptions = {
+        openUrl: async (defaultUrl) => {
+          // console.log(`logout: openUrl: ${defaultUrl}`);
+          window.location.replace(window.location.origin + '/auth/login');
+        },
+      },
+    ) => {
       await auth0Client.logout(o);
       user.value = undefined;
       isLoggedIn.value = false;
