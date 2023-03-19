@@ -23,6 +23,7 @@ const HTMLConsole = function HTMLConsole(
   this.data = [];
   var _this = this;
   var data;
+  console.log("HTMLConsole", this.ele);
   if ((data = localStorage.getItem("consoleData"))) {
     data = JSON.parse(data);
     data.forEach(function (d: any) {
@@ -39,12 +40,15 @@ HTMLConsole.prototype.clear = function () {
 
 HTMLConsole.prototype.dumpCallback = function (err: any, data: any) {
   if (err) {
+    console.log("dumpCallback.err", err);
     return this.dump(err, "error");
   }
   if (data && data.error) {
+    console.log("dumpCallback.data.error", data.error);
     return this.dump(data, "error");
   }
   if (data) {
+    console.log("dumpCallback.data", data);
     return this.dump(data);
   }
 };

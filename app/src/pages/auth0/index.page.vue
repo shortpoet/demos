@@ -6,6 +6,7 @@ import Cookies from 'js-cookie';
 // import { ref } from 'vue';
 let htmlConsole: AuthConsole;
 let REDIRECT_URL: string;
+// import { GithubUser } from '~/types'
 export { onLoad, htmlConsole, REDIRECT_URL };
 export default {
   setup() {
@@ -46,7 +47,7 @@ export default {
 
 // let webAuth;
 // let webAuthPasswordless;
-let organization;
+// let organization;
 
 
 function setConfig(REDIRECT_URL: string) {
@@ -111,10 +112,10 @@ function setConfig(REDIRECT_URL: string) {
   Cookies.set('auth0_user_email', userEmail.toString());
   Cookies.set('auth0_user_pw', userPass.toString());
 
-  if (configOrganization) {
-    Cookies.set('auth0_config_organization', configOrganization.toString());
-    organization = configOrganization;
-  }
+  // if (configOrganization) {
+  //   Cookies.set('auth0_config_organization', configOrganization.toString());
+  //   organization = configOrganization;
+  // }
 
   $domainInput.val(domain);
   $clientIdInput.val(clientId);
@@ -132,10 +133,11 @@ function setConfig(REDIRECT_URL: string) {
     $(el).val(userPass);
   });
 }
+// let user: GithubUser
 
 function onLoad(htmlConsole: AuthConsole, REDIRECT_URL: string) {
   console.log('onLoad');
-  let organization: string | null = null;
+  // let organization: string | null = null;
 
   window.webAuth.parseHash(function (err: any, data: any) {
     console.log(err, data);
@@ -153,11 +155,39 @@ function onLoad(htmlConsole: AuthConsole, REDIRECT_URL: string) {
           data.accessToken,
           htmlConsole.dumpCallback.bind(htmlConsole)
         );
+
       }
     }
 
     window.location.hash = '';
   });
+
+  function getUserInfo(htmlConsole: AuthConsole, accessToken: string) {
+
+    window.webAuth.client.userInfo(
+
+      Cookies.get('auth0_access_token'),
+      htmlConsole.dumpCallback.bind(htmlConsole)
+      // accessToken,
+      // function (err, user) {
+      //   if (err) {
+      //     console.log("renewAuth userinfo err");
+      //     console.log(err);
+      //   }
+      //   // setIdToken(authResult.idToken || "");
+      //   // setAccessToken(authResult.accessToken || "");
+      //   // Now you have the user's information
+      //   console.log("user");
+      //   console.log(user);
+      //   // setCurrentUser(user);
+      //   // setLoggedIn(true);
+      //   return authResul
+      // }
+    );
+
+  }
+  console.log('getUserInfo');
+  getUserInfo(htmlConsole, Cookies.get('auth0_access_token') || '');
 
   $('#clear-console').click(function () {
     $('#clear-console').removeClass('icon-budicon-498');
@@ -176,14 +206,14 @@ function onLoad(htmlConsole: AuthConsole, REDIRECT_URL: string) {
     setConfig(REDIRECT_URL);
   });
 
-  $('#clear-org').click(function (e) {
-    e.preventDefault();
+  // $('#clear-org').click(function (e) {
+  //   e.preventDefault();
 
-    Cookies.remove('auth0_config_organization');
-    $('#config-organization').val('');
-    organization = null;
-    setConfig(REDIRECT_URL);
-  });
+  //   Cookies.remove('auth0_config_organization');
+  //   $('#config-organization').val('');
+  //   organization = null;
+  //   setConfig(REDIRECT_URL);
+  // });
 
   $('#invoke-invite').click(function (e) {
     e.preventDefault();
@@ -236,11 +266,12 @@ function onLoad(htmlConsole: AuthConsole, REDIRECT_URL: string) {
     );
   });
 
-  let popupHandler;
+  // let popupHandler;
 
   $('.popup-login-db-preload').click(function (e) {
     e.preventDefault();
-    popupHandler = window.webAuth.popup.preload();
+    // popupHandler = window.webAuth.popup.preload();
+    window.webAuth.popup.preload();
   });
 
   $('.popup-login-db').click(function (e) {
@@ -435,12 +466,12 @@ function onLoad(htmlConsole: AuthConsole, REDIRECT_URL: string) {
 
   $('.web-message-check-session').click(function (e) {
     e.preventDefault();
-    const configPwless = {
-      domain: Cookies.get('auth0_domain'),
-      redirectUri: REDIRECT_URL,
-      clientID: Cookies.get('auth0_client_id'),
-      responseType: 'token'
-    }
+    // const configPwless = {
+    //   domain: Cookies.get('auth0_domain'),
+    //   redirectUri: REDIRECT_URL,
+    //   clientID: Cookies.get('auth0_client_id'),
+    //   responseType: 'token'
+    // }
     window.webAuth.checkSession({}, htmlConsole.dumpCallback.bind(htmlConsole));
   });
 
