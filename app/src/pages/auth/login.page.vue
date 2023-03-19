@@ -4,11 +4,11 @@
     <Login :use-popup="false">
       <template #login="loginProps">
         <button class="c-yellow btn m-3 text-sm bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full"
-          id="login-button" :disabled="isLoggedIn" @click="loginProps.loginWithPopup">Log in</button>
+          id="login-button" :disabled="isLoggedIn" @click="loginProps.onLogin">Log in</button>
       </template>
       <template #logout="logoutProps">
         <button class="c-yellow btn m-3 text-sm bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full"
-          id="logout-button" :disabled="isLoggedIn" @click="logoutProps.logout">Log out</button>
+          id="logout-button" :disabled="isLoggedIn" @click="logoutProps.onLogout">Log out</button>
       </template>
     </Login>
 

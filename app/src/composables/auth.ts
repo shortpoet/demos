@@ -65,10 +65,10 @@ const loading = ref(true);
 const popupOpen = ref(false);
 const error = ref<any>();
 
-const defaultOptions = {
+const defaultOptions: ClientOptions = {
   domain: import.meta.env.VITE_AUTH0_DOMAIN,
   clientId: import.meta.env.VITE_AUTH0_CLIENT_ID,
-  redirectUri: import.meta.env.VITE_AUTH0_CALLBACK_URL,
+  useRefreshTokens: true,
   onRedirectCallback: (appState: any) => {
     console.log("onRedirectCallback");
     navigate(
@@ -81,18 +81,26 @@ const defaultOptions = {
 
 const useAuth = async ({
   onRedirectCallback = DEFAULT_REDIRECT_CALLBACK,
-  redirectUri = window.location.origin,
+  redirectUri = import.meta.env.VITE_AUTH0_CALLBACK_URL,
   ...options
 }): Promise<Auth0Instance> => {
   // if (instance) return instance;
-  console.log("useAuth");
+  // console.log("useAuth");
+
+  const audience = `https://ssr.shortpoet.com`;
 
   const initOptions: ClientOptions = {
-    redirect_uri: redirectUri,
+    ...options,
     domain: options.domain,
     clientId: options.clientId,
-    ...options,
+    authorizationParams: {
+      scope: "openid profile email",
+      audience,
+      redirect_uri: redirectUri,
+      response_type: "code",
+    },
   };
+
   const auth0Client = await createAuth0Client(initOptions);
   const isLoggedIn = ref(await auth0Client.isAuthenticated());
 
@@ -102,7 +110,7 @@ const useAuth = async ({
     popupOpen,
     isLoggedIn,
     onLoad: (async () => {
-      console.log("onLoad");
+      // console.log("onLoad");
       try {
         if (
           window.location.search.includes("code=") &&
@@ -110,6 +118,8 @@ const useAuth = async ({
         ) {
           console.log("onLoad: handleRedirectCallback");
           const { appState } = await auth0Client.handleRedirectCallback();
+          console.log("onLoad: handleRedirectCallback: after");
+          console.log(`onLoad: appState: ${JSON.stringify(appState)}`);
           onRedirectCallback(appState);
         }
       } catch (err) {
@@ -118,11 +128,11 @@ const useAuth = async ({
       } finally {
         loading.value = false;
       }
-      console.log("onLoad: after finally");
+      // console.log("onLoad: after finally");
       isLoggedIn.value = await auth0Client.isAuthenticated();
       user.value = await auth0Client.getUser();
-      console.log(`onLoad: user: ${JSON.stringify(user.value)}`);
-      console.log(`onLoad: isLoggedIn: ${isLoggedIn.value}`);
+      // console.log(`onLoad: user: ${JSON.stringify(user.value)}`);
+      // console.log(`onLoad: isLoggedIn: ${isLoggedIn.value}`);
     })(),
     handleRedirectCallback: async () => {
       console.log("handleRedirectCallback");
@@ -150,6 +160,7 @@ const useAuth = async ({
       return authenticated;
     },
     loginWithRedirect: async (o) => {
+      console.log("loginWithRedirect");
       loading.value = true;
       try {
         const res = await auth0Client.loginWithRedirect(o);

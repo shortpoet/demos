@@ -42,6 +42,7 @@ useHead({
       onload: async () => {
         console.log('XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX')
         const { onLoad } = await useAuth(defaultOptions);
+        console.log('auth0 loaded');
         return onLoad
       },
     },
