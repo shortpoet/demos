@@ -1,38 +1,13 @@
 resource "auth0_client" "this" {
-  name = local.application_name
+  name        = local.application_name
+  description = local.description
 
   app_type = "spa"
 
-  allowed_logout_urls = [
-    "http://localhost:3000/api",
-    "http://localhost:3000/auth/logout",
-    "http://localhost:3000",
-    "https://${local.application_name}-dev.shortpoet.workers.dev",
-    "https://${local.application_name}-dev.shortpoet.workers.dev/api",
-    "https://${local.application_name}-dev.shortpoet.workers.dev/auth/logout",
-    "https://${local.application_name}.shortpoet.workers.dev",
-    "https://${local.application_name}.shortpoet.workers.dev/api",
-    "https://${local.application_name}.shortpoet.workers.dev/auth/logout",
-  ]
-  allowed_origins = [
-    "http://localhost:3000",
-    "https://${local.application_name}-dev.shortpoet.workers.dev",
-    "https://${local.application_name}.shortpoet.workers.dev",
-  ]
-
-  callbacks = [
-    "http://localhost:3000/auth/callback",
-    "http://localhost:3000/auth/popup-callback",
-    "https://${local.application_name}-dev.shortpoet.workers.dev/auth/callback",
-    "https://${local.application_name}-dev.shortpoet.workers.dev/auth/popup-callback",
-    "https://${local.application_name}.shortpoet.workers.dev/auth/callback",
-    "https://${local.application_name}.shortpoet.workers.dev/auth/popup-callback",
-  ]
-  web_origins = [
-    "http://localhost:3000",
-    "https://${local.application_name}-dev.shortpoet.workers.dev",
-    "https://${local.application_name}.shortpoet.workers.dev",
-  ]
+  allowed_logout_urls = local.allowed_logout_urls
+  allowed_origins     = local.allowed_origins
+  callbacks           = local.callbacks
+  web_origins         = local.web_origins
 
   grant_types = ["refresh_token", "implicit", "authorization_code"]
 
@@ -50,6 +25,10 @@ resource "auth0_client" "this" {
 
     secret_encoded = false
   }
+
+  token_endpoint_auth_method = "none" # "client_secret_post"
+
+  oidc_conformant = true
 
   # native_social_login {
   #   apple {
@@ -77,8 +56,6 @@ resource "auth0_client" "this" {
   #   token_lifetime = 31557600
   # }
 
-  token_endpoint_auth_method = "none" # "client_secret_post"
-
   # cross_origin_auth = false
 
   # custom_login_page_on = true
@@ -86,8 +63,6 @@ resource "auth0_client" "this" {
   # is_first_party = true
 
   # is_token_endpoint_ip_header_trusted = false
-
-  oidc_conformant = true
 
   # sso = false
 
@@ -103,21 +78,16 @@ resource "auth0_client" "this" {
 
   # client_secret_rotation_trigger = null
 
-
   # cross_origin_loc = null
 
   # custom_login_page = null
 
 
-  # description = ""
-
   # encryption_key = null # {}
 
   # form_template = null
 
-
   # initiate_login_uri = ""
-
 
   # logo_uri = ""
 
@@ -133,6 +103,5 @@ resource "auth0_client" "this" {
   # organization_require_behavior = null
 
   # organization_usage = null
-
 
 }
