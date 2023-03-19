@@ -71,9 +71,10 @@ const defaultOptions: ClientOptions = {
   useRefreshTokens: true,
   onRedirectCallback: (appState: any) => {
     console.log("onRedirectCallback");
+    console.log(`appState: ${JSON.stringify(appState)}`);
     navigate(
-      appState && appState.targetUrl
-        ? appState.targetUrl
+      appState && appState.loginRedirectPath
+        ? appState.loginRedirectPath
         : window.location.pathname
     );
   },
@@ -117,10 +118,10 @@ const useAuth = async ({
           window.location.search.includes("state=")
         ) {
           console.log("onLoad: handleRedirectCallback");
-          const { appState } = await auth0Client.handleRedirectCallback();
+          const res = await auth0Client.handleRedirectCallback();
           console.log("onLoad: handleRedirectCallback: after");
-          console.log(`onLoad: appState: ${JSON.stringify(appState)}`);
-          onRedirectCallback(appState);
+          console.log(`onLoad: res: ${JSON.stringify(res)}`);
+          onRedirectCallback(res.appState);
         }
       } catch (err) {
         console.error(`error: ${err}`);
@@ -139,6 +140,7 @@ const useAuth = async ({
       loading.value = true;
       try {
         const { appState } = await auth0Client.handleRedirectCallback();
+        console.log(`handleRedirectCallback: appState: ${appState}`);
         user.value = await auth0Client.getUser();
         isLoggedIn.value = true;
         // window.history.replaceState({}, document.title, window.location.pathname);
@@ -159,7 +161,13 @@ const useAuth = async ({
       }
       return authenticated;
     },
-    loginWithRedirect: async (o) => {
+    loginWithRedirect: async (
+      o: RedirectLoginOptions = {
+        appState: {
+          loginRedirectPath: window.location.pathname,
+        },
+      }
+    ) => {
       console.log("loginWithRedirect");
       loading.value = true;
       try {
