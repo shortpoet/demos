@@ -1,5 +1,8 @@
 <template>
   <div class="page-container" flex-col items-center flex>
+    <Link :href="`/auth`" :title="'back'">
+    <i class="i-carbon-page-first" inline-block /><span>back</span>
+    </Link>
 
     <Login :use-popup="false">
       <template #login="loginProps">
@@ -12,9 +15,6 @@
       </template>
     </Login>
 
-    <Link :href="`/`" :title="'back'">
-    <i class="i-carbon-page-first" inline-block /><span>back</span>
-    </Link>
 
   </div>
 </template>

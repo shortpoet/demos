@@ -11,11 +11,11 @@ import {
   RedirectLoginResult,
   TokenEndpointOptions,
   GetTokenSilentlyVerboseResponse,
-} from "@auth0/auth0-spa-js";
+} from '@auth0/auth0-spa-js';
 
-import { ref, Ref, computed, watch } from "vue";
+import { ref, Ref, computed, watch } from 'vue';
 
-import { navigate } from "vite-plugin-ssr/client/router";
+import { navigate } from 'vite-plugin-ssr/client/router';
 
 export { Auth0Client, ClientOptions, useAuth, defaultOptions };
 
@@ -25,7 +25,7 @@ interface ClientOptions extends Auth0ClientOptions {
   audience?: string;
   redirect_uri?: string;
   useRefreshTokens?: boolean;
-  cacheLocation?: "memory" | "localstorage";
+  cacheLocation?: 'memory' | 'localstorage';
   leeway?: number;
   onRedirectCallback?(appState: any): void;
 }
@@ -35,7 +35,8 @@ interface Auth0Instance extends Partial<Auth0Client> {
   user: Ref<any>;
   loading: Ref<boolean>;
   popupOpen: Ref<boolean>;
-  onLoad: Promise<void>;
+  onLoad: () => Promise<void>;
+  // onLoad: Promise<void>;
   isAuthenticated: () => Promise<boolean>;
   loginWithPopup(o?: PopupLoginOptions): Promise<void>;
   handleRedirectCallback(url?: string): Promise<RedirectLoginResult>;
@@ -64,18 +65,19 @@ const user = ref<any>();
 const loading = ref(true);
 const popupOpen = ref(false);
 const error = ref<any>();
+const isLoggedIn = ref(false);
 
 const defaultOptions: ClientOptions = {
   domain: import.meta.env.VITE_AUTH0_DOMAIN,
   clientId: import.meta.env.VITE_AUTH0_CLIENT_ID,
   useRefreshTokens: true,
   onRedirectCallback: (appState: any) => {
-    console.log("onRedirectCallback");
-    console.log(`appState: ${JSON.stringify(appState)}`);
+    // console.log('onRedirectCallback');
+    // console.log(`appState: ${JSON.stringify(appState)}`);
     navigate(
       appState && appState.loginRedirectPath
         ? appState.loginRedirectPath
-        : window.location.pathname
+        : window.location.pathname,
     );
   },
 };
@@ -95,32 +97,31 @@ const useAuth = async ({
     domain: options.domain,
     clientId: options.clientId,
     authorizationParams: {
-      scope: "openid profile email",
+      scope: 'openid profile email',
       audience,
       redirect_uri: redirectUri,
-      response_type: "code",
+      response_type: 'code',
     },
   };
 
   const auth0Client = await createAuth0Client(initOptions);
-  const isLoggedIn = ref(await auth0Client.isAuthenticated());
 
   return {
     user,
     loading,
     popupOpen,
     isLoggedIn,
-    onLoad: (async () => {
+    onLoad: async () => {
       // console.log("onLoad");
       try {
         if (
-          window.location.search.includes("code=") &&
-          window.location.search.includes("state=")
+          window.location.search.includes('code=') &&
+          window.location.search.includes('state=')
         ) {
-          console.log("onLoad: handleRedirectCallback");
+          // console.log('onLoad: handleRedirectCallback');
           const res = await auth0Client.handleRedirectCallback();
-          console.log("onLoad: handleRedirectCallback: after");
-          console.log(`onLoad: res: ${JSON.stringify(res)}`);
+          // console.log('onLoad: handleRedirectCallback: after');
+          // console.log(`onLoad: res: ${JSON.stringify(res)}`);
           onRedirectCallback(res.appState);
         }
       } catch (err) {
@@ -129,14 +130,39 @@ const useAuth = async ({
       } finally {
         loading.value = false;
       }
-      // console.log("onLoad: after finally");
+      // console.log('onLoad: after finally');
       isLoggedIn.value = await auth0Client.isAuthenticated();
       user.value = await auth0Client.getUser();
       // console.log(`onLoad: user: ${JSON.stringify(user.value)}`);
       // console.log(`onLoad: isLoggedIn: ${isLoggedIn.value}`);
-    })(),
+    },
+    // onLoad: (async () => {
+    //   // console.log("onLoad");
+    //   try {
+    //     if (
+    //       window.location.search.includes('code=') &&
+    //       window.location.search.includes('state=')
+    //     ) {
+    //       console.log('onLoad: handleRedirectCallback');
+    //       const res = await auth0Client.handleRedirectCallback();
+    //       console.log('onLoad: handleRedirectCallback: after');
+    //       console.log(`onLoad: res: ${JSON.stringify(res)}`);
+    //       onRedirectCallback(res.appState);
+    //     }
+    //   } catch (err) {
+    //     console.error(`error: ${err}`);
+    //     error.value = err;
+    //   } finally {
+    //     loading.value = false;
+    //   }
+    //   console.log('onLoad: after finally');
+    //   isLoggedIn.value = await auth0Client.isAuthenticated();
+    //   user.value = await auth0Client.getUser();
+    //   console.log(`onLoad: user: ${JSON.stringify(user.value)}`);
+    //   console.log(`onLoad: isLoggedIn: ${isLoggedIn.value}`);
+    // })(),
     handleRedirectCallback: async () => {
-      console.log("handleRedirectCallback");
+      console.log('handleRedirectCallback');
       loading.value = true;
       try {
         const { appState } = await auth0Client.handleRedirectCallback();
@@ -149,6 +175,7 @@ const useAuth = async ({
       } catch (e) {
         // eslint-disable-next-line
         console.error(e);
+        error.value = e;
         // error = e;
       } finally {
         loading.value = false;
@@ -166,17 +193,20 @@ const useAuth = async ({
         appState: {
           loginRedirectPath: window.location.pathname,
         },
-      }
+      },
     ) => {
-      console.log("loginWithRedirect");
+      console.log('loginWithRedirect');
       loading.value = true;
       try {
         const res = await auth0Client.loginWithRedirect(o);
         return res;
       } catch (e) {
         console.error(e);
+        error.value = e;
       } finally {
         loading.value = false;
+        user.value = await auth0Client.getUser();
+        isLoggedIn.value = await auth0Client.isAuthenticated();
       }
     },
     loginWithPopup: async (o) => {
@@ -186,11 +216,13 @@ const useAuth = async ({
       } catch (e) {
         // eslint-disable-next-line
         console.error(e);
+        error.value = e;
       } finally {
         popupOpen.value = false;
+        loading.value = false;
+        user.value = await auth0Client.getUser();
+        isLoggedIn.value = await auth0Client.isAuthenticated();
       }
-      user.value = await auth0Client.getUser();
-      isLoggedIn.value = true;
     },
     logout: async (o) => {
       await auth0Client.logout(o);

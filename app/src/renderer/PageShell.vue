@@ -24,8 +24,6 @@ import { useAuth, defaultOptions } from '~/composables/auth';
 
 import logoUrl from '/logo.svg';
 
-console.log('logoUrl', logoUrl);
-
 const title = 'Carlos Soriano'
 const description = `
   This is a demo of SSR on the edge using cloudflare workers.
@@ -44,10 +42,12 @@ useHead({
       crossorigin: 'anonymous',
       async: true,
       onload: async () => {
-        console.log('XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX')
+        // console.log('XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX')
         const { onLoad } = await useAuth(defaultOptions);
-        console.log('auth0 loaded');
-        return onLoad
+        // console.log('auth0 loaded');
+        onLoad();
+        // the self-executing function below fires multiple times
+        // return onLoad
       },
     },
   ],
