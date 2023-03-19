@@ -3,7 +3,6 @@ import { createHead, renderHeadToString } from "@vueuse/head";
 import { escapeInject, dangerouslySkipEscape } from "vite-plugin-ssr";
 import { PageContextServer } from "~/types/pageContext";
 import { createApp } from "./app";
-import logoUrl from "./logo.svg";
 
 export { render };
 export { passToClient };

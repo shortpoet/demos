@@ -2,7 +2,7 @@
   <div class="layout">
     <div class="navigation">
       <a href="/" class="logo">
-        <img src="./logo.svg" height="64" width="64" alt="logo" />
+        <img :src="logoUrl" height="64" width="64" alt="logo" />
       </a>
       <Link href="/">Home</Link>
       <Link href="/about">About</Link>
@@ -21,6 +21,10 @@ import { useHead } from '@vueuse/head';
 import { computed } from 'vue';
 import Link from '~/components/Link.vue';
 import { useAuth, defaultOptions } from '~/composables/auth';
+
+import logoUrl from '/public/logo.svg';
+
+console.log('logoUrl', logoUrl);
 
 const title = 'Carlos Soriano'
 const description = `

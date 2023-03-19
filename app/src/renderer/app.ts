@@ -3,6 +3,9 @@ import PageShell from "./PageShell.vue";
 import { setPageContext } from "./usePageContext";
 import { createHead } from "@vueuse/head";
 import { Component, PageContext } from "~/types/pageContext";
+import "@unocss/reset/tailwind.css";
+import "uno.css";
+import "~/styles/main.css";
 
 export { createApp };
 
@@ -39,7 +42,7 @@ function createApp(pageContext: PageContext) {
       Object.assign(pageContextReactive, pageContext);
       rootComponent.Page = markRaw(pageContext.Page);
       rootComponent.pageProps = markRaw(pageContext.pageProps || {});
-      // without the below line it only changes on reload, and then persists weirdly to other navigated pages
+      // without the below line the layout only changes on reload, and then persists weirdly to other navigated pages
       rootComponent.Layout = markRaw(pageContext.exports.Layout || PageShell);
     },
   });

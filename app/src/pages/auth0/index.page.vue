@@ -24,7 +24,7 @@ export default {
             });
             if (typeof window !== "undefined") {
 
-              const REDIRECT_URL = window.location.origin;
+              const REDIRECT_URL = import.meta.env.VITE_AUTH0_CALLBACK_URL || window.location.origin;
               setConfig(REDIRECT_URL);
               onLoad(htmlConsole, REDIRECT_URL);
             }
@@ -325,7 +325,7 @@ function onLoad(htmlConsole: AuthConsole, REDIRECT_URL: string) {
     e.preventDefault();
 
     var options = {
-      redirectURI: REDIRECT_URL + '/auth/callback',
+      redirectURI: REDIRECT_URL,
       connection: 'facebook',
       // organization: ''
     };
@@ -344,7 +344,7 @@ function onLoad(htmlConsole: AuthConsole, REDIRECT_URL: string) {
     e.preventDefault();
 
     var options = {
-      redirectURI: REDIRECT_URL + '/auth/callback',
+      redirectURI: REDIRECT_URL,
       // organization: ''
     };
 
@@ -363,7 +363,7 @@ function onLoad(htmlConsole: AuthConsole, REDIRECT_URL: string) {
 
     var options = {
       connection: 'twitter',
-      redirectURI: REDIRECT_URL + '/auth/callback',
+      redirectURI: REDIRECT_URL,
       // organization: ''
     };
 
@@ -382,7 +382,7 @@ function onLoad(htmlConsole: AuthConsole, REDIRECT_URL: string) {
 
     var options = {
       connection: 'github',
-      redirectURI: REDIRECT_URL + '/auth/callback',
+      redirectURI: REDIRECT_URL,
       // organization: ''
     };
 
@@ -398,7 +398,7 @@ function onLoad(htmlConsole: AuthConsole, REDIRECT_URL: string) {
 
   $('.logout').click(function (e) {
     e.preventDefault();
-    window.webAuth.logout({ returnTo: REDIRECT_URL });
+    window.webAuth.logout({ returnTo: window.location.origin });
   });
 
   $('.renew-auth').click(function (e) {
@@ -406,7 +406,7 @@ function onLoad(htmlConsole: AuthConsole, REDIRECT_URL: string) {
     window.webAuth.renewAuth(
       {
         usePostMessage: true,
-        redirectURI: REDIRECT_URL + '/auth/callback'
+        redirectURI: REDIRECT_URL
       },
       htmlConsole.dumpCallback.bind(htmlConsole)
     );

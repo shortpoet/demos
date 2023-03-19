@@ -21,6 +21,7 @@
     "@auth0/auth0-spa-js": "^2.0.4",
     "@types/compression": "^1.7.2",
     "@types/express": "^4.17.14",
+    "@unocss/reset": "^0.50.6",
     "@vitejs/plugin-vue": "^4.0.0",
     "@vue/compiler-sfc": "^3.2.33",
     "@vue/server-renderer": "^3.2.33",
@@ -42,6 +43,7 @@
     "@brillout/test-e2e": "^0.4.17",
     "@cloudflare/kv-asset-handler": "^0.3.0",
     "@cloudflare/workers-types": "^4.20230307.0",
+    "@iconify-json/carbon": "^1.1.16",
     "@types/jquery": "^3.5.16",
     "@types/js-cookie": "^3.0.3",
     "@types/node": "^18.15.1",
@@ -53,6 +55,7 @@
     "miniflare": "^2.12.1",
     "test-e2e": "file:/Users/Shared/source/repos/oss/test-e2e",
     "typescript": "^4.9.5",
+    "unocss": "^0.50.6",
     "vitest": "^0.29.2",
     "wrangler": "^2.12.2"
   }
