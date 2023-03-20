@@ -40,21 +40,21 @@ resource "auth0_client" "this" {
   #   }
   # }
 
-  # refresh_token {
-  #   expiration_type = "non-expiring"
+  refresh_token {
+    expiration_type = "expiring"
 
-  #   idle_token_lifetime = 2592000
+    idle_token_lifetime = 60 * 60 * 1
 
-  #   infinite_idle_token_lifetime = true
+    infinite_idle_token_lifetime = false
 
-  #   infinite_token_lifetime = true
+    infinite_token_lifetime = false
 
-  #   leeway = 0
+    leeway = 3
 
-  #   rotation_type = "non-rotating"
+    rotation_type = "rotating"
 
-  #   token_lifetime = 31557600
-  # }
+    token_lifetime = 60 * 60 * 3
+  }
 
   # cross_origin_auth = false
 

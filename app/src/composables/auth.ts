@@ -16,8 +16,28 @@ import {
 import { ref, Ref, computed, watch } from 'vue';
 
 import { navigate } from 'vite-plugin-ssr/client/router';
+import { CookieSetOptions } from 'universal-cookie';
 
-export { Auth0Client, ClientOptions, useAuth, defaultOptions };
+export {
+  Auth0Client,
+  ClientOptions,
+  useAuth,
+  defaultOptions,
+  COOKIES_USER_TOKEN,
+  cookieOptions,
+};
+
+const COOKIES_USER_TOKEN = `${import.meta.env.VITE_APP_NAME}-user-token`;
+const cookieOptions: CookieSetOptions = {
+  path: '/',
+  expires: new Date(Date.now() + 1000 * 60 * 60 * 24),
+  maxAge: 60 * 60 * 24,
+  domain: 'localhost',
+  sameSite: 'strict',
+  // below only works in https
+  // secure: true,
+  // httpOnly: true,
+};
 
 interface ClientOptions extends Auth0ClientOptions {
   domain: string;
@@ -42,13 +62,11 @@ interface Auth0Instance extends Partial<Auth0Client> {
   handleRedirectCallback(url?: string): Promise<RedirectLoginResult>;
   logout(options?: LogoutOptions): Promise<void>;
   loginWithRedirect(o?: RedirectLoginOptions): Promise<void>;
+  getTokenSilently(options?: GetTokenSilentlyOptions): Promise<string>;
+  getTokenSilently(
+    options: GetTokenSilentlyOptions & { detailedResponse: true },
+  ): Promise<GetTokenSilentlyVerboseResponse>;
   // getIdTokenClaims(): Promise<IdToken | undefined>;
-  // getTokenSilently(
-  //   options: GetTokenSilentlyOptions & {
-  //     detailedResponse: true;
-  //   }
-  // ): Promise<GetTokenSilentlyVerboseResponse>;
-  // getTokenSilently(options?: GetTokenSilentlyOptions): Promise<string>;
   // getTokenWithPopup(o?: GetTokenWithPopupOptions): Promise<string | undefined>;
 }
 
@@ -62,6 +80,7 @@ const DEFAULT_REDIRECT_CALLBACK = (state: any = {}) =>
 // let instance: Auth0Instance;
 
 const user = ref<any>();
+const token = ref<string>();
 const loading = ref(true);
 const popupOpen = ref(false);
 const error = ref<any>();
@@ -71,6 +90,7 @@ const defaultOptions: ClientOptions = {
   domain: import.meta.env.VITE_AUTH0_DOMAIN,
   clientId: import.meta.env.VITE_AUTH0_CLIENT_ID,
   useRefreshTokens: true,
+  cacheLocation: 'localstorage',
   onRedirectCallback: (appState: any) => {
     // console.log('onRedirectCallback');
     // console.log(`appState: ${JSON.stringify(appState)}`);
@@ -106,6 +126,23 @@ const useAuth = async ({
 
   const auth0Client = await createAuth0Client(initOptions);
 
+  async function _getTokenSilently(
+    options?: GetTokenSilentlyOptions,
+  ): Promise<string>;
+  async function _getTokenSilently(
+    options: GetTokenSilentlyOptions & { detailedResponse: true },
+  ): Promise<GetTokenSilentlyVerboseResponse>;
+  async function _getTokenSilently(options?: any): Promise<any> {
+    if (options?.detailedResponse) {
+      return await auth0Client.getTokenSilently({
+        ...options,
+        detailedResponse: true,
+      });
+    } else {
+      return await auth0Client.getTokenSilently(options);
+    }
+  }
+
   return {
     user,
     loading,
@@ -114,53 +151,34 @@ const useAuth = async ({
     onLoad: async () => {
       // console.log("onLoad");
       try {
+        const { useCookies } = await import('@vueuse/integrations/useCookies');
+        const cookies = useCookies([COOKIES_USER_TOKEN]);
+        const hasToken = cookies.get(COOKIES_USER_TOKEN);
+        console.log(`hasToken: ${hasToken}`);
         if (
           window.location.search.includes('code=') &&
           window.location.search.includes('state=')
         ) {
-          // console.log('onLoad: handleRedirectCallback');
           const res = await auth0Client.handleRedirectCallback();
-          // console.log('onLoad: handleRedirectCallback: after');
-          // console.log(`onLoad: res: ${JSON.stringify(res)}`);
           onRedirectCallback(res.appState);
+        } else if (hasToken === 'true') {
+          const tokenRes = await auth0Client.getTokenSilently({
+            detailedResponse: true,
+          });
+          token.value = tokenRes.id_token;
         }
       } catch (err) {
         console.error(`error: ${err}`);
         error.value = err;
       } finally {
         loading.value = false;
+        user.value = await auth0Client.getUser();
+        isLoggedIn.value = await auth0Client.isAuthenticated();
+        if (isLoggedIn.value === true) {
+          token.value = await auth0Client.getTokenSilently();
+        }
       }
-      // console.log('onLoad: after finally');
-      isLoggedIn.value = await auth0Client.isAuthenticated();
-      user.value = await auth0Client.getUser();
-      // console.log(`onLoad: user: ${JSON.stringify(user.value)}`);
-      // console.log(`onLoad: isLoggedIn: ${isLoggedIn.value}`);
     },
-    // onLoad: (async () => {
-    //   // console.log("onLoad");
-    //   try {
-    //     if (
-    //       window.location.search.includes('code=') &&
-    //       window.location.search.includes('state=')
-    //     ) {
-    //       console.log('onLoad: handleRedirectCallback');
-    //       const res = await auth0Client.handleRedirectCallback();
-    //       console.log('onLoad: handleRedirectCallback: after');
-    //       console.log(`onLoad: res: ${JSON.stringify(res)}`);
-    //       onRedirectCallback(res.appState);
-    //     }
-    //   } catch (err) {
-    //     console.error(`error: ${err}`);
-    //     error.value = err;
-    //   } finally {
-    //     loading.value = false;
-    //   }
-    //   console.log('onLoad: after finally');
-    //   isLoggedIn.value = await auth0Client.isAuthenticated();
-    //   user.value = await auth0Client.getUser();
-    //   console.log(`onLoad: user: ${JSON.stringify(user.value)}`);
-    //   console.log(`onLoad: isLoggedIn: ${isLoggedIn.value}`);
-    // })(),
     handleRedirectCallback: async () => {
       console.log('handleRedirectCallback');
       loading.value = true;
@@ -205,23 +223,27 @@ const useAuth = async ({
         error.value = e;
       } finally {
         loading.value = false;
-        user.value = await auth0Client.getUser();
-        isLoggedIn.value = await auth0Client.isAuthenticated();
       }
     },
     loginWithPopup: async (o) => {
+      console.log('loginWithPopup');
       popupOpen.value = true;
+      loading.value = true;
       try {
-        await auth0Client.loginWithPopup(o);
+        const res = await auth0Client.loginWithPopup(o);
+        return res;
       } catch (e) {
-        // eslint-disable-next-line
         console.error(e);
         error.value = e;
       } finally {
         popupOpen.value = false;
-        loading.value = false;
         user.value = await auth0Client.getUser();
         isLoggedIn.value = await auth0Client.isAuthenticated();
+        token.value = await auth0Client.getTokenSilently();
+        // because no redirect we set this here vs in onLoad
+        // console.log(`isLoggedIn: ${isLoggedIn.value}`);
+        // console.log(`user: ${JSON.stringify(user.value)}`);
+        loading.value = false;
       }
     },
     logout: async (
@@ -236,13 +258,40 @@ const useAuth = async ({
       user.value = undefined;
       isLoggedIn.value = false;
     },
+    getTokenSilently: _getTokenSilently,
   };
 };
+
+// onLoad: (async () => {
+//   // console.log("onLoad");
+//   try {
+//     if (
+//       window.location.search.includes('code=') &&
+//       window.location.search.includes('state=')
+//     ) {
+//       console.log('onLoad: handleRedirectCallback');
+//       const res = await auth0Client.handleRedirectCallback();
+//       console.log('onLoad: handleRedirectCallback: after');
+//       console.log(`onLoad: res: ${JSON.stringify(res)}`);
+//       onRedirectCallback(res.appState);
+//     }
+//   } catch (err) {
+//     console.error(`error: ${err}`);
+//     error.value = err;
+//   } finally {
+//     loading.value = false;
+//   }
+//   console.log('onLoad: after finally');
+//   isLoggedIn.value = await auth0Client.isAuthenticated();
+//   user.value = await auth0Client.getUser();
+//   console.log(`onLoad: user: ${JSON.stringify(user.value)}`);
+//   console.log(`onLoad: isLoggedIn: ${isLoggedIn.value}`);
+// })(),
 
 //   handleRedirectCallback,
 //   getIdTokenClaims: (...p) => auth0Client.getIdTokenClaims(...p),
 //   loginWithRedirect: (...p) => auth0Client.loginWithRedirect(...p),
-//   getTokenSilently: (...p) => auth0Client.getTokenSilently(...p),
+// getTokenSilently: (...p) => auth0Client.getTokenSilently(...p),
 //   getTokenWithPopup: (...p) => auth0Client.getTokenWithPopup(...p),
 //   logout: (...p) => auth0Client.logout(...p),
 
