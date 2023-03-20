@@ -149,7 +149,7 @@ const useAuth = async ({
     popupOpen,
     isLoggedIn,
     onLoad: async () => {
-      // console.log("onLoad");
+      console.log('onLoad');
       try {
         const { useCookies } = await import('@vueuse/integrations/useCookies');
         const cookies = useCookies([COOKIES_USER_TOKEN]);
@@ -171,7 +171,9 @@ const useAuth = async ({
         console.error(`error: ${err}`);
         error.value = err;
       } finally {
+        console.log('finally: loading ->');
         loading.value = false;
+        console.log(loading.value);
         user.value = await auth0Client.getUser();
         isLoggedIn.value = await auth0Client.isAuthenticated();
         if (isLoggedIn.value === true) {

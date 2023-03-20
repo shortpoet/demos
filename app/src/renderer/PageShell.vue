@@ -37,7 +37,6 @@ useHead({
   title: title,
   script: [
     {
-
       src: 'https://cdn.auth0.com/js/auth0/9.18/auth0.min.js',
       crossorigin: 'anonymous',
       async: true,
@@ -45,7 +44,7 @@ useHead({
         // console.log('XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX')
         const { onLoad } = await useAuth(defaultOptions);
         // console.log('auth0 loaded');
-        onLoad();
+        await onLoad();
         // the self-executing function below fires multiple times
         // return onLoad
       },
