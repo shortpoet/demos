@@ -55,6 +55,7 @@
     "cypress": "^12.7.0",
     "jsdom": "^21.1.1",
     "miniflare": "^2.12.1",
+    "mockdate": "^3.0.5",
     "test-e2e": "file:/Users/Shared/source/repos/oss/test-e2e",
     "typescript": "^4.9.5",
     "unocss": "^0.50.6",

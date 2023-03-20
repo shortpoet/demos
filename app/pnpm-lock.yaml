@@ -29,6 +29,7 @@ specifiers:
   js-cookie: ^3.0.1
   jsdom: ^21.1.1
   miniflare: ^2.12.1
+  mockdate: ^3.0.5
   sirv: ^2.0.2
   test-e2e: file:/Users/Shared/source/repos/oss/test-e2e
   ts-node: ^10.9.1
@@ -78,6 +79,7 @@ devDependencies:
   cypress: 12.7.0
   jsdom: 21.1.1
   miniflare: 2.12.1
+  mockdate: 3.0.5
   test-e2e: file:../../../oss/test-e2e
   typescript: 4.9.5
   unocss: 0.50.6_vite@4.1.4
@@ -3543,6 +3545,10 @@ packages:
       pathe: 1.1.0
       pkg-types: 1.0.2
       ufo: 1.1.1
+    dev: true
+
+  /mockdate/3.0.5:
+    resolution: {integrity: sha512-iniQP4rj1FhBdBYS/+eQv7j1tadJ9lJtdzgOpvsOHng/GbcDh2Fhdeq+ZRldrPYdXvCyfFUmFeEwEGXZB5I/AQ==}
     dev: true
 
   /mrmime/1.0.1:

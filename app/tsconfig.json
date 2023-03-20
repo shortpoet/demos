@@ -43,5 +43,9 @@
   },
   "exclude": [
     "node_modules",
+  ],
+  "include": [
+    "app/src/**/*",
+    "test/**/*",
   ]
 }
