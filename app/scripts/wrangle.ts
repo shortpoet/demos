@@ -80,11 +80,11 @@ const writeToml = (data: string) => {
 };
 
 const getBinding = (env) => {
-  return getToml()['env'][`${env}`]['vars']['kv_namespaces'][0]['binding'];
+  return getToml()['env'][`${env}`]['kv_namespaces'][0]['binding'];
 };
 
 function executeWranglerCommand(command: string, env: string) {
-  return execSync(`npx wrangler ${command} --env ${env}`, { encoding: 'utf8' });
+  return execSync(`npx wrangler --env ${env} ${command}`, { encoding: 'utf8' });
 }
 
 const parseId = (binding: string, env: string) =>
@@ -134,11 +134,13 @@ const parseId = (binding: string, env: string) =>
     const previewId = getPreview().id;
 
     const config = getToml();
-    config['env'][`${env}`]['vars']['kv_namespaces'][0] = {
-      ...config['env'][`${env}`]['vars']['kv_namespaces'][0],
+
+    config['env'][`${env}`]['kv_namespaces'][0] = {
+      ...config['env'][`${env}`]['kv_namespaces'][0],
       id: namespaceId,
       preview_id: namespaceId,
     };
+
     writeToml(config);
     // let deleteCmd = `kv:namespace delete --namespace-id ${namespaceId}`;
     // // if (debug) process.exit(0);

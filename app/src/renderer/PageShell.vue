@@ -7,6 +7,7 @@
       <Link href="/">Home</Link>
       <Link href="/about">About</Link>
       <Link href="/star-wars">Star Wars</Link>
+      <Link href="/api-data">Api Data</Link>
       <Link href="/auth">Auth</Link>
       <Link href="/auth0">Auth0</Link>
     </div>
@@ -22,7 +23,7 @@ import { computed } from 'vue';
 import Link from '~/components/Link.vue';
 import { useAuth, defaultOptions } from '~/composables/auth';
 
-import logoUrl from '/logo.svg';
+import logoUrl from '../../public/logo.svg';
 
 const title = 'Carlos Soriano'
 const description = `

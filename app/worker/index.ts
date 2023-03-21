@@ -5,17 +5,24 @@ import {
   MethodNotAllowedError,
   NotFoundError,
 } from '@cloudflare/kv-asset-handler/dist/types';
-import { isAssetURL } from './util';
+import { isAPI, isAssetURL } from './util';
 import { Env } from './types';
+import { RequestHandler } from './api/auth';
+import { handleAPI } from './api/api';
 
 export default {
   async fetch(
     request: Request,
     env: Env,
     ctx: ExecutionContext,
+    waitUntil: (promise: Promise<any>) => void,
   ): Promise<Response> {
     try {
-      return await handleFetchEvent(request, env, ctx);
+      const req = new RequestHandler(request, env);
+
+      const response = await handleFetchEvent(req, env, ctx, waitUntil);
+
+      return response;
     } catch (e) {
       console.error(e);
       if (e instanceof NotFoundError) {
@@ -30,9 +37,10 @@ export default {
 };
 
 async function handleFetchEvent(
-  request: Request,
+  request: RequestHandler,
   env: Env,
   ctx: ExecutionContext,
+  waitUntil: (promise: Promise<any>) => void,
 ): Promise<Response> {
   if (env.LOG_LEVEL === 'debug') {
     console.log('worker.handleFetchEvent');
@@ -44,6 +52,9 @@ async function handleFetchEvent(
       console.log('worker.handleFetchstaticAssets');
     }
     return await handleStaticAssets(request, env, ctx);
+  }
+  if (isAPI(url)) {
+    return handleAPI(request, env, ctx, waitUntil);
   }
 
   const response = await handleSsr(request, env, ctx);

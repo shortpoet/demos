@@ -2,8 +2,11 @@
 
 # This file is sourced by the wrangler build script to set the secrets
 
-[[ ! -f ../.env ]] && echo "No .env file found" && exit 1
-source ../.env
+script_root=$(dirname "$0")
+env_file="$script_root/../.env"
+
+[[ ! -f "$env_file" ]] && echo "No .env file found" && exit 1
+source "$env_file"
 
 [[ -z "$VITE_APP_NAME" ]] && echo "VITE_APP_NAME not set" && exit 1
 

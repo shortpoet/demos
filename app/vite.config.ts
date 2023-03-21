@@ -29,7 +29,7 @@ export default ({ mode }: { mode: string }) => {
     ],
 
     server: {
-      port: parseInt(process.env.VITE_PORT || '3333'),
+      port: parseInt(process.env.VITE_PORT || '3000'),
       hmr: {
         overlay: false,
       },

@@ -5,19 +5,19 @@ node_compat = true
 workers_dev = true
 [dev]
 port = 3000
-[env.dev]
-ENVIRONMENT = "dev"
-LOG_LEVEL = "debug"
-[[env.dev.vars.kv_namespaces]]
+[[env.dev.kv_namespaces]]
 binding = "DEMO_CFW_SSR"
-id = "10d16e2123674b449ce69b3157b8ce09"
-preview_id = "10d16e2123674b449ce69b3157b8ce09"
-[env.prod]
+id = "3740e85e3b174682964efa26066fa5c4"
+preview_id = "3740e85e3b174682964efa26066fa5c4"
+[env.dev.vars]
+ENVIRONMENT = "dev"
+LOG_LEVEL = "info"
+[[env.prod.kv_namespaces]]
+binding = "DEMO_CFW_SSR"
+id = "s"
+preview_id = "s"
+[env.prod.vars]
 ENVIRONMENT = "prod"
 LOG_LEVEL = "error"
-[[env.prod.vars.kv_namespaces]]
-binding = "DEMO_CFW_SSR"
-id = "cdf7b5d662674807be4f07badbb96f9d"
-preview_id = "cdf7b5d662674807be4f07badbb96f9d"
 [site]
 bucket = "./app/build/client"

@@ -1,23 +1,23 @@
+name = "demo-cfw-ssr"
 compatibility_date = "2022-05-03"
 main = "./app/worker/index.ts"
-name = "demo-cfw-ssr"
 node_compat = true
 workers_dev = true
 [dev]
 port = 3000
-[env.dev]
+[[env.dev.vars]]
 ENVIRONMENT = "dev"
 LOG_LEVEL = "debug"
-[[env.dev.vars.kv_namespaces]]
+[[env.dev.kv_namespaces]]
 binding = "DEMO_CFW_SSR"
-id = "10d16e2123674b449ce69b3157b8ce09"
-preview_id = "10d16e2123674b449ce69b3157b8ce09"
-[env.prod]
+id = "s"
+preview_id = "s"
+[[env.prod.vars]]
 ENVIRONMENT = "prod"
 LOG_LEVEL = "error"
-[[env.prod.vars.kv_namespaces]]
+[[env.prod.kv_namespaces]]
 binding = "DEMO_CFW_SSR"
-id = ""
-preview_id = ""
+id = "s"
+preview_id = "s"
 [site]
 bucket = "./app/build/client"
