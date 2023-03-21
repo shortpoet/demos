@@ -17,7 +17,7 @@ ENVIRONMENT = "prod"
 LOG_LEVEL = "error"
 [[env.prod.vars.kv_namespaces]]
 binding = "DEMO_CFW_SSR"
-id = "cdf7b5d662674807be4f07badbb96f9d"
-preview_id = "cdf7b5d662674807be4f07badbb96f9d"
+id = ""
+preview_id = ""
 [site]
 bucket = "./app/build/client"
