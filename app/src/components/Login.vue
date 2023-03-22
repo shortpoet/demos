@@ -18,7 +18,7 @@
       <slot name="login-popup" :onLoginPopup="onLoginPopup" :isLoggedIn="isLoggedIn" />
     </div>
     <div>
-      <slot name="logout" :onLogout="onLogout" :isLoggedIn="isLoggedIn" />
+      <slot name="logout" :onLogout="onLogout" :isLoggedIn="isLoggedIn" :authError="authError" />
     </div>
     <ul>
       <li>User Info</li>
@@ -41,11 +41,11 @@ import { GithubUser } from '~/types';
 
 export default {
   props: {
-    usePopup: {
-      type: Boolean,
-      required: false,
-      default: true,
-    },
+    // usePopup: {
+    //   type: Boolean,
+    //   required: false,
+    //   default: true,
+    // },
   },
   async setup(props, ctx) {
     // this triggers oauth refresh i want
@@ -113,6 +113,8 @@ export default {
     const c = ctx;
     const slots = c.slots;
     const loginSlot = slots.login;
+    const logoutSlot = slots.logout;
+    const loginPopupSlot = slots.loginPopup;
 
     watch(loading, async (cur, prev) => {
       console.log(`login.component.loading ${cur} ${prev}`);
@@ -131,6 +133,8 @@ export default {
       onLogout,
       onLoginPopup,
       loginSlot,
+      logoutSlot,
+      loginPopupSlot,
       isLoggedIn,
       user,
       loading,

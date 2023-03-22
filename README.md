@@ -1,5 +1,11 @@
 # demos
 
+## Resources
+
+- [Vite](https://vitejs.dev/)
+- [Vite SSR](https://vitejs.dev/guide/ssr.html)
+- [Vite Plugin SSR](https://vite-plugin-ssr.com/)
+
 ## tags
 
 ```bash

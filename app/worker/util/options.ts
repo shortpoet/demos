@@ -1,8 +1,10 @@
 import { mapRequestToAsset, Options } from '@cloudflare/kv-asset-handler';
+import { logLevel } from '.';
 import { RequestHandler } from '../api';
 import { Env, LogLevel, LOG_LOVELS } from '../types';
 
 export { setCacheOptions, handleOptions, handleCors };
+const FILE_LOG_LEVEL = 'debug';
 
 function handleOptions(
   request: RequestHandler,
@@ -11,7 +13,10 @@ function handleOptions(
   statusText: string = 'OK',
   headers?: any,
 ) {
-  console.log('worker.handleOptions');
+  if (logLevel(FILE_LOG_LEVEL, env)) {
+    console.log('worker.handleOptions');
+    // console.log(JSON.stringify(request, null, 2));
+  }
   return handleCors(request, env, status, statusText, headers);
 }
 
@@ -23,7 +28,9 @@ function handleCors(
   headers?: any,
 ) {
   if (!request.headers) return;
-  console.log('worker.handleCors');
+  if (logLevel(FILE_LOG_LEVEL, env)) {
+    console.log('worker.handleCors');
+  }
   // this is not technically allowed by spec but can be abused in other ways
   // https://stackoverflow.com/questions/1653308/access-control-allow-origin-multiple-origin-domains
   const allowedOrigins = [
@@ -58,7 +65,9 @@ function handleCors(
     const origin = request.headers.get('Origin');
     return allowedOrigins.find((o) => o === origin);
   };
-  console.log('worker.handleOptions.checkOrigin', checkOrigin(request || ''));
+  if (logLevel(FILE_LOG_LEVEL, env)) {
+    console.log('worker.handleOptions.checkOrigin', checkOrigin(request || ''));
+  }
 
   tryLogHeader('Origin', request);
   tryLogHeader('Authorization', request);
@@ -94,8 +103,10 @@ function handleCors(
         request.headers.get('Access-Control-Request-Headers') !== null) ||
       request.isAuthenticated)
   ) {
-    console.log('worker.handleOptions: CORS');
-    console.log('corsHeaders', JSON.stringify(corsHeaders, null, 2));
+    if (logLevel(FILE_LOG_LEVEL, env)) {
+      console.log('worker.handleOptions: CORS');
+      console.log('corsHeaders', JSON.stringify(corsHeaders, null, 2));
+    }
     return new Response(null, {
       status,
       statusText,
@@ -105,7 +116,10 @@ function handleCors(
       },
     });
   } else {
-    console.log('worker.handleOptions: NO CORS');
+    if (logLevel(FILE_LOG_LEVEL, env)) {
+      console.log('worker.handleOptions: NO CORS');
+    }
+
     return new Response(null, {
       status,
       statusText,

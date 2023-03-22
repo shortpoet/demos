@@ -44,38 +44,15 @@ const useFetchTee = async <T>(
   const error = ref(null);
   const data: Ref<any> = ref();
   // empty token ?
-  const token = ref();
+  const token = ref(options.token);
   // possible leak of private data
 
-  let headers;
-
-  options.token = token.value;
-  headers = {
+  const headers = {
     ...options.headers,
-    Authorization: `Bearer ${options.token}`,
+    Authorization: `Bearer ${token.value}`,
     // "X-Ping": "pong",
   };
   options = { ...options, headers };
-
-  // if (options.withAuth) {
-  //   if (import.meta.env.VITE_LOG_LEVEL === 'debug') {
-  //     console.log('fetchTee.withAuth.options', options);
-  //   }
-  //   // part of the issue is
-  //   //  surviving refresh
-  //   //  silently reverifying without refresh?
-  //   // if (!authStore.isLoggedIn) {
-  //   //   throw new Error("Not logged in");
-  //   // }
-
-  //   options.token = token.value;
-  //   headers = {
-  //     ...options.headers,
-  //     Authorization: `Bearer ${options.token}`,
-  //     // "X-Ping": "pong",
-  //   };
-  //   options = { ...options, headers };
-  // }
 
   let init = {
     method: 'GET',
@@ -92,7 +69,9 @@ const useFetchTee = async <T>(
         `fetching data with init: -> ${JSON.stringify(init, null, 2)}`,
       );
       const request = new Request(url, init);
+      console.log('request', request);
       const response = await fetch(request);
+      console.log('response', response);
       const ct = response.headers.get('Content-Type');
       if (!response.ok) {
         throw new Error(

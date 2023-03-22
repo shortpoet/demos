@@ -14,9 +14,9 @@ export { handleHealth };
 const healthCheckJson = async (req: RequestHandler, env: Env) => {
   if (logLevel(FILE_LOG_LEVEL, env)) {
     console.log('worker.getHealth');
+    console.log('worker.getHealth.env');
+    console.log(await env.DEMO_CFW_SSR);
   }
-  console.log('worker.getHealth.env');
-  console.log(await env.DEMO_CFW_SSR);
   const gitInfo =
     env.ENVIRONMENT === 'dev'
       ? JSON.parse(await env.DEMO_CFW_SSR.get('gitInfo'))

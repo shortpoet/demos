@@ -1,14 +1,14 @@
-import { getAssetFromKV } from "@cloudflare/kv-asset-handler";
+import { getAssetFromKV } from '@cloudflare/kv-asset-handler';
 export { handleStaticAssets };
 
-import rawManifest from "__STATIC_CONTENT_MANIFEST";
-import { setCacheOptions } from "./util";
-const KV_ASSET_NAMESPACE = "CLOUDFLARE_WORKERS_VUE";
+import rawManifest from '__STATIC_CONTENT_MANIFEST';
+import { setCacheOptions } from './util';
+const KV_ASSET_NAMESPACE = 'CLOUDFLARE_WORKERS_VUE';
 
 async function handleStaticAssets(request, env, ctx) {
-  const DEBUG = env.LOG_LEVEL === "debug";
-  if (env.LOG_LEVEL === "debug") {
-    console.log("worker.handleStaticAssets");
+  const DEBUG = env.LOG_LEVEL === 'debug';
+  if (env.LOG_LEVEL === 'debug') {
+    console.log('worker.handleStaticAssets');
   }
   let options = setCacheOptions(request, DEBUG);
 
@@ -21,29 +21,29 @@ async function handleStaticAssets(request, env, ctx) {
 
   try {
     try {
-      if (env.LOG_LEVEL === "debug") {
-        console.log("worker.handleStaticAssets.getAssetFromKV");
+      if (env.LOG_LEVEL === 'debug') {
+        console.log('worker.handleStaticAssets.getAssetFromKV');
       }
       options = {
         ...options,
         ASSET_NAMESPACE:
-          "__STATIC_CONTENT" in env ? env.__STATIC_CONTENT : undefined,
+          '__STATIC_CONTENT' in env ? env.__STATIC_CONTENT : undefined,
         ASSET_MANIFEST:
-          "__STATIC_CONTENT_MANIFEST" in env
+          '__STATIC_CONTENT_MANIFEST' in env
             ? env.__STATIC_CONTENT_MANIFEST
             : JSON.parse(rawManifest),
       };
       const page = await getAssetFromKV(getAssetFromKVArgs, options);
       const response = new Response(page.body, page);
-      response.headers.set("X-XSS-Protection", "1; mode=block");
-      response.headers.set("X-Content-Type-Options", "nosniff");
-      response.headers.set("X-Frame-Options", "DENY");
-      response.headers.set("Referrer-Policy", "unsafe-url");
-      response.headers.set("Feature-Policy", "none");
+      response.headers.set('X-XSS-Protection', '1; mode=block');
+      response.headers.set('X-Content-Type-Options', 'nosniff');
+      response.headers.set('X-Frame-Options', 'DENY');
+      response.headers.set('Referrer-Policy', 'unsafe-url');
+      response.headers.set('Feature-Policy', 'none');
 
       return response;
     } catch (error) {
-      console.log("error", error);
+      console.error('error', error);
       return new Response(error.message || error.toString(), { status: 500 });
     }
   } catch (e) {
@@ -60,7 +60,7 @@ async function handleStaticAssets(request, env, ctx) {
           status: 404,
         });
       } catch (e) {
-        console.log("error", e);
+        console.error('error', e);
       }
     }
 

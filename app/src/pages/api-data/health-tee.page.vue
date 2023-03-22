@@ -47,6 +47,7 @@ export default {
 
       const { valueRef, errorRef, loadingRef } = await useFetchTee<Record<string, any>>("api/health/check",
         { withAuth: false }, health, healthLoaded, healthError);
+
       health.value = valueRef.value;
       healthError.value = errorRef.value;
       healthLoaded.value = loadingRef.value;

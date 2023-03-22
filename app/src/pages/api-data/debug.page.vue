@@ -52,6 +52,7 @@ export default {
     let valueRef = ref();
     let errorRef = ref();
     let loadingRef = ref();
+    let authLoading = ref(false);
 
     (async () => {
 
@@ -60,12 +61,13 @@ export default {
 
       if (typeof window !== "undefined" && typeof window.document !== "undefined") {
         const { useAuth, defaultOptions } = await import("~/composables/auth");
-        const { user: u, authLoading } = await useAuth(defaultOptions);
+        const { user: u, authLoading: l } = await useAuth(defaultOptions);
+        authLoading.value = l.value;
         if (authLoading.value === true) {
           console.log("authLoading.value", authLoading.value);
           return;
         } else {
-          console.log("authLoading.value loaded", authLoading.value);
+          console.log("authLoading.value", authLoading.value);
           user = u;
           const options = { token: user.value ? user.value.token : null };
 
@@ -85,8 +87,15 @@ export default {
       }
     })();
 
-    watch(() => user.value.token, async (cur, prev) => {
-      console.log(`debug.page.user changed from ${prev} to ${cur}`);
+    // watch([valueRef, errorRef, loadingRef], () => {
+    //     health.value = valueRef.value;
+    //     healthError.value = errorRef.value;
+    //     healthLoaded.value = loadingRef.value;
+    //   });
+
+
+    watch(() => [authLoading], async (cur, prev) => {
+      console.log(`debug.page.authLoading changed from ${prev} to ${cur}`);
       ({ valueRef, errorRef, loadingRef } = await useFetchTee<Record<string, any>>(
         "api/health/debug",
         { token: user.value ? user.value.token : null },

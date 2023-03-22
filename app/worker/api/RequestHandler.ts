@@ -74,7 +74,9 @@ class RequestHandler<CfHostMetadata = unknown> extends Request<CfHostMetadata> {
             statusText = 'Bad Request. Token format may be incorrect.';
             res = createJsonResponse(
               {
-                error: `Bad Request. Token format may be incorrect. ${payload.error}`,
+                error: `Bad Request. Token format may be incorrect. ${JSON.stringify(
+                  payload.error,
+                )}`,
               },
               req,
               env,
@@ -84,7 +86,9 @@ class RequestHandler<CfHostMetadata = unknown> extends Request<CfHostMetadata> {
             );
             break;
           case 401:
-            statusText = `Unauthorized. Please Log in to continue. ${payload.error}`;
+            statusText = `Unauthorized. Please Log in to continue. ${JSON.stringify(
+              payload.error,
+            )}`;
             res = createJsonResponse(
               {
                 error:
@@ -146,7 +150,7 @@ class RequestHandler<CfHostMetadata = unknown> extends Request<CfHostMetadata> {
           req,
           env,
           status,
-          null,
+          statusText,
           options?.headers,
         );
       }
@@ -159,7 +163,7 @@ class RequestHandler<CfHostMetadata = unknown> extends Request<CfHostMetadata> {
         req,
         env,
         status,
-        null,
+        'OK',
         options?.headers,
       );
       if (logLevel(FILE_LOG_LEVEL, env)) {
