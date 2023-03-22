@@ -66,12 +66,23 @@ const useFetchTee = async <T>(
 
     try {
       console.info(
-        `fetching data with init: -> ${JSON.stringify(init, null, 2)}`,
+        `fetching data with init: -> ${JSON.stringify(
+          {
+            ...init,
+            headers: {
+              ...init.headers,
+              Authorization: `Bearer ${token.value?.substring(0, 7)}...}`,
+            },
+            token: token.value?.substring(0, 7),
+          },
+          null,
+          2,
+        )}`,
       );
       const request = new Request(url, init);
-      console.log('request', request);
+      // console.log('request', request);
       const response = await fetch(request);
-      console.log('response', response);
+      // console.log('response', response);
       const ct = response.headers.get('Content-Type');
       if (!response.ok) {
         throw new Error(

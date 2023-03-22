@@ -62,14 +62,13 @@ export default {
       }
     }
 
-
     (async () => {
 
       const url = `${urlBase}/api/health/debug`;
       console.info(`debug.page.fetching data from: -> ${url}`);
-
       const { useAuth, defaultOptions } = await import("~/composables/auth");
       const { user: u, authLoading: l } = await useAuth(defaultOptions);
+
       authLoading.value = l.value;
       if (authLoading.value === true) {
         console.log("debug.page.authLoading.value", authLoading.value);

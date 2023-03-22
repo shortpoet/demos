@@ -68,9 +68,20 @@ const useFetch = (url: string, options: RequestConfig = {}) => {
     error.value = null;
 
     try {
-      // console.info(
-      //   `fetching data with init: -> ${JSON.stringify(init, null, 2)}`,
-      // );
+      console.info(
+        `fetching data with init: -> ${JSON.stringify(
+          {
+            ...init,
+            headers: {
+              ...init.headers,
+              Authorization: `Bearer ${options.token?.substring(0, 7)}...}`,
+            },
+            token: `Bearer ${options.token?.substring(0, 7)}...}`,
+          },
+          null,
+          2,
+        )}`,
+      );
       const request = new Request(url, init);
       const response = await fetch(request);
       const ct = response.headers.get('Content-Type');

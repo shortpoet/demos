@@ -194,7 +194,7 @@ const createAuthClient = async ({
     },
   };
   if (import.meta.env.VITE_LOG_LEVEL === 'debug') {
-    console.log('createAuthClient', initOptions);
+    // console.log('createAuthClient', initOptions);
   }
   authClient.value = await createAuth0Client(initOptions);
   redirectCallback = onRedirectCallback;
@@ -205,7 +205,7 @@ async function onLoad() {
     const { useCookies } = await import('@vueuse/integrations/useCookies');
     const cookies = useCookies([COOKIES_USER_TOKEN]);
     const hasToken = cookies.get(COOKIES_USER_TOKEN);
-    console.log(`hasToken and bool: ${[hasToken, hasToken === true]}`);
+    console.log(`plugin hasToken and bool: ${[hasToken, hasToken === true]}`);
     if (
       window.location.search.includes('code=') &&
       window.location.search.includes('state=')

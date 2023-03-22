@@ -152,13 +152,11 @@ const useAuth = async ({
     isLoggedIn,
     authError: error,
     onLoad: async () => {
-      console.log('onLoad');
       try {
         const { useCookies } = await import('@vueuse/integrations/useCookies');
         const cookies = useCookies([COOKIES_USER_TOKEN]);
         const hasToken = cookies.get(COOKIES_USER_TOKEN);
-        console.log(`hasToken: ${hasToken}`);
-        console.log(hasToken === true);
+        console.log(`auth hasToken and bool: ${[hasToken, hasToken === true]}`);
         if (
           window.location.search.includes('code=') &&
           window.location.search.includes('state=')
