@@ -193,6 +193,9 @@ const createAuthClient = async ({
       response_type,
     },
   };
+  if (import.meta.env.VITE_LOG_LEVEL === 'debug') {
+    console.log('createAuthClient', initOptions);
+  }
   authClient.value = await createAuth0Client(initOptions);
   redirectCallback = onRedirectCallback;
 };
@@ -216,7 +219,7 @@ async function onLoad() {
       const tokenRes = await authClient.value.getTokenSilently({
         detailedResponse: true,
       });
-      // console.log(`tokenRes: ${JSON.stringify(tokenRes)}`);
+      console.log(`tokenRes: ${JSON.stringify(tokenRes)}`);
       token.value = tokenRes?.id_token;
     }
   } catch (err) {

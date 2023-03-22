@@ -70,12 +70,12 @@ export default {
       const { useAuth, defaultOptions } = await import("~/composables/auth");
       const { isLoggedIn: a, user: u, authLoading: l, authError: e } = await useAuth(defaultOptions);
       const { loginWithRedirect, logout, loginWithPopup } = await useAuth(defaultOptions);
-      console.log("login.typeof window !== 'undefined' -> can now load things that would break SSR");
+      // console.log("login.typeof window !== 'undefined' -> can now load things that would break SSR");
       const { useCookies } = await import('@vueuse/integrations/useCookies');
       const cookies = useCookies([COOKIES_USER_TOKEN]);
 
       loading.value = l.value;
-      console.log(`login.component.loading.value ${loading.value}`);
+      // console.log(`login.component.loading.value ${loading.value}`);
       isLoggedIn.value = a.value;
       user.value = u.value;
       authError.value = e.value;
@@ -109,7 +109,7 @@ export default {
       };
     }
     // })();
-    console.log("login.component.setup done");
+    // console.log("login.component.setup done");
     const c = ctx;
     const slots = c.slots;
     const loginSlot = slots.login;
@@ -117,7 +117,7 @@ export default {
     const loginPopupSlot = slots.loginPopup;
 
     watch(loading, async (cur, prev) => {
-      console.log(`login.component.loading ${cur} ${prev}`);
+      // console.log(`login.component.loading ${cur} ${prev}`);
       loading.value = cur;
       if (typeof window !== "undefined" && typeof window.document !== "undefined") {
         const { useAuth, defaultOptions } = await import("~/composables/auth");
