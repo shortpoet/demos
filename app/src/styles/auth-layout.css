@@ -2,12 +2,12 @@
   display: flex;
   max-width: 900px;
   margin: auto;
-  background-color: red;
+  background-color: antiquewhite;
 }
 
 .content {
   padding: 20px;
-  border-left: 2px solid #eee;
+  border-left: 2px solid #ccc;
   padding-bottom: 50px;
   min-height: 100vh;
 }

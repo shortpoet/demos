@@ -41,7 +41,11 @@
   flex-direction: column;
 }
 </style>
-  
+
+<script lang="ts">
+</script>
+
+
 <script lang="ts">
 import { computed, ref, watch } from 'vue';
 import Counter from '~/components/Counter.vue'
@@ -51,8 +55,8 @@ import { useFetchTee } from '~/composables/fetchTee';
 import { User } from '@auth0/auth0-spa-js';
 
 import AuthLayout from '~/layouts/AuthLayout.vue';
-
-export { AuthLayout }
+let Layout = AuthLayout;
+export { Layout }
 
 export default {
   components: {
