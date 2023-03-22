@@ -14,9 +14,9 @@ import { createNamespace, getNamespace, parseId, writeKV } from './kv';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-let _debug = false;
+let KV_DEBUG = false;
 
-export { _debug as debug };
+export { KV_DEBUG };
 
 function getArgs() {
   let env = 'dev';
@@ -63,16 +63,18 @@ async function main(env, debug) {
   const config = dotenv.config({
     path: path.join(__dirname, `../${envFile}`),
   });
-  console.log(config);
   const bindingName = process.env.VITE_APP_NAME.toUpperCase().replace(
     /-/g,
     '_',
   );
-  if (debug || process.env.VITLE_LOG_LEVEL === 'debug') {
-    _debug = true;
-  }
-  console.log('debug', _debug);
   const id = parseId(bindingName, env);
+
+  if (debug || process.env.VITLE_LOG_LEVEL === 'debug') {
+    console.log(config);
+    console.log('bindingName', bindingName);
+    console.log('id', id);
+    KV_DEBUG = true;
+  }
 
   if (!getNamespace(id, env)) {
     createNamespace(bindingName, env);

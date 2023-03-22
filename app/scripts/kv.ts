@@ -10,13 +10,12 @@ import getGitInfo from './get-git-info';
 import * as dotenv from 'dotenv';
 
 export { createNamespace, writeKV, getNamespace, parseId };
+import { KV_DEBUG as debug } from './wrangle';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 type Env = 'dev' | 'prod';
-
-import { debug } from './wrangle';
 
 function getToml(): string {
   try {
