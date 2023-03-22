@@ -5,25 +5,26 @@
 </template>
 
 <script lang="ts">
-import { useHead } from '@vueuse/head';
+// import { useHead } from '@vueuse/head';
 
 export default {
   setup() {
     // this triggers oauth refresh i want
     // this needs to be added to pages that use auth0
-    useHead({
-      // TODO look into how the title affects back button text
-      // script: [
-      //   {
-      //     src: "https://cdn.auth0.com/js/auth0/9.13.2/auth0.min.js",
-      //     async: true,
-      //     defer: true,
-      //     onload: async () => {
-      //       parent.postMessage(window.location.hash, 'http://localhost:3000/')
-      //     },
-      //   },
-      // ],
-    });
+    // useHead({
+    //   script: [
+    //     {
+    //       src: 'https://cdn.auth0.com/js/auth0-spa-js/2.0.4/auth0-spa-js.production.js',
+    //       crossorigin: 'anonymous',
+    //       async: true,
+    //       onload: async () => {
+    //         console.log('health-pee.auth0 loaded');
+    //         await auth?.createAuthClient(DEFAULT_REDIRECT_CALLBACK);
+    //         await auth?.onLoad();
+    //       },
+    //     },
+    //   ]
+    // });
   },
 };
 </script>

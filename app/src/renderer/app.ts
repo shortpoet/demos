@@ -1,11 +1,12 @@
-import { createSSRApp, defineComponent, h, markRaw, reactive } from "vue";
-import PageShell from "./PageShell.vue";
-import { setPageContext } from "./usePageContext";
-import { createHead } from "@vueuse/head";
-import { Component, PageContext } from "~/types/pageContext";
-import "@unocss/reset/tailwind.css";
-import "uno.css";
-import "~/styles/main.css";
+import { createSSRApp, defineComponent, h, markRaw, reactive } from 'vue';
+import PageShell from './PageShell.vue';
+import { setPageContext } from './usePageContext';
+import { createHead } from '@vueuse/head';
+import { Component, PageContext } from '~/types/pageContext';
+import '@unocss/reset/tailwind.css';
+import 'uno.css';
+import '~/styles/main.css';
+import { provideAuth } from '~/composables/auth-plugin';
 
 export { createApp };
 
@@ -21,6 +22,7 @@ function createApp(pageContext: PageContext) {
     }),
     created() {
       rootComponent = this;
+      provideAuth();
     },
     render() {
       return h(
@@ -30,7 +32,7 @@ function createApp(pageContext: PageContext) {
           default: () => {
             return h(this.Page, this.pageProps);
           },
-        }
+        },
       );
     },
   });
@@ -62,7 +64,7 @@ function createApp(pageContext: PageContext) {
 // Same as `Object.assign()` but with type inference
 function objectAssign<Obj, ObjAddendum>(
   obj: Obj,
-  objAddendum: ObjAddendum
+  objAddendum: ObjAddendum,
 ): asserts obj is Obj & ObjAddendum {
   Object.assign(obj, objAddendum);
 }

@@ -169,7 +169,7 @@ const useAuth = async ({
           const tokenRes = await auth0Client.getTokenSilently({
             detailedResponse: true,
           });
-          console.log(`tokenRes: ${JSON.stringify(tokenRes)}`);
+          // console.log(`tokenRes: ${JSON.stringify(tokenRes)}`);
           token.value = tokenRes.id_token;
         }
       } catch (err) {

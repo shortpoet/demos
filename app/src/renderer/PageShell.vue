@@ -22,6 +22,7 @@ import { useHead } from '@vueuse/head';
 import { computed } from 'vue';
 import Link from '~/components/Link.vue';
 import { useAuth, defaultOptions } from '~/composables/auth';
+import { useAuthPlugin, DEFAULT_REDIRECT_CALLBACK } from '~/composables/auth-plugin';
 
 import logoUrl from '../../public/logo.svg';
 
@@ -34,11 +35,14 @@ const description = `
 const image = `https://${import.meta.env.VITE_APP_URL}/pwa-512x512.png`
 const imageType = 'image/png'
 const imageAlt = `A PWABuilder logo.`
+
+const authP = useAuthPlugin();
+
 useHead({
   title: title,
   script: [
     {
-      src: 'https://cdn.auth0.com/js/auth0/9.18/auth0.min.js',
+      src: 'https://cdn.auth0.com/js/auth0-spa-js/2.0.4/auth0-spa-js.production.js',
       crossorigin: 'anonymous',
       async: true,
       onload: async () => {
@@ -48,6 +52,10 @@ useHead({
         await onLoad();
         // the self-executing function below fires multiple times
         // return onLoad
+
+        await authP?.createAuthClient(DEFAULT_REDIRECT_CALLBACK);
+        await authP?.onLoad();
+
       },
     },
   ],

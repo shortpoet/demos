@@ -11,238 +11,329 @@ import {
   RedirectLoginResult,
   TokenEndpointOptions,
   GetTokenSilentlyVerboseResponse,
-} from "@auth0/auth0-spa-js";
+} from '@auth0/auth0-spa-js';
 
-import { ref, Ref, computed, watch } from "vue";
+import { ref, Ref, computed, watch, inject, provide } from 'vue';
+import type { InjectionKey } from 'vue';
+
+import { navigate } from 'vite-plugin-ssr/client/router';
+import { CookieSetOptions } from 'universal-cookie';
+import { User } from '~/types';
+
+export {
+  useAuthPlugin,
+  DEFAULT_REDIRECT_CALLBACK,
+  Auth0Client,
+  ClientOptions,
+  defaultOptions,
+  COOKIES_USER_TOKEN,
+  cookieOptions,
+};
 
 interface ClientOptions extends Auth0ClientOptions {
   domain: string;
-  client_id: string;
+  clientId: string;
   audience?: string;
   redirect_uri?: string;
   useRefreshTokens?: boolean;
-  cacheLocation?: "memory" | "localstorage";
+  cacheLocation?: 'memory' | 'localstorage';
   leeway?: number;
   onRedirectCallback?(appState: any): void;
 }
 
-interface Auth0PluginOptions {
-  onRedirectCallback?(appState: any): void;
-}
-
-interface Auth0Plugin {
-  install(app: any, options: Auth0PluginOptions): void;
-}
-
-interface Auth0PluginInstance {
-  isAuthenticated: Ref<boolean>;
-  user: Ref<any>;
-  loading: Ref<boolean>;
+interface Auth0Instance extends Partial<Auth0Client> {
+  isLoggedIn: Ref<boolean>;
+  user: Ref<User | undefined>;
+  authLoading: Ref<boolean>;
+  authError: Ref<any>;
   popupOpen: Ref<boolean>;
+  createAuthClient: (
+    onRedirectCallback: (appState: any) => void,
+    redirectUri?: string,
+    options?: ClientOptions,
+  ) => Promise<void>;
+  onLoad: () => Promise<void>;
+  // onLoad: Promise<void>;
+  isAuthenticated: () => Promise<boolean>;
   loginWithPopup(o?: PopupLoginOptions): Promise<void>;
   handleRedirectCallback(url?: string): Promise<RedirectLoginResult>;
-  getIdTokenClaims(): Promise<IdToken | undefined>;
+  logout(options?: LogoutOptions): Promise<void>;
   loginWithRedirect(o?: RedirectLoginOptions): Promise<void>;
-  getTokenSilently(o?: GetTokenSilentlyOptions): Promise<string | undefined>;
-  getTokenWithPopup(o?: GetTokenWithPopupOptions): Promise<string | undefined>;
-  logout(o?: LogoutOptions): void;
+  getTokenSilently(options?: GetTokenSilentlyOptions): Promise<string>;
+  getTokenSilently(
+    options: GetTokenSilentlyOptions & { detailedResponse: true },
+  ): Promise<GetTokenSilentlyVerboseResponse>;
+  // getIdTokenClaims(): Promise<IdToken | undefined>;
+  // getTokenWithPopup(o?: GetTokenWithPopupOptions): Promise<string | undefined>;
 }
 
-interface Auth0PluginInstance {
-  $auth: Auth0PluginInstance;
-}
+const AuthSymbol = Symbol() as InjectionKey<Auth0Instance>;
 
-const DEFAULT_REDIRECT_CALLBACK = () =>
-  window.history.replaceState({}, document.title, window.location.pathname);
+// interface Auth0Instance {
+//   $auth: this;
+// }
 
-let instance: Auth0PluginInstance;
+const DEFAULT_REDIRECT_CALLBACK = (appState: any = {}) =>
+  // window.history.replaceState(appState, document.title, window.location.pathname);
+  navigate(
+    appState && appState.loginRedirectPath
+      ? appState.loginRedirectPath
+      : window.location.pathname,
+  );
 
-export const Auth0Plugin: Auth0Plugin = {
-  install(Vue, options: Auth0PluginOptions = {}) {
-    const redirectCallback =
-      options.onRedirectCallback || DEFAULT_REDIRECT_CALLBACK;
+// let instance: Auth0Instance;
 
-    Vue.mixin({
-      beforeCreate() {
-        if (this.$options.auth0) {
-          instance = this.$options.auth0;
-        } else if (this.$parent && this.$parent.$auth) {
-          this.$auth = this.$parent.$auth;
+const authClient = ref<Auth0Client | null>(null);
+let redirectCallback: (appState: any) => void;
+// const redirectCallback = ref(DEFAULT_REDIRECT_CALLBACK);
+const user = ref<User | undefined>();
+const token = ref<string>();
+const authLoading = ref(true);
+const popupOpen = ref(false);
+const error = ref<any>();
+const isLoggedIn = ref(false);
+const audience = `https://ssr.shortpoet.com`;
+const scope = 'openid profile email';
+const response_type = 'code';
+
+const COOKIES_USER_TOKEN = `${import.meta.env.VITE_APP_NAME}-user-token`;
+
+const cookieOptions: CookieSetOptions = {
+  path: '/',
+  expires: new Date(Date.now() + 1000 * 60 * 60 * 24),
+  maxAge: 60 * 60 * 24,
+  domain: 'localhost',
+  sameSite: 'strict',
+  // below only works in https
+  // secure: true,
+  // httpOnly: true,
+};
+
+export const provideAuth = () => {
+  const auth = {
+    user,
+    authLoading,
+    popupOpen,
+    isLoggedIn,
+    authError: error,
+
+    createAuthClient,
+    onLoad,
+    handleRedirectCallback,
+    isAuthenticated,
+    loginWithPopup,
+    loginWithRedirect,
+    logout,
+    getTokenSilently,
+    // getIdTokenClaims,
+    // getTokenWithPopup,
+  };
+
+  provide(AuthSymbol, auth);
+};
+
+export const isClient = typeof window !== 'undefined';
+const defaultWindow: (Window & typeof globalThis) | undefined =
+  /* #__PURE__ */ isClient ? window : undefined;
+
+const awaitWindowPromise = async (
+  window: Window | undefined,
+): Promise<Window> => {
+  if (!window) {
+    return new Promise((resolve) => {
+      const interval = setInterval(() => {
+        if (window) {
+          clearInterval(interval);
+          resolve(window);
         }
-      },
+      }, 100);
     });
+  }
+  return window;
+};
 
-    Vue.prototype.$auth = instance;
+const useAuthPlugin = (window = defaultWindow) => {
+  // await awaitWindowPromise(window);
+  if (!window) {
+    return;
+  }
+  const auth = inject(AuthSymbol);
+  if (!auth) {
+    return;
+  }
+  return auth;
+};
 
-    Vue.component("auth0-login-button", {
-      props: {
-        label: {
-          type: String,
-          default: "Login",
-        },
-      },
-      methods: {
-        login() {
-          instance.loginWithRedirect();
-        },
-      },
-      template: `<button @click="login">{{ label }}</button>`,
-    });
-
-    Vue.component("auth0-logout-button", {
-      props: {
-        label: {
-          type: String,
-          default: "Logout",
-        },
-      },
-      methods: {
-        logout() {
-          instance.logout();
-        },
-      },
-      template: `<button @click="logout">{{ label }}</button>`,
-    });
+const defaultOptions: ClientOptions = {
+  domain: import.meta.env.VITE_AUTH0_DOMAIN,
+  clientId: import.meta.env.VITE_AUTH0_CLIENT_ID,
+  useRefreshTokens: true,
+  cacheLocation: 'localstorage',
+  onRedirectCallback: (appState: any) => {
+    navigate(
+      appState && appState.loginRedirectPath
+        ? appState.loginRedirectPath
+        : window.location.pathname,
+    );
   },
 };
 
-export const useAuth0 = (): Auth0PluginInstance => instance;
-
-export const createAuth0Client = async (
-  options: ClientOptions
-): Promise<Auth0PluginInstance> => {
-  const auth0Client = await createAuth0Client(options);
-  const isAuthenticated = ref(await auth0Client.isAuthenticated());
-  const user = ref<any>();
-  const loading = ref(true);
-  const popupOpen = ref(false);
-
-  const handleRedirectCallback = async () => {
-    loading.value = true;
-    try {
-      await auth0Client.handleRedirectCallback();
-      user.value = await auth0Client.getUser();
-      isAuthenticated.value = true;
-    } catch (e) {
-      user.value = undefined;
-      isAuthenticated.value = false;
-    } finally {
-      loading.value = false;
-    }
-  };
-
-  if (
-    window.location.search.includes("code=") &&
-    window.location.search.includes("state=")
-  ) {
-    const { appState } = await auth0Client.handleRedirectCallback();
-    redirectCallback(appState);
-  }
-
-  watch(
-    () => isAuthenticated.value,
-    (isAuthenticated) => {
-      if (isAuthenticated) {
-        user.value = auth0Client.getUser();
-      }
-    }
-  );
-
-  return {
-    isAuthenticated,
-    user,
-    loading,
-    popupOpen,
-    loginWithPopup: async (o) => {
-      popupOpen.value = true;
-      try {
-        await auth0Client.loginWithPopup(o);
-      } catch (e) {
-        // eslint-disable-next-line
-        console.error(e);
-      } finally {
-        popupOpen.value = false;
-      }
-      user.value = await auth0Client.getUser();
-      isAuthenticated.value = true;
+const createAuthClient = async ({
+  onRedirectCallback = DEFAULT_REDIRECT_CALLBACK,
+  redirectUri = import.meta.env.VITE_AUTH0_CALLBACK_URL,
+  ...options
+}): Promise<void> => {
+  const initOptions: ClientOptions = {
+    ...defaultOptions,
+    ...options,
+    authorizationParams: {
+      scope,
+      audience,
+      redirect_uri: redirectUri,
+      response_type,
     },
-    handleRedirectCallback,
-    getIdTokenClaims: (...p) => auth0Client.getIdTokenClaims(...p),
-    loginWithRedirect: (...p) => auth0Client.loginWithRedirect(...p),
-    getTokenSilently: (...p) => auth0Client.getTokenSilently(...p),
-    getTokenWithPopup: (...p) => auth0Client.getTokenWithPopup(...p),
-    logout: (...p) => auth0Client.logout(...p),
   };
+  authClient.value = await createAuth0Client(initOptions);
+  redirectCallback = onRedirectCallback;
 };
 
-// // Path: app/src/main.ts
+async function onLoad() {
+  try {
+    const { useCookies } = await import('@vueuse/integrations/useCookies');
+    const cookies = useCookies([COOKIES_USER_TOKEN]);
+    const hasToken = cookies.get(COOKIES_USER_TOKEN);
+    console.log(`hasToken and bool: ${[hasToken, hasToken === true]}`);
+    if (
+      window.location.search.includes('code=') &&
+      window.location.search.includes('state=')
+    ) {
+      const res = await authClient.value?.handleRedirectCallback();
+      redirectCallback(res?.appState);
+    } else if (hasToken === true) {
+      if (!authClient.value) {
+        return;
+      }
+      const tokenRes = await authClient.value.getTokenSilently({
+        detailedResponse: true,
+      });
+      // console.log(`tokenRes: ${JSON.stringify(tokenRes)}`);
+      token.value = tokenRes?.id_token;
+    }
+  } catch (err) {
+    console.error(`error: ${err}`);
+    error.value = err;
+    authLoading.value = false;
+  } finally {
+    authLoading.value = false;
+    console.log(`finally: authLoading plugin -> ${authLoading.value}`);
+    user.value = await authClient.value?.getUser();
+    isLoggedIn.value = (await authClient.value?.isAuthenticated()) || false;
+    if (isLoggedIn.value === true && user.value) {
+      token.value = (await authClient.value?.getTokenSilently()) || '';
+      user.value.token = token.value;
+    }
+  }
+}
 
-// import { createApp } from "vue";
-// import App from "./App.vue";
-// import router from "./router";
-// import store from "./store";
-// import { Auth0Plugin } from "./composables/auth";
+async function handleRedirectCallback() {
+  authLoading.value = true;
+  try {
+    if (!authClient.value) {
+      return;
+    }
+    const { appState } = await authClient.value.handleRedirectCallback();
+    // console.log(`handleRedirectCallback: appState: ${appState}`);
+    user.value = await authClient.value.getUser();
+    isLoggedIn.value = true;
+    // window.history.replaceState({}, document.title, window.location.pathname);
+    redirectCallback(appState);
+    return appState;
+  } catch (e) {
+    console.error(e);
+    error.value = e;
+    authLoading.value = false;
+  } finally {
+    authLoading.value = false;
+  }
+}
 
-// const app = createApp(App);
+async function isAuthenticated() {
+  const authenticated = (await authClient.value?.isAuthenticated()) || false;
+  if (authenticated !== isLoggedIn.value) {
+    isLoggedIn.value = authenticated || false;
+  }
+  return authenticated;
+}
 
-// app.use(store);
+async function getTokenSilently(
+  options?: GetTokenSilentlyOptions,
+): Promise<string>;
+async function getTokenSilently(
+  options: GetTokenSilentlyOptions & { detailedResponse: true },
+): Promise<GetTokenSilentlyVerboseResponse>;
+async function getTokenSilently(options?: any): Promise<any> {
+  if (options?.detailedResponse) {
+    return await authClient.value?.getTokenSilently({
+      ...options,
+      detailedResponse: true,
+    });
+  } else {
+    return await authClient.value?.getTokenSilently(options);
+  }
+}
 
-// app.use(router);
+async function loginWithRedirect(
+  o: RedirectLoginOptions = {
+    appState: {
+      loginRedirectPath: window.location.pathname,
+    },
+  },
+) {
+  authLoading.value = true;
+  try {
+    const res = await authClient.value?.loginWithRedirect(o);
+    return res;
+  } catch (e) {
+    console.error(e);
+    error.value = e;
+    authLoading.value = false;
+  } finally {
+    authLoading.value = false;
+  }
+}
 
-// app.use(Auth0Plugin, {
-//   onRedirectCallback: (appState) => {
-//     router.push(appState?.returnTo || window.location.pathname);
-//   }
-// });
+async function loginWithPopup(o: PopupLoginOptions = {}) {
+  popupOpen.value = true;
+  authLoading.value = true;
+  try {
+    const res = await authClient.value?.loginWithPopup(o);
+    return res;
+  } catch (e) {
+    console.error(e);
+    error.value = e;
+    authLoading.value = false;
+  } finally {
+    popupOpen.value = false;
+    user.value = await authClient.value?.getUser();
+    isLoggedIn.value = (await authClient.value?.isAuthenticated()) || false;
+    token.value = await authClient.value?.getTokenSilently();
+    if (user.value) user.value.token = token.value || '';
+    // because no redirect we set this here vs in onLoad
+    // console.log(`isLoggedIn: ${isLoggedIn.value}`);
+    // console.log(`user: ${JSON.stringify(user.value)}`);
+    authLoading.value = false;
+  }
+}
 
-// app.mount("#app");
-
-// // Path: app/src/App.vue
-
-// <template>
-//   <div id="app">
-//     <router-view />
-//   </div>
-// </template>
-
-// <script lang="ts">
-// import { defineComponent } from "vue";
-// import { useAuth0 } from "./composables/auth";
-
-// export default defineComponent({
-//   name: "App",
-//   setup() {
-//     const { loading } = useAuth0();
-//     return {
-//       loading,
-//     };
-//   }
-// });
-// </script>
-
-// // Path: app/src/views/Home.vue
-
-// <template>
-//   <div class="home">
-//     <h1>Home</h1>
-//     <auth0-login-button />
-//     <auth0-logout-button />
-//   </div>
-// </template>
-
-// <script lang="ts">
-// import { defineComponent } from "vue";
-// import { useAuth0 } from "../composables/auth";
-
-// export default defineComponent({
-//   name: "Home",
-//   setup() {
-//     const { isAuthenticated, user, loading } = useAuth0();
-//     return {
-//       isAuthenticated,
-//       user,
-//       loading,
-//     };
-//   }
-// });
-// </script>
+async function logout(
+  o: LogoutOptions = {
+    openUrl: async (defaultUrl) => {
+      // console.log(`logout: openUrl: ${defaultUrl}`);
+      window.location.replace(window.location.origin + '/auth/login');
+    },
+  },
+) {
+  await authClient.value?.logout(o);
+  user.value = undefined;
+  isLoggedIn.value = false;
+}

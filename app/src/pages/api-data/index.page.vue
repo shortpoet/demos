@@ -15,6 +15,7 @@
       <Link btn-purple v-bind="attrsObj" href="/api-data/health">Health</Link>
       <Link btn-purple v-bind="attrsObj" href="/api-data/debug">Debug</Link>
       <Link btn-purple v-bind="attrsObj" href="/api-data/health-tee">Health Tee</Link>
+      <Link btn-purple v-bind="attrsObj" href="/api-data/health-plugin">Health Plugin</Link>
     </nav>
 
     <!-- <div class="api-content">
@@ -25,22 +26,22 @@
 </template>
 
 <script lang="ts" setup>
-import ApiViewer from '~/components/ApiViewer.vue';
-import JsonTree from '~/components/JsonTree.vue';
+// import ApiViewer from '~/components/ApiViewer.vue';
+// import JsonTree from '~/components/JsonTree.vue';
 import Link from '~/components/Link.vue';
 
-const attrs = `
-      bg-purple-300
-      hover:bg-purple-400
-      dark:bg-purple-400
-      dark:hover:bg-purple-500
-      font-mono
-      font-light
-      p-y-2
-      p-x-4
-      border-2
-      rounded
-      border-purple-200`
+// const attrs = `
+//       bg-purple-300
+//       hover:bg-purple-400
+//       dark:bg-purple-400
+//       dark:hover:bg-purple-500
+//       font-mono
+//       font-light
+//       p-y-2
+//       p-x-4
+//       border-2
+//       rounded
+//       border-purple-200`
 const attrsObj = {
   bg: 'blue-400 hover:blue-500 dark:blue-500 dark:hover:blue-600',
   // text: 'sm white', // this causes a bug that changes inner html
