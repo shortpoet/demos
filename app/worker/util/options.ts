@@ -56,6 +56,14 @@ function handleCors(
     if (!req.headers) return;
     const value = req.headers.get(key);
     if (value) {
+      if (key === 'Authorization') {
+        console.log(
+          'worker.handleOptions.header.value',
+          key,
+          `${value.slice(0, 15)}...`,
+        );
+        return;
+      }
       console.log('worker.handleOptions.header.value', key, value);
     }
   };

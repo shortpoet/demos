@@ -219,7 +219,7 @@ async function onLoad() {
       const tokenRes = await authClient.value.getTokenSilently({
         detailedResponse: true,
       });
-      console.log(`tokenRes: ${JSON.stringify(tokenRes)}`);
+      // console.log(`tokenRes: ${JSON.stringify(tokenRes)}`);
       token.value = tokenRes?.id_token;
     }
   } catch (err) {

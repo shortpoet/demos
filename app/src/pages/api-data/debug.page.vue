@@ -54,44 +54,56 @@ export default {
     let loadingRef = ref();
     let authLoading = ref(false);
 
+    if (typeof window === "undefined") {
+      return {
+        debug,
+        loaded,
+        debugError,
+      }
+    }
+
+
     (async () => {
 
       const url = `${urlBase}/api/health/debug`;
-      console.info(`page.fetching data from: -> ${url}`);
+      console.info(`debug.page.fetching data from: -> ${url}`);
 
-      if (typeof window !== "undefined" && typeof window.document !== "undefined") {
-        const { useAuth, defaultOptions } = await import("~/composables/auth");
-        const { user: u, authLoading: l } = await useAuth(defaultOptions);
-        authLoading.value = l.value;
-        if (authLoading.value === true) {
-          console.log("authLoading.value", authLoading.value);
-          return;
-        } else {
-          console.log("authLoading.value", authLoading.value);
-          user = u;
-          const options = { token: user.value ? user.value.token : null };
+      const { useAuth, defaultOptions } = await import("~/composables/auth");
+      const { user: u, authLoading: l } = await useAuth(defaultOptions);
+      authLoading.value = l.value;
+      if (authLoading.value === true) {
+        console.log("debug.page.authLoading.value", authLoading.value);
+        return;
+      } else {
+        console.log("debug.page.authLoading.value", authLoading.value);
+        user = u;
+        const options = { token: user.value ? user.value.token : null };
 
-          ({ valueRef, errorRef, loadingRef } = await useFetchTee<Record<string, any>>(
-            "api/health/debug",
-            options,
-            debug,
-            debugLoaded,
-            debugError
-          ));
+        ({ valueRef, errorRef, loadingRef } = await useFetchTee<Record<string, any>>(
+          "api/health/debug",
+          options,
+          debug,
+          debugLoaded,
+          debugError
+        ));
 
-          debug.value = valueRef.value;
-          debugError.value = errorRef.value;
-          debugLoaded.value = loadingRef.value;
-
-        }
+        debug.value = valueRef.value;
+        debugError.value = errorRef.value;
+        debugLoaded.value = loadingRef.value;
       }
     })();
 
-    // watch([valueRef, errorRef, loadingRef], () => {
-    //     health.value = valueRef.value;
-    //     healthError.value = errorRef.value;
-    //     healthLoaded.value = loadingRef.value;
-    //   });
+    watch([valueRef, errorRef, loadingRef], async (cur, prev) => {
+      console.log(`debug.page.refs changed from ${prev} to ${cur}`);
+      ({ valueRef, errorRef, loadingRef } = await useFetchTee<Record<string, any>>(
+        "api/health/debug",
+        { token: user.value ? user.value.token : null },
+        debug,
+        debugLoaded,
+        debugError
+      ));
+      debug.value = valueRef.value;
+    });
 
 
     watch(() => [authLoading], async (cur, prev) => {
