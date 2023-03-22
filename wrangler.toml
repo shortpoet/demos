@@ -12,6 +12,7 @@ preview_id = "3740e85e3b174682964efa26066fa5c4"
 [env.dev.vars]
 ENVIRONMENT = "dev"
 LOG_LEVEL = "info"
+AUTH0_DOMAIN = "shortpoet.auth0.com"
 [[env.prod.kv_namespaces]]
 binding = "DEMO_CFW_SSR"
 id = "s"

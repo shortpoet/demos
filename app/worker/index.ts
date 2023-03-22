@@ -24,6 +24,7 @@ export default {
 
       return response;
     } catch (e) {
+      console.error('worker.fetch');
       console.error(e);
       if (e instanceof NotFoundError) {
         return new Response('Not Found', { status: 404 });

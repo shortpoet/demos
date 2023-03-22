@@ -1,6 +1,6 @@
 import { getAssetFromKV } from '@cloudflare/kv-asset-handler';
 export { handleStaticAssets };
-
+// @ts-expect-error
 import rawManifest from '__STATIC_CONTENT_MANIFEST';
 import { setCacheOptions } from './util';
 const KV_ASSET_NAMESPACE = 'CLOUDFLARE_WORKERS_VUE';
@@ -43,6 +43,7 @@ async function handleStaticAssets(request, env, ctx) {
 
       return response;
     } catch (error) {
+      console.error('worker.handleStaticAssets.getAssetFromKV.error');
       console.error('error', error);
       return new Response(error.message || error.toString(), { status: 500 });
     }
@@ -60,6 +61,7 @@ async function handleStaticAssets(request, env, ctx) {
           status: 404,
         });
       } catch (e) {
+        console.error('worker.handleStaticAssets.getAssetFromKV.error2');
         console.error('error', e);
       }
     }

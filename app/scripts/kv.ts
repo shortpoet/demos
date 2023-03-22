@@ -1,48 +1,14 @@
 import { KVNamespace } from '@cloudflare/workers-types';
 import { execSync } from 'node:child_process';
-import toml from 'toml';
-import json2toml from 'json2toml';
-import fs from 'node:fs';
-import path, { dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import getGitInfo from './get-git-info';
 
 import * as dotenv from 'dotenv';
 
 export { createNamespace, writeKV, getNamespace, parseId };
 import { KV_DEBUG as debug } from './wrangle';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+import { getToml, writeToml } from './util';
 
 type Env = 'dev' | 'prod';
-
-function getToml(): string {
-  try {
-    return toml.parse(
-      fs.readFileSync(path.join(__dirname, '../../wrangler.toml'), 'utf8'),
-    );
-  } catch (error) {
-    console.error(error);
-  }
-}
-
-const writeToml = (data: string) => {
-  try {
-    fs.writeFileSync(
-      path.join(__dirname, '../../wrangler.bak.toml'),
-      fs.readFileSync(path.join(__dirname, '../../wrangler.toml'), 'utf8'),
-    );
-    // console.log('wrote toml');
-    // console.log(data);
-    fs.writeFileSync(
-      path.join(__dirname, '../../wrangler.toml'),
-      json2toml(data),
-    );
-  } catch (error) {
-    console.error(error);
-  }
-};
 
 const getBinding = (env) => {
   return getToml()['env'][`${env}`]['kv_namespaces'][0]['binding'];

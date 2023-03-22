@@ -275,6 +275,8 @@ const jwtDecode = function (jwt, env) {
     try {
       return JSON.parse(b64DecodeUnicode(output));
     } catch (err) {
+      console.error('Error while decoding from base64');
+      console.error(err);
       return atob(output);
     }
   }
