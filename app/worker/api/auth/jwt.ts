@@ -1,8 +1,8 @@
-import { Env } from '../../environment';
+import { Env } from '../../types';
 import { logLevel } from '../../util';
 import { Jwt, Key, ValidateJWT, WellKnownResponse } from '../types';
 import { cacheResponse } from '../../util';
-import { RequestHandler } from './RequestHandler';
+import { RequestHandler } from '../RequestHandler';
 
 export { isValidJwt };
 

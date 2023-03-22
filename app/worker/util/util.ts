@@ -1,4 +1,3 @@
-import { mapRequestToAsset, Options } from '@cloudflare/kv-asset-handler';
 import { Env, LogLevel, LOG_LOVELS } from '../types';
 
 export { logLevel, isAssetURL, redirectToHttps, isAPI };

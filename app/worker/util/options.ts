@@ -1,5 +1,5 @@
 import { mapRequestToAsset, Options } from '@cloudflare/kv-asset-handler';
-import { RequestHandler } from '../api/auth';
+import { RequestHandler } from '../api';
 import { Env, LogLevel, LOG_LOVELS } from '../types';
 
 export { setCacheOptions, handleOptions, handleCors };

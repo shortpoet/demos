@@ -1,8 +1,8 @@
-import { Env } from '../../types';
-import { logLevel } from '../../util';
-import { User } from '../types';
-import { createJsonResponse } from '../../util';
-import { isValidJwt } from './jwt';
+import { Env } from '../types';
+import { logLevel } from '../util';
+import { User } from './types';
+import { createJsonResponse } from '../util';
+import { isValidJwt } from './auth/jwt';
 
 export { RequestHandler, defineInit };
 

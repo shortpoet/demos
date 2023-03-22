@@ -1,8 +1,9 @@
 /** source/controllers/posts.ts */
 import { Env } from '../../types';
 import { logLevel, msToTime } from '../../util';
-import { RequestHandler } from '../auth';
+import { RequestHandler } from '..';
 import { createJsonResponse, generateUUID } from '../../util';
+// @ts-expect-error
 import rawManifest from '__STATIC_CONTENT_MANIFEST';
 import { HealthCheck } from '../types';
 

@@ -7,8 +7,8 @@ import {
 } from '@cloudflare/kv-asset-handler/dist/types';
 import { isAPI, isAssetURL } from './util';
 import { Env } from './types';
-import { RequestHandler } from './api/auth';
-import { handleAPI } from './api/api';
+import { RequestHandler } from './api';
+import { handleAPI } from './api';
 
 export default {
   async fetch(

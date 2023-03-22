@@ -1,7 +1,7 @@
 import { Env } from '../types';
 import { logLevel } from '../util';
 import { createJsonResponse, handleCors, handleOptions } from '../util';
-import { RequestHandler } from './auth';
+import { RequestHandler } from '.';
 import { handleHealth } from './health';
 
 export { handleAPI };

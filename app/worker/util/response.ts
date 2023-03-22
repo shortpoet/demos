@@ -1,6 +1,6 @@
 import { Env } from '../types';
 import { handleOptions, logLevel } from '.';
-import { RequestHandler } from '../api/auth';
+import { RequestHandler } from '../api';
 
 export { createJsonResponse, cloneResponse, cacheResponse };
 const FILE_LOG_LEVEL = 'debug';
