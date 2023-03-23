@@ -6,7 +6,7 @@ import { RequestHandler } from '../RequestHandler';
 
 export { isValidJwt };
 
-const FILE_LOG_LEVEL = 'info';
+const FILE_LOG_LEVEL = 'error';
 
 async function isValidJwt(
   handler: RequestHandler,

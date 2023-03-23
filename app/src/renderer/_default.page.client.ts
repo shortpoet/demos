@@ -1,19 +1,20 @@
-import { PageContextBuiltInClient } from "vite-plugin-ssr/client";
-import { PageContext } from "~/types/pageContext";
-import { createApp } from "./app";
-import { getPageTitle } from "./getPageTitle";
+import { PageContextBuiltInClient } from 'vite-plugin-ssr/client';
+import { PageContext } from '~/types/pageContext';
+import { createApp } from './app';
+import { getPageTitle } from './getPageTitle';
 
 export const clientRouting = true;
-export const prefetchStaticAssets = { when: "VIEWPORT" };
+export const prefetchStaticAssets = { when: 'VIEWPORT' };
 export { render };
 
 let app: Awaited<Promise<PromiseLike<ReturnType<typeof createApp>>>>;
 async function render(pageContext: PageContextBuiltInClient & PageContext) {
+  console.log('client.render');
   // const { Page, Layout } = pageContext.exports;
   // console.log(Page, Layout);
   if (!app) {
     app = await createApp(pageContext);
-    app.mount("#app");
+    app.mount('#app');
   } else {
     app.changePage(pageContext);
   }

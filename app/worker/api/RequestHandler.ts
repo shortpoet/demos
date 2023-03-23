@@ -6,7 +6,7 @@ import { isValidJwt } from './auth/jwt';
 
 export { RequestHandler, defineInit };
 
-const FILE_LOG_LEVEL = 'debug';
+const FILE_LOG_LEVEL = 'info';
 
 async function defineInit(request: Request): Promise<RequestInit> {
   return {
@@ -102,6 +102,28 @@ class RequestHandler {
     };
   };
 
+  async initData() {
+    console.log(`worker.initData -> ${this.url}`);
+    console.log(`method -> ${this.req.method}`);
+    // this results in an error when there is a user object in request
+    // but can't see any of the data
+    if (this.req.method === 'POST') {
+      const t = await this.req.text();
+      // const j: BodyContext = await this.req.clone().json();
+      // console.log('worker.handleRequest.text', t);
+      // if (j) {
+      //   this.user = j.user;
+      //   this.data = j.data;
+      // }
+      const data = JSON.parse(t);
+      console.log('worker.handleRequest.data', data);
+      this.user = data;
+      this.data = data.data;
+      console.log('worker.handleRequest.body', this.data);
+      console.log('worker.handleRequest.user', this.user);
+    }
+  }
+
   async handleRequest(
     env: Env,
     ctx: ExecutionContext,
@@ -112,20 +134,9 @@ class RequestHandler {
       headers?: Record<string, string>;
     } = { withAuth: false, headers: {} },
   ): Promise<Response> {
-    console.log(`worker.handleRequest: ${this.url}`);
-    console.log('worker.handleRequest.options', options);
+    // console.log(`worker.handleRequest: ${this.url}`);
+    // console.log('worker.handleRequest.options', options);
     let res;
-    // this results in an error when there is a user object in request
-    // but can't see any of the data
-    // const j: BodyContext = await this.req.json();
-    const t = await this.req.text();
-    console.log('worker.handleRequest.text', t);
-    // if (j) {
-    //   this.user = j.user;
-    //   this.data = j.data;
-    // }
-    console.log('worker.handleRequest.body', this.data);
-    console.log('worker.handleRequest.user', this.user);
 
     if (options.withAuth) {
       const { valid, payload, status } = await isValidJwt(this, env, ctx);

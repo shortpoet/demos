@@ -11,7 +11,8 @@ import { provideAuth } from '~/composables/auth-plugin';
 export { createApp };
 
 function createApp(pageContext: PageContext) {
-  const { Page, pageProps } = pageContext;
+  console.log('createApp');
+  const { Page, pageProps, user } = pageContext;
   let rootComponent: Component;
 
   const PageWithWrapper = defineComponent({
@@ -19,6 +20,7 @@ function createApp(pageContext: PageContext) {
       Page: markRaw(Page),
       pageProps: markRaw(pageProps || {}),
       Layout: markRaw(pageContext.exports.Layout || PageShell),
+      user,
     }),
     created() {
       rootComponent = this;

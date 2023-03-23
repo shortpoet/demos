@@ -4,7 +4,7 @@ import { RequestHandler } from '../api';
 import { Env, LogLevel, LOG_LOVELS } from '../types';
 
 export { setCacheOptions, handleOptions, handleCors };
-const FILE_LOG_LEVEL = 'debug';
+const FILE_LOG_LEVEL = 'info';
 
 function handleOptions(
   handler: RequestHandler,

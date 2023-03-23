@@ -20,8 +20,12 @@ export default {
     try {
       // BUG: sending env back as response body. includes all static manifest etc.
 
-      console.log('worker.fetch');
-      console.log(JSON.stringify(request, null, 2));
+      console.log(`
+      \nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n
+      worker.fetch -> ${request.url}
+      \n
+      `);
+      // console.log(JSON.stringify(request, null, 2));
       if (request.body) {
         console.log('worker.RequestHandler.req.body', request.body);
         if (request.body instanceof ReadableStream) {
@@ -33,9 +37,10 @@ export default {
       }
 
       const handler = new RequestHandler(request, env);
+      await handler.initData();
       // const req = new RequestHandler(request, env, await defineInit(request));
-      console.log('worker.handleFetchEvent.handler');
-      console.log(JSON.stringify(handler, null, 2));
+      // console.log('worker.handleFetchEvent.handler');
+      // console.log(JSON.stringify(handler, null, 2));
 
       const response = await handleFetchEvent(handler, env, ctx, waitUntil);
 
@@ -75,7 +80,7 @@ async function handleFetchEvent(
     return handleAPI(handler, env, ctx, waitUntil);
   }
 
-  const response = await handleSsr(handler.req, env, ctx);
+  const response = await handleSsr(handler, env, ctx);
   if (response !== null) return response;
 
   return new Response('Not Found', { status: 404 });
