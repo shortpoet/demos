@@ -12,9 +12,9 @@
 
     <nav>
       <Link btn href="/auth/login" title="Login">Login</Link>
-      <Link btn-purple v-bind="attrsObj" href="/api-data/health">Health</Link>
       <Link btn-purple v-bind="attrsObj" href="/api-data/debug">Debug</Link>
-      <Link btn-purple v-bind="attrsObj" href="/api-data/health-tee">Health Tee</Link>
+      <Link btn-purple v-bind="attrsObj" href="/api-data/health">Health</Link>
+      <Link btn-purple v-bind="attrsObj" href="/api-data/debug-plugin">Debug Plugin</Link>
       <Link btn-purple v-bind="attrsObj" href="/api-data/health-plugin">Health Plugin</Link>
     </nav>
 

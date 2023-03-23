@@ -5,7 +5,7 @@
       Interactive while loading:
       <Counter />
       <div v-if="loaded === false">
-        <p>Loading...</p>
+        <p>Loading... (slowed down for FX 🤠)</p>
       </div>
       <div v-else>
         <ol>
