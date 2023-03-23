@@ -1,13 +1,13 @@
 <template>
   <div class="page-container">
     <div>
-      <h1>Health Tee</h1>
+      <h1>Debug Plugin</h1>
       <Link :href="`/api-data`" :title="'back'">
       <i class="i-carbon-page-first" inline-block />
       </Link>
-      <pre v-if="healthError">{{ healthError }}</pre>
+      <pre v-if="error">{{ error }}</pre>
       <div v-else>
-        <JsonTree :data="health" />
+        <JsonTree :data="data" />
       </div>
     </div>
   </div>
@@ -22,7 +22,7 @@
 
 
 <script lang="ts">
-import { computed, ref } from 'vue';
+import { computed, Ref, ref } from 'vue';
 import Counter from '~/components/Counter.vue'
 import Link from '~/components/Link.vue'
 import JsonTree from '~/components/JsonTree.vue'
@@ -40,16 +40,16 @@ export default {
     JsonTree,
   },
   async setup() {
-    const loaded = computed(() => healthLoaded.value && authLoading.value)
-    const healthError = ref(null);
-    const healthLoaded = ref(false);
-    const health = ref({});
+    const loaded = computed(() => dataLoading.value && authLoading.value)
+    let dataLoading = ref(false);
+    let error = ref(null);
+    let data: Ref<any> = ref();
 
     if (typeof window === "undefined") {
       return {
-        health,
+        data,
         loaded,
-        healthError,
+        error,
       }
     }
 
@@ -61,14 +61,12 @@ export default {
 
     const options = { token: user.value ? user.value.token : undefined };
 
-    const { valueRef, errorRef, loadingRef } = await useFetchTee<Record<string, any>>("api/health/debug",
-      options, health, healthLoaded, healthError);
+    ({ data, error, dataLoading } = await useFetchTee<Record<string, any>>(
+      "api/health/debug",
+      options,
+    ));
 
-    health.value = valueRef.value;
-    healthError.value = errorRef.value;
-    healthLoaded.value = loadingRef.value;
-
-    return { health, loaded, healthError };
+    return { data, dataLoading, error, authLoading };
   },
 }
 </script>

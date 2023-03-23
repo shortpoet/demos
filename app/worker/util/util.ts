@@ -6,7 +6,7 @@ const logLevel = (level: LogLevel, env: Env): boolean => {
   const envLevel = env.LOG_LEVEL;
   const currentIndex = LOG_LOVELS.indexOf(env.LOG_LEVEL);
   const targetIndex = LOG_LOVELS.indexOf(level);
-  const out = currentIndex <= targetIndex;
+  const out = currentIndex >= targetIndex;
   // console.log("logLevel", { level, envLevel, currentIndex, targetIndex, out });
   return out;
 };

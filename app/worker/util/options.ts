@@ -7,7 +7,7 @@ export { setCacheOptions, handleOptions, handleCors };
 const FILE_LOG_LEVEL = 'debug';
 
 function handleOptions(
-  request: RequestHandler,
+  handler: RequestHandler,
   env: Env,
   status: number = 200,
   statusText: string = 'OK',
@@ -17,17 +17,17 @@ function handleOptions(
     console.log('worker.handleOptions');
     // console.log(JSON.stringify(request, null, 2));
   }
-  return handleCors(request, env, status, statusText, headers);
+  return handleCors(handler, env, status, statusText, headers);
 }
 
 function handleCors(
-  request: RequestHandler,
+  handler: RequestHandler,
   env: Env,
   status: number = 200,
   statusText: string = 'OK',
   headers?: any,
 ) {
-  if (!request.headers) return;
+  if (!handler.req.headers) return;
   if (logLevel(FILE_LOG_LEVEL, env)) {
     console.log('worker.handleCors');
   }
@@ -74,17 +74,20 @@ function handleCors(
     return allowedOrigins.find((o) => o === origin);
   };
   if (logLevel(FILE_LOG_LEVEL, env)) {
-    console.log('worker.handleOptions.checkOrigin', checkOrigin(request || ''));
+    console.log(
+      'worker.handleOptions.checkOrigin',
+      checkOrigin(handler.req || ''),
+    );
   }
 
-  tryLogHeader('Origin', request);
-  tryLogHeader('Authorization', request);
-  tryLogHeader('X-Ping', request);
-  tryLogHeader('Access-Control-Request-Method', request);
-  tryLogHeader('Access-Control-Request-Headers', request);
-  tryLogHeader('sec-fetch-dest', request);
-  tryLogHeader('sec-fetch-mode', request);
-  tryLogHeader('sec-fetch-site', request);
+  tryLogHeader('Origin', handler.req);
+  tryLogHeader('Authorization', handler.req);
+  tryLogHeader('X-Ping', handler.req);
+  tryLogHeader('Access-Control-Request-Method', handler.req);
+  tryLogHeader('Access-Control-Request-Headers', handler.req);
+  tryLogHeader('sec-fetch-dest', handler.req);
+  tryLogHeader('sec-fetch-mode', handler.req);
+  tryLogHeader('sec-fetch-site', handler.req);
 
   // const checkOrigin = (request) => {
   //   if (!request.headers) return;
@@ -104,12 +107,12 @@ function handleCors(
   };
 
   if (
-    request.headers.get('Origin') !== null &&
-    (request.headers.get('X-Ping') === 'pong' ||
-      request.headers.get('Authorization') !== null ||
-      (request.headers.get('Access-Control-Request-Method') !== null &&
-        request.headers.get('Access-Control-Request-Headers') !== null) ||
-      request.isAuthenticated)
+    handler.req.headers.get('Origin') !== null &&
+    (handler.req.headers.get('X-Ping') === 'pong' ||
+      handler.req.headers.get('Authorization') !== null ||
+      (handler.req.headers.get('Access-Control-Request-Method') !== null &&
+        handler.req.headers.get('Access-Control-Request-Headers') !== null) ||
+      handler.isAuthenticated)
   ) {
     if (logLevel(FILE_LOG_LEVEL, env)) {
       console.log('worker.handleOptions: CORS');

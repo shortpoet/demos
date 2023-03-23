@@ -5,11 +5,11 @@ import {
   MethodNotAllowedError,
   NotFoundError,
 } from '@cloudflare/kv-asset-handler/dist/types';
-import { isAPI, isAssetURL } from './util';
+import { isAPI, isAssetURL, logLevel } from './util';
 import { Env } from './types';
-import { RequestHandler } from './api';
+import { defineInit, RequestHandler } from './api';
 import { handleAPI } from './api';
-
+const FILE_LOG_LEVEL = 'error';
 export default {
   async fetch(
     request: Request,
@@ -18,9 +18,26 @@ export default {
     waitUntil: (promise: Promise<any>) => void,
   ): Promise<Response> {
     try {
-      const req = new RequestHandler(request, env);
+      // BUG: sending env back as response body. includes all static manifest etc.
 
-      const response = await handleFetchEvent(req, env, ctx, waitUntil);
+      console.log('worker.fetch');
+      console.log(JSON.stringify(request, null, 2));
+      if (request.body) {
+        console.log('worker.RequestHandler.req.body', request.body);
+        if (request.body instanceof ReadableStream) {
+          console.log(
+            'worker.RequestHandler.req.body instanceof ReadableStream',
+          );
+          console.log(await request.clone().body.pipeTo(new WritableStream()));
+        }
+      }
+
+      const handler = new RequestHandler(request, env);
+      // const req = new RequestHandler(request, env, await defineInit(request));
+      console.log('worker.handleFetchEvent.handler');
+      console.log(JSON.stringify(handler, null, 2));
+
+      const response = await handleFetchEvent(handler, env, ctx, waitUntil);
 
       return response;
     } catch (e) {
@@ -38,27 +55,27 @@ export default {
 };
 
 async function handleFetchEvent(
-  request: RequestHandler,
+  handler: RequestHandler,
   env: Env,
   ctx: ExecutionContext,
   waitUntil: (promise: Promise<any>) => void,
 ): Promise<Response> {
-  if (env.LOG_LEVEL === 'debug') {
+  if (logLevel(FILE_LOG_LEVEL, env)) {
     console.log('worker.handleFetchEvent');
   }
-  const url = new URL(request.url);
+  const url = new URL(handler.url);
 
   if (isAssetURL(url)) {
-    if (env.LOG_LEVEL === 'debug') {
+    if (logLevel(FILE_LOG_LEVEL, env)) {
       console.log('worker.handleFetchstaticAssets');
     }
-    return await handleStaticAssets(request, env, ctx);
+    return await handleStaticAssets(handler.req, env, ctx);
   }
   if (isAPI(url)) {
-    return handleAPI(request, env, ctx, waitUntil);
+    return handleAPI(handler, env, ctx, waitUntil);
   }
 
-  const response = await handleSsr(request, env, ctx);
+  const response = await handleSsr(handler.req, env, ctx);
   if (response !== null) return response;
 
   return new Response('Not Found', { status: 404 });

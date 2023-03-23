@@ -2,8 +2,8 @@ import { Env } from '../types';
 import { handleOptions, logLevel } from '.';
 import { RequestHandler } from '../api';
 
-export { createJsonResponse, cloneResponse, cacheResponse };
-const FILE_LOG_LEVEL = 'debug';
+export { createJsonResponse, cloneResponse, cacheResponse, cloneRequest };
+const FILE_LOG_LEVEL = 'error';
 
 function cloneResponse(response: Response): Response[] {
   const { body } = response;
@@ -12,17 +12,33 @@ function cloneResponse(response: Response): Response[] {
   return [new Response(body1, response), new Response(body2, response)];
 }
 
+function cloneRequest(request: Request): ReadableStream[] {
+  const { body } = request;
+  const [body1, body2] =
+    body && typeof body.tee === 'function' ? body.tee() : [body, body];
+  return [body1, body2];
+  // return [
+  //   new Request(body1, request),
+  //   new Request(body2, request),
+  // ];
+}
+
 function createJsonResponse(
   o: any,
-  request: RequestHandler,
+  handler: RequestHandler,
   env: Env,
   status: number = 200,
   statusText: string = 'OK',
   headers?: any,
 ) {
+  if (logLevel(FILE_LOG_LEVEL, env)) {
+    console.log('worker.createJsonResponse');
+    console.log(JSON.stringify(handler, null, 2));
+    console.log(JSON.stringify(o, null, 2));
+  }
   return new Response(
     JSON.stringify(o),
-    handleOptions(request, env, status, statusText, {
+    handleOptions(handler, env, status, statusText, {
       ...headers,
       'Content-Type': 'application/json',
     }),

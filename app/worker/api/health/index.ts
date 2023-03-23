@@ -11,20 +11,32 @@ const FILE_LOG_LEVEL = 'debug';
 
 export { handleHealth };
 
-const healthCheckJson = async (req: RequestHandler, env: Env) => {
+const healthCheckJson = async (handler: RequestHandler, env: Env) => {
   if (logLevel(FILE_LOG_LEVEL, env)) {
     console.log('worker.getHealth');
-    console.log('worker.getHealth.env');
-    console.log(await env.DEMO_CFW_SSR);
+    // console.log('worker.getHealth.env');
+    // console.log(await env.DEMO_CFW_SSR);
   }
-  const gitInfo =
-    env.ENVIRONMENT === 'dev'
-      ? JSON.parse(await env.DEMO_CFW_SSR.get('gitInfo'))
-      : JSON.parse(await env.DEMO_CFW_SSR.get('gitInfo'));
-
+  let gitInfo;
+  try {
+    gitInfo =
+      env.ENVIRONMENT === 'dev'
+        ? JSON.parse(await env.DEMO_CFW_SSR.get('gitInfo'))
+        : JSON.parse(await env.DEMO_CFW_SSR.get('gitInfo'));
+  } catch (error) {
+    console.error('worker.getHealth.gitInfo.error');
+    console.error(error);
+  }
+  let version = '';
+  try {
+    version = JSON.parse(rawManifest)['__STATIC_CONTENT_MANIFEST'];
+  } catch (error) {
+    console.error('worker.getHealth.healthCheckJson.version.error');
+    console.error(error);
+  }
   const res: HealthCheck = {
     status: 'OK',
-    version: JSON.parse(rawManifest)['__STATIC_CONTENT_MANIFEST'],
+    version,
     uptime: msToTime(process.uptime()),
     env: env.ENVIRONMENT,
     timestamp: new Date(Date.now()),
@@ -38,46 +50,84 @@ const healthCheckJson = async (req: RequestHandler, env: Env) => {
 };
 
 const handleHealth = async (
-  req: RequestHandler,
+  handler: RequestHandler,
   env: Env,
   ctx: ExecutionContext,
 ) => {
-  const url = new URL(req.url);
-  const method = req.method;
+  const url = new URL(handler.req.url);
+  const method = handler.req.method;
   let res;
 
   if (url.pathname.startsWith('/api/health/debug')) {
     if (logLevel(FILE_LOG_LEVEL, env)) {
       console.log('worker.health.handleHealth.debug');
     }
-    if (method === 'GET') {
-      res = await req.handleRequest(
-        req,
-        env,
-        ctx,
-        { req, env, ctx, rawManifest: JSON.parse(rawManifest) },
-        200,
-        { withAuth: true },
-      );
+    if (method === 'GET' || method === 'POST') {
+      try {
+        res = await handler.handleRequest(
+          env,
+          ctx,
+          { req: handler.req, env, ctx, rawManifest: JSON.parse(rawManifest) },
+          200,
+          { withAuth: true },
+        );
+      } catch (error) {
+        console.error('worker.health.handleHealth.debug.error');
+        console.error(error);
+        res = createJsonResponse(
+          { error: 'worker.health.handleHealth.debug.error' },
+          handler,
+          env,
+          404,
+        );
+      }
     }
   }
 
   if (url.pathname.startsWith('/api/health/check')) {
-    if (method === 'GET') {
+    if (method === 'GET' || method === 'POST') {
       if (logLevel(FILE_LOG_LEVEL, env)) {
         console.log('worker.health.handleHealth.check');
       }
-      res = createJsonResponse(
-        <HealthCheck>await healthCheckJson(req, env),
-        req,
-        env,
-        200,
-      );
+      try {
+        res = await handler.handleRequest(
+          env,
+          ctx,
+          await healthCheckJson(handler, env),
+          200,
+          { withAuth: true },
+        );
+      } catch (error) {
+        console.error('worker.health.handleHealth.check.error');
+        console.error(error);
+        res = createJsonResponse(
+          { error: 'worker.health.handleHealth.check.error' },
+          handler,
+          env,
+          404,
+        );
+      }
+
+      // try {
+      //   const healthCheck = await healthCheckJson(handler, env);
+      //   if (logLevel(FILE_LOG_LEVEL, env)) {
+      //     console.log(
+      //       'worker.health.handleHealth.check.healthCheck',
+      //       healthCheck,
+      //     );
+      //   }
+      //   res = createJsonResponse(<HealthCheck>healthCheck, handler, env, 200);
+      // } catch (error) {
+      //   console.error('worker.health.handleHealth.check.error');
+      //   console.error(error);
+      //   res = createJsonResponse({ error: 'Not Found' }, handler, env, 404);
+      // }
     }
   }
+
   if (logLevel(FILE_LOG_LEVEL, env)) {
     console.log('worker.health.handleHealth.res', JSON.stringify(res, null, 2));
-    console.log({ req, env, ctx, rawManifest });
+    console.log({ req: handler.req, env, ctx, rawManifest });
   }
   return res;
 };

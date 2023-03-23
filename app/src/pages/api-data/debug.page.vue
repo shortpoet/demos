@@ -8,9 +8,9 @@
       <div v-if="authLoading">
         <h1 class="text-4xl font-bold">Auth Loading...</h1>
       </div>
-      <pre v-else-if="debugError">{{ debugError }}</pre>
+      <pre v-else-if="error">{{ error }}</pre>
       <div v-else>
-        <JsonTree :data="debug" />
+        <JsonTree :data="data" />
       </div>
     </div>
 
@@ -25,7 +25,7 @@
 </style>
   
 <script lang="ts">
-import { computed, ref } from 'vue';
+import { computed, Ref, ref } from 'vue';
 import Counter from '~/components/Counter.vue'
 import Link from '~/components/Link.vue'
 import JsonTree from '~/components/JsonTree.vue'
@@ -42,36 +42,30 @@ export default {
     JsonTree,
   },
   async setup() {
-    const loaded = computed(() => debugLoaded.value && !authLoading.value)
-    const debugError = ref(null);
-    const debugLoaded = ref(false);
-    const debug = ref({});
+    const loaded = computed(() => dataLoading.value && !authLoading.value)
+    let dataLoading = ref(false);
+    let error = ref(null);
+    let data: Ref<any> = ref();
 
     if (typeof window === "undefined") {
       return {
-        debug,
+        data,
         loaded,
-        debugError,
+        error,
       }
     }
     const { useAuth, defaultOptions } = await import("~/composables/auth");
 
     const { user, authLoading } = await useAuth(defaultOptions);
-    const options = { token: user.value ? user.value.token : null };
 
-    const { valueRef, errorRef, loadingRef } = await useFetchTee<Record<string, any>>(
+    // const options = { token: user.value ? user.value.token : null };
+    const options = { user: user.value };
+    ({ data, error, dataLoading } = await useFetchTee<Record<string, any>>(
       "api/health/debug",
       options,
-      debug,
-      debugLoaded,
-      debugError
-    );
+    ));
 
-    debug.value = valueRef.value;
-    debugError.value = errorRef.value;
-    debugLoaded.value = loadingRef.value;
-
-    return { debug, loaded, debugError, authLoading };
+    return { data, dataLoading, error, authLoading };
 
   },
 }

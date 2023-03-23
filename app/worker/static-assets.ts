@@ -2,12 +2,12 @@ import { getAssetFromKV } from '@cloudflare/kv-asset-handler';
 export { handleStaticAssets };
 // @ts-expect-error
 import rawManifest from '__STATIC_CONTENT_MANIFEST';
-import { setCacheOptions } from './util';
+import { logLevel, setCacheOptions } from './util';
 const KV_ASSET_NAMESPACE = 'CLOUDFLARE_WORKERS_VUE';
-
+const FILE_LOG_LEVEL = 'error';
 async function handleStaticAssets(request, env, ctx) {
   const DEBUG = env.LOG_LEVEL === 'debug';
-  if (env.LOG_LEVEL === 'debug') {
+  if (logLevel(FILE_LOG_LEVEL, env)) {
     console.log('worker.handleStaticAssets');
   }
   let options = setCacheOptions(request, DEBUG);
@@ -21,7 +21,7 @@ async function handleStaticAssets(request, env, ctx) {
 
   try {
     try {
-      if (env.LOG_LEVEL === 'debug') {
+      if (logLevel(FILE_LOG_LEVEL, env)) {
         console.log('worker.handleStaticAssets.getAssetFromKV');
       }
       options = {

@@ -1,11 +1,24 @@
-import { Commit } from "git-last-commit";
+import { Commit } from 'git-last-commit';
 
-export type User = {
+type AuthUser = {
   id: string;
-  email: string;
   name: string;
-  picture?: string;
+  token: string;
+  email?: string;
 };
+
+type GithubUser = {
+  name: string;
+  nickname: string;
+  picture: string;
+  updated_at: string;
+  sub: string;
+  email?: string;
+};
+
+type User = AuthUser & GithubUser;
+
+export { User };
 
 export type HealthCheck = {
   status: string;
@@ -45,7 +58,7 @@ export type WellKnownResponse = {
 
 export interface ValidateJWT {
   valid: boolean;
-  payload?: Jwt["payload"] | { error: string };
+  payload?: Jwt['payload'] | { error: string };
   status: number;
 }
 
@@ -70,4 +83,9 @@ export interface ResponseOptions extends ResponseInit {
   status: number;
   headers: Headers;
   body?: string;
+}
+
+export interface BodyContext {
+  user: User;
+  data: any;
 }

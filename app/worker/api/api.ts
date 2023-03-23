@@ -9,7 +9,7 @@ export { handleAPI };
 const FILE_LOG_LEVEL = 'info';
 
 async function handleAPI(
-  request: RequestHandler,
+  handler: RequestHandler,
   env: Env,
   ctx: ExecutionContext,
   waitUntil: (promise: Promise<any>) => void,
@@ -18,19 +18,28 @@ async function handleAPI(
     console.log('worker.handleAPI');
   }
 
-  const url: URL = new URL(request.url);
+  const url: URL = new URL(handler.req.url);
 
-  if (request.method === 'OPTIONS') {
+  if (handler.req.method === 'OPTIONS') {
     if (logLevel(FILE_LOG_LEVEL, env)) {
       console.log('worker.handleAPI.optionsMethod');
     }
-
-    return handleCors(request, env);
+    try {
+      return handleCors(handler, env);
+    } catch (error) {
+      console.error('worker.handleAPI.optionsMethod.error');
+      console.error(error);
+    }
   }
 
   if (url.pathname.startsWith('/api/health')) {
-    return await handleHealth(request, env, ctx);
+    try {
+      return await handleHealth(handler, env, ctx);
+    } catch (error) {
+      console.error('worker.handleAPI.health.error');
+      console.error(error);
+    }
   }
 
-  return createJsonResponse({ error: 'Not Found' }, request, env, 404);
+  return createJsonResponse({ error: 'Not Found' }, handler, env, 404);
 }

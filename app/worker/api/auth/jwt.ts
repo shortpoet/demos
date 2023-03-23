@@ -6,17 +6,17 @@ import { RequestHandler } from '../RequestHandler';
 
 export { isValidJwt };
 
-const FILE_LOG_LEVEL = 'debug';
+const FILE_LOG_LEVEL = 'info';
 
 async function isValidJwt(
-  request: RequestHandler,
+  handler: RequestHandler,
   env: Env,
   ctx: ExecutionContext,
 ): Promise<ValidateJWT> {
   if (logLevel(FILE_LOG_LEVEL, env)) {
     console.log('worker.jwt.isValidJwt');
   }
-  const encodedToken = getJwt(request, env);
+  const encodedToken = getJwt(handler.req, env);
   if (encodedToken === 'null') {
     return {
       valid: false,

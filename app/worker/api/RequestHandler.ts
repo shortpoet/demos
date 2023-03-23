@@ -1,6 +1,6 @@
 import { Env } from '../types';
-import { logLevel } from '../util';
-import { User } from './types';
+import { cloneRequest, cloneResponse, logLevel } from '../util';
+import { BodyContext, User } from './types';
 import { createJsonResponse } from '../util';
 import { isValidJwt } from './auth/jwt';
 
@@ -8,33 +8,61 @@ export { RequestHandler, defineInit };
 
 const FILE_LOG_LEVEL = 'debug';
 
-function defineInit(request: Request): RequestInit {
+async function defineInit(request: Request): Promise<RequestInit> {
   return {
     method: request.method,
     headers: request.headers,
-    cf: request.cf,
-    redirect: request.redirect,
-    fetcher: request.fetcher,
-    integrity: request.integrity,
-    signal: request.signal,
+    body: request.body,
+    // cf: request.cf,
+    // redirect: request.redirect,
+    // fetcher: request.fetcher,
+    // integrity: request.integrity,
+    // signal: request.signal,
   };
 }
 
-class RequestHandler<CfHostMetadata = unknown> extends Request<CfHostMetadata> {
+class RequestHandler {
+  // class RequestHandler<CfHostMetadata = unknown> extends Request<CfHostMetadata> {
+  declare req: Request;
+  declare url: string;
   declare isAuthenticated: boolean;
   private declare token: string;
   declare query?: Record<string, string>;
   declare params?: Record<string, string>;
   declare user?: User;
+  declare data?: any;
 
   constructor(req: Request, env: Env, init?: RequestInit) {
     if (logLevel(FILE_LOG_LEVEL, env)) {
       console.log(`worker.RequestHandler: ${req.url}`);
     }
-    super(req, init);
+    // super(req, init);
 
+    // const [stream1, stream2] = cloneRequest(req);
+    // super(req, {
+    //   ...init,
+    //   body: stream1,
+    // });
+    // console.log(
+    //   `worker.RequestHandler.stream: ${JSON.stringify(stream2, null, 2)}`,
+    // );
+    this.req = req;
+    this.url = req.url;
     this.query = this._parseQuery(new URL(this.url));
     this.params = this._parseParams(new URL(this.url));
+
+    // if (this.body) {
+    //   console.log('worker.RequestHandler.body', this.body);
+    //   this.user = this._parseBodyData(this._parseBody(this.body)).user;
+    //   this.data = this._parseBodyData(this._parseBody(this.body)).data;
+    // }
+
+    // const clone = this.clone();
+    // if (clone.body) {
+    //   console.log('worker.RequestHandler.clone.body', clone.body);
+    //   this.user = this._parseBodyData(this._parseBody(clone.body)).user;
+    //   this.data = this._parseBodyData(this._parseBody(clone.body)).data;
+    // }
   }
   private _parseQuery(url: URL): Record<string, string> {
     const query: Record<string, string> = {};
@@ -51,8 +79,30 @@ class RequestHandler<CfHostMetadata = unknown> extends Request<CfHostMetadata> {
     return params;
   };
 
+  private _parseBody: (body: any) => any = (body) => {
+    if (body instanceof ReadableStream) {
+      return body;
+    }
+    if (typeof body === 'string') {
+      try {
+        return JSON.parse(body);
+      } catch (e) {
+        return body;
+      }
+    }
+    return body;
+  };
+
+  private _parseBodyData: (body: any) => { user?: User; data?: any } = (
+    body,
+  ) => {
+    return {
+      ...(body.user ? { user: body.user } : {}),
+      ...(body.data ? { data: body.data } : {}),
+    };
+  };
+
   async handleRequest(
-    req: RequestHandler,
     env: Env,
     ctx: ExecutionContext,
     content: any,
@@ -62,11 +112,23 @@ class RequestHandler<CfHostMetadata = unknown> extends Request<CfHostMetadata> {
       headers?: Record<string, string>;
     } = { withAuth: false, headers: {} },
   ): Promise<Response> {
-    console.log(`worker.handleRequest: ${req.url}`);
+    console.log(`worker.handleRequest: ${this.url}`);
     console.log('worker.handleRequest.options', options);
     let res;
+    // this results in an error when there is a user object in request
+    // but can't see any of the data
+    // const j: BodyContext = await this.req.json();
+    const t = await this.req.text();
+    console.log('worker.handleRequest.text', t);
+    // if (j) {
+    //   this.user = j.user;
+    //   this.data = j.data;
+    // }
+    console.log('worker.handleRequest.body', this.data);
+    console.log('worker.handleRequest.user', this.user);
+
     if (options.withAuth) {
-      const { valid, payload, status } = await isValidJwt(req, env, ctx);
+      const { valid, payload, status } = await isValidJwt(this, env, ctx);
       let statusText = 'OK';
       if (!valid) {
         switch (status) {
@@ -78,7 +140,7 @@ class RequestHandler<CfHostMetadata = unknown> extends Request<CfHostMetadata> {
                   payload.error,
                 )}`,
               },
-              req,
+              this,
               env,
               status,
               statusText,
@@ -94,7 +156,7 @@ class RequestHandler<CfHostMetadata = unknown> extends Request<CfHostMetadata> {
                 error:
                   'Unauthorized. Please Log in to .... this content is rated 18+ you must be logged in to continue.... age verify?',
               },
-              req,
+              this,
               env,
               status,
               statusText,
@@ -109,7 +171,7 @@ class RequestHandler<CfHostMetadata = unknown> extends Request<CfHostMetadata> {
               'Forbidden. You are not authorized to access this content.';
             res = createJsonResponse(
               { error: statusText },
-              req,
+              this,
               env,
               status,
               statusText,
@@ -119,7 +181,7 @@ class RequestHandler<CfHostMetadata = unknown> extends Request<CfHostMetadata> {
             statusText = 'Not Found';
             res = createJsonResponse(
               { error: statusText },
-              req,
+              this,
               env,
               status,
               statusText,
@@ -144,10 +206,10 @@ class RequestHandler<CfHostMetadata = unknown> extends Request<CfHostMetadata> {
         }
         this.isAuthenticated = valid;
         this.token = payload.token;
-        this.user = null;
+        this.user = this.user;
         res = createJsonResponse(
           content,
-          req,
+          this,
           env,
           status,
           statusText,
@@ -160,7 +222,7 @@ class RequestHandler<CfHostMetadata = unknown> extends Request<CfHostMetadata> {
       this.user = null;
       res = createJsonResponse(
         content,
-        req,
+        this,
         env,
         status,
         'OK',
