@@ -76,7 +76,9 @@ HTMLConsole.prototype.dump = function (o: any, className: string) {
 
   const logObj = JSON.parse(JSON.stringify(o));
   mask(logObj, 'accessToken');
+  mask(logObj, 'access_token');
   mask(logObj, 'idToken');
+  mask(logObj, 'id_token');
   mask(logObj, 'refreshToken');
   mask(logObj, 'token');
   mask(logObj, 'state');
