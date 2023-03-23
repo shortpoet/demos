@@ -54,11 +54,17 @@ HTMLConsole.prototype.dumpCallback = function (err: any, data: any) {
   }
 };
 
-HTMLConsole.prototype.dump = function (o: any, className: string) {
-  console.log('dump', o, className);
-  className = className || '';
+function mask(obj: any, key: string) {
+  if (Object.keys(obj).includes(key)) {
+    if (!!obj[key]) obj[key] = obj[key].substring(0, 7) + '...';
+  }
+}
 
+HTMLConsole.prototype.dump = function (o: any, className: string) {
+  // console.log('dump', o, className);
+  className = className || '';
   this.data.push(o);
+
   localStorage.setItem('consoleData', JSON.stringify(this.data));
 
   function replacer(key: any, value: any) {
@@ -68,8 +74,25 @@ HTMLConsole.prototype.dump = function (o: any, className: string) {
     return '<span>' + value + '</span>';
   }
 
-  var plainStr = JSON.stringify(o).substr(0, 50);
-  var str = JSON.stringify(o, replacer, 4);
+  const logObj = JSON.parse(JSON.stringify(o));
+  mask(logObj, 'accessToken');
+  mask(logObj, 'idToken');
+  mask(logObj, 'refreshToken');
+  mask(logObj, 'token');
+  mask(logObj, 'state');
+
+  if (Object.keys(logObj).includes('idTokenPayload')) {
+    if (!!o.idTokenPayload) {
+      o.idTokenPayload.sid = o.idTokenPayload.sid.substring(0, 7) + '...';
+      o.idTokenPayload.nonce = o.idTokenPayload.nonce.substring(0, 7) + '...';
+      o.idTokenPayload.at_hash =
+        o.idTokenPayload.at_hash.substring(0, 7) + '...';
+      o.idTokenPayload.aud = o.idTokenPayload.aud.substring(0, 7) + '...';
+    }
+  }
+
+  var plainStr = JSON.stringify(logObj).substr(0, 50);
+  var str = JSON.stringify(logObj, replacer, 4);
   var html =
     '<details class="' +
     className +

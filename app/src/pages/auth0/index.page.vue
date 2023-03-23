@@ -155,7 +155,7 @@ function onLoad(htmlConsole: AuthConsole, REDIRECT_URL: string) {
   window.webAuth.parseHash(function (err: any, data: any) {
     console.log('parseHash');
     console.log('err, data');
-    console.log(err, data);
+    // console.log(err, data);
     if (err) {
       htmlConsole.dumpCallback(err, null);
       window.location.hash = '';

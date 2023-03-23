@@ -104,12 +104,12 @@ async function main(env, debug) {
     KV_DEBUG = true;
   }
 
-  // if (!getNamespace(id, env)) {
-  //   createNamespace(bindingName, env);
-  // }
-  // await setGitconfig(id, env);
+  if (!getNamespace(id, env)) {
+    createNamespace(bindingName, env);
+  }
+  await setGitconfig(id, env);
 
-  await setVars(id, env, config);
+  // await setVars(id, env, config);
 }
 
 (async () => {
