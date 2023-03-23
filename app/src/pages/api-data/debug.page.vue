@@ -5,7 +5,10 @@
       <Link :href="`/api-data`" :title="'back'">
       <i class="i-carbon-page-first" inline-block />
       </Link>
-      <pre v-if="debugError">{{ debugError }}</pre>
+      <div v-if="authLoading">
+        <h1 class="text-4xl font-bold">Auth Loading...</h1>
+      </div>
+      <pre v-else-if="debugError">{{ debugError }}</pre>
       <div v-else>
         <JsonTree :data="debug" />
       </div>
@@ -22,12 +25,11 @@
 </style>
   
 <script lang="ts">
-import { computed, ref, watch } from 'vue';
+import { computed, ref } from 'vue';
 import Counter from '~/components/Counter.vue'
 import Link from '~/components/Link.vue'
 import JsonTree from '~/components/JsonTree.vue'
 import { useFetchTee } from '~/composables/fetchTee';
-import { User } from '@auth0/auth0-spa-js';
 
 import AuthLayout from '~/layouts/AuthLayout.vue';
 let Layout = AuthLayout;
@@ -40,19 +42,10 @@ export default {
     JsonTree,
   },
   async setup() {
-
-    let user = ref({} as User);
-
-    const urlBase = `${import.meta.env.VITE_APP_URL}`;
-
-    const loaded = computed(() => debugLoaded && true)
+    const loaded = computed(() => debugLoaded.value && !authLoading.value)
     const debugError = ref(null);
     const debugLoaded = ref(false);
     const debug = ref({});
-    let valueRef = ref();
-    let errorRef = ref();
-    let loadingRef = ref();
-    let authLoading = ref(false);
 
     if (typeof window === "undefined") {
       return {
@@ -61,64 +54,24 @@ export default {
         debugError,
       }
     }
-
-
-    const url = `${urlBase}/api/health/debug`;
-    console.info(`debug.page.fetching data from: -> ${url}`);
     const { useAuth, defaultOptions } = await import("~/composables/auth");
-    const { user: u, authLoading: l } = await useAuth(defaultOptions);
 
-    authLoading.value = l.value;
-
-    if (authLoading.value === true) {
-      console.log("debug.page.authLoading.value", authLoading.value);
-    } else {
-      console.log("debug.page.authLoading.value", authLoading.value);
-    }
-
-    user = u;
+    const { user, authLoading } = await useAuth(defaultOptions);
     const options = { token: user.value ? user.value.token : null };
 
-    ({ valueRef, errorRef, loadingRef } = await useFetchTee<Record<string, any>>(
+    const { valueRef, errorRef, loadingRef } = await useFetchTee<Record<string, any>>(
       "api/health/debug",
       options,
       debug,
       debugLoaded,
       debugError
-    ));
+    );
 
     debug.value = valueRef.value;
     debugError.value = errorRef.value;
     debugLoaded.value = loadingRef.value;
 
-
-    // watch([valueRef, errorRef, loadingRef], async (cur, prev) => {
-    //   console.log(`debug.page.refs changed from ${prev} to ${cur}`);
-    //   ({ valueRef, errorRef, loadingRef } = await useFetchTee<Record<string, any>>(
-    //     "api/health/debug",
-    //     { token: user.value ? user.value.token : null },
-    //     debug,
-    //     debugLoaded,
-    //     debugError
-    //   ));
-    //   debug.value = valueRef.value;
-    // });
-
-
-    watch(() => [authLoading], async (cur, prev) => {
-      console.log(`debug.page.authLoading changed from ${prev} to ${cur}`);
-      ({ valueRef, errorRef, loadingRef } = await useFetchTee<Record<string, any>>(
-        "api/health/debug",
-        { token: user.value ? user.value.token : null },
-        debug,
-        debugLoaded,
-        debugError
-      ));
-      debug.value = valueRef.value;
-      debugError.value = errorRef.value;
-      debugLoaded.value = loadingRef.value;
-    });
-    return { debug, loaded, debugError };
+    return { debug, loaded, debugError, authLoading };
 
   },
 }

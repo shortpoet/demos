@@ -49,7 +49,7 @@ interface Auth0Instance extends Partial<Auth0Client> {
   popupOpen: Ref<boolean>;
   createAuthClient: (
     onRedirectCallback: (appState: any) => void,
-    redirectUri?: string,
+    redirect_uri?: string,
     options?: ClientOptions,
   ) => Promise<void>;
   onLoad: () => Promise<void>;
@@ -180,7 +180,7 @@ const defaultOptions: ClientOptions = {
 
 const createAuthClient = async ({
   onRedirectCallback = DEFAULT_REDIRECT_CALLBACK,
-  redirectUri = import.meta.env.VITE_AUTH0_CALLBACK_URL,
+  redirect_uri = import.meta.env.VITE_AUTH0_CALLBACK_URL,
   ...options
 }): Promise<void> => {
   const initOptions: ClientOptions = {
@@ -189,7 +189,7 @@ const createAuthClient = async ({
     authorizationParams: {
       scope,
       audience,
-      redirect_uri: redirectUri,
+      redirect_uri: redirect_uri,
       response_type,
     },
   };

@@ -40,7 +40,21 @@ const useFetch = (url: string, options: RequestConfig = {}) => {
   console.info(`fetch.fetching data from: -> ${url}`);
 
   let headers = {};
-  console.log('options', JSON.stringify(options, null, 2));
+  // console.log(
+  //   'options',
+  //   JSON.stringify(
+  //     {
+  //       ...options,
+  //       headers: {
+  //         ...options.headers,
+  //         Authorization: `Bearer ${options.token?.substring(0, 7)}...}`,
+  //       },
+  //       token: `Bearer ${options.token?.substring(0, 7)}...}`,
+  //     },
+  //     null,
+  //     2,
+  //   ),
+  // );
 
   if (options.token) {
     headers = {

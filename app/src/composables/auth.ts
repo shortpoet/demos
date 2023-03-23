@@ -57,6 +57,7 @@ interface Auth0Instance extends Partial<Auth0Client> {
   authLoading: Ref<boolean>;
   authError: Ref<any>;
   popupOpen: Ref<boolean>;
+  createAuthClient: (options: ClientOptions) => Promise<void>;
   onLoad: () => Promise<void>;
   // onLoad: Promise<void>;
   isAuthenticated: () => Promise<boolean>;
@@ -87,6 +88,7 @@ const authLoading = ref(true);
 const popupOpen = ref(false);
 const error = ref<any>();
 const isLoggedIn = ref(false);
+const authClient = ref<Auth0Client>({} as Auth0Client);
 
 const defaultOptions: ClientOptions = {
   domain: import.meta.env.VITE_AUTH0_DOMAIN,
@@ -104,16 +106,10 @@ const defaultOptions: ClientOptions = {
   },
 };
 
-const useAuth = async ({
-  onRedirectCallback = DEFAULT_REDIRECT_CALLBACK,
-  redirectUri = import.meta.env.VITE_AUTH0_CALLBACK_URL,
-  ...options
-}): Promise<Auth0Instance> => {
-  // if (instance) return instance;
-  // console.log("useAuth");
+const audience = `https://ssr.shortpoet.com`;
 
-  const audience = `https://ssr.shortpoet.com`;
-
+async function createAuthClient(options: ClientOptions) {
+  // console.log('createAuthClient');
   const initOptions: ClientOptions = {
     ...options,
     domain: options.domain,
@@ -121,12 +117,63 @@ const useAuth = async ({
     authorizationParams: {
       scope: 'openid profile email',
       audience,
-      redirect_uri: redirectUri,
+      redirect_uri: import.meta.env.VITE_AUTH0_CALLBACK_URL,
       response_type: 'code',
     },
   };
+  authClient.value = await createAuth0Client(initOptions);
+  if (!authClient.value) {
+    throw new Error('Auth0 client not initialized');
+  }
+}
 
-  const auth0Client = await createAuth0Client(initOptions);
+async function onLoad(onRedirectCallback = DEFAULT_REDIRECT_CALLBACK) {
+  try {
+    const { useCookies } = await import('@vueuse/integrations/useCookies');
+    const cookies = useCookies([COOKIES_USER_TOKEN]);
+    const hasToken = cookies.get(COOKIES_USER_TOKEN);
+    console.log(`auth hasToken and bool: ${[hasToken, hasToken === true]}`);
+    if (
+      window.location.search.includes('code=') &&
+      window.location.search.includes('state=')
+    ) {
+      const res = await authClient.value.handleRedirectCallback();
+      onRedirectCallback(res.appState);
+    } else if (hasToken === true) {
+      const tokenRes = await authClient.value.getTokenSilently({
+        detailedResponse: true,
+      });
+      // console.log(`tokenRes: ${JSON.stringify(tokenRes)}`);
+      token.value = tokenRes.id_token;
+    }
+  } catch (err) {
+    console.error(`error: ${err}`);
+    error.value = err;
+    authLoading.value = false;
+  } finally {
+    authLoading.value = false;
+    console.log(`finally: authLoading -> ${authLoading.value}`);
+    user.value = await authClient.value.getUser();
+    isLoggedIn.value = await authClient.value.isAuthenticated();
+    if (isLoggedIn.value === true && user.value) {
+      token.value = await authClient.value.getTokenSilently();
+      user.value.token = token.value;
+    }
+  }
+}
+
+const useAuth = async (
+  {
+    onRedirectCallback = DEFAULT_REDIRECT_CALLBACK,
+    redirect_uri = import.meta.env.VITE_AUTH0_CALLBACK_URL,
+    ...options
+  }: ClientOptions = { ...defaultOptions },
+): Promise<Auth0Instance> => {
+  // if (instance) return instance;
+  // console.log("useAuth");
+
+  await createAuthClient(options);
+  await onLoad(onRedirectCallback);
 
   async function _getTokenSilently(
     options?: GetTokenSilentlyOptions,
@@ -136,12 +183,12 @@ const useAuth = async ({
   ): Promise<GetTokenSilentlyVerboseResponse>;
   async function _getTokenSilently(options?: any): Promise<any> {
     if (options?.detailedResponse) {
-      return await auth0Client.getTokenSilently({
+      return await authClient.value.getTokenSilently({
         ...options,
         detailedResponse: true,
       });
     } else {
-      return await auth0Client.getTokenSilently(options);
+      return await authClient.value.getTokenSilently(options);
     }
   }
 
@@ -151,47 +198,15 @@ const useAuth = async ({
     popupOpen,
     isLoggedIn,
     authError: error,
-    onLoad: async () => {
-      try {
-        const { useCookies } = await import('@vueuse/integrations/useCookies');
-        const cookies = useCookies([COOKIES_USER_TOKEN]);
-        const hasToken = cookies.get(COOKIES_USER_TOKEN);
-        console.log(`auth hasToken and bool: ${[hasToken, hasToken === true]}`);
-        if (
-          window.location.search.includes('code=') &&
-          window.location.search.includes('state=')
-        ) {
-          const res = await auth0Client.handleRedirectCallback();
-          onRedirectCallback(res.appState);
-        } else if (hasToken === true) {
-          const tokenRes = await auth0Client.getTokenSilently({
-            detailedResponse: true,
-          });
-          // console.log(`tokenRes: ${JSON.stringify(tokenRes)}`);
-          token.value = tokenRes.id_token;
-        }
-      } catch (err) {
-        console.error(`error: ${err}`);
-        error.value = err;
-        authLoading.value = false;
-      } finally {
-        authLoading.value = false;
-        console.log(`finally: authLoading -> ${authLoading.value}`);
-        user.value = await auth0Client.getUser();
-        isLoggedIn.value = await auth0Client.isAuthenticated();
-        if (isLoggedIn.value === true && user.value) {
-          token.value = await auth0Client.getTokenSilently();
-          user.value.token = token.value;
-        }
-      }
-    },
+    createAuthClient: createAuthClient,
+    onLoad: onLoad,
     handleRedirectCallback: async () => {
       console.log('handleRedirectCallback');
       authLoading.value = true;
       try {
-        const { appState } = await auth0Client.handleRedirectCallback();
+        const { appState } = await authClient.value.handleRedirectCallback();
         console.log(`handleRedirectCallback: appState: ${appState}`);
-        user.value = await auth0Client.getUser();
+        user.value = await authClient.value.getUser();
         isLoggedIn.value = true;
         // window.history.replaceState({}, document.title, window.location.pathname);
         onRedirectCallback(appState);
@@ -207,7 +222,7 @@ const useAuth = async ({
       }
     },
     isAuthenticated: async () => {
-      const authenticated = await auth0Client.isAuthenticated();
+      const authenticated = await authClient.value.isAuthenticated();
       if (authenticated !== isLoggedIn.value) {
         isLoggedIn.value = authenticated;
       }
@@ -223,7 +238,7 @@ const useAuth = async ({
       console.log('loginWithRedirect');
       authLoading.value = true;
       try {
-        const res = await auth0Client.loginWithRedirect(o);
+        const res = await authClient.value.loginWithRedirect(o);
         return res;
       } catch (e) {
         console.error(e);
@@ -238,7 +253,7 @@ const useAuth = async ({
       popupOpen.value = true;
       authLoading.value = true;
       try {
-        const res = await auth0Client.loginWithPopup(o);
+        const res = await authClient.value.loginWithPopup(o);
         return res;
       } catch (e) {
         console.error(e);
@@ -246,9 +261,9 @@ const useAuth = async ({
         authLoading.value = false;
       } finally {
         popupOpen.value = false;
-        user.value = await auth0Client.getUser();
-        isLoggedIn.value = await auth0Client.isAuthenticated();
-        token.value = await auth0Client.getTokenSilently();
+        user.value = await authClient.value.getUser();
+        isLoggedIn.value = await authClient.value.isAuthenticated();
+        token.value = await authClient.value.getTokenSilently();
         if (user.value) user.value.token = token.value;
         // because no redirect we set this here vs in onLoad
         // console.log(`isLoggedIn: ${isLoggedIn.value}`);
@@ -264,7 +279,7 @@ const useAuth = async ({
         },
       },
     ) => {
-      await auth0Client.logout(o);
+      await authClient.value.logout(o);
       user.value = undefined;
       isLoggedIn.value = false;
     },
@@ -280,7 +295,7 @@ const useAuth = async ({
 //       window.location.search.includes('state=')
 //     ) {
 //       console.log('onLoad: handleRedirectCallback');
-//       const res = await auth0Client.handleRedirectCallback();
+//       const res = await authClient.value.handleRedirectCallback();
 //       console.log('onLoad: handleRedirectCallback: after');
 //       console.log(`onLoad: res: ${JSON.stringify(res)}`);
 //       onRedirectCallback(res.appState);
@@ -292,24 +307,24 @@ const useAuth = async ({
 //     authLoading.value = false;
 //   }
 //   console.log('onLoad: after finally');
-//   isLoggedIn.value = await auth0Client.isAuthenticated();
-//   user.value = await auth0Client.getUser();
+//   isLoggedIn.value = await authClient.value.isAuthenticated();
+//   user.value = await authClient.value.getUser();
 //   console.log(`onLoad: user: ${JSON.stringify(user.value)}`);
 //   console.log(`onLoad: isLoggedIn: ${isLoggedIn.value}`);
 // })(),
 
 //   handleRedirectCallback,
-//   getIdTokenClaims: (...p) => auth0Client.getIdTokenClaims(...p),
-//   loginWithRedirect: (...p) => auth0Client.loginWithRedirect(...p),
-// getTokenSilently: (...p) => auth0Client.getTokenSilently(...p),
-//   getTokenWithPopup: (...p) => auth0Client.getTokenWithPopup(...p),
-//   logout: (...p) => auth0Client.logout(...p),
+//   getIdTokenClaims: (...p) => authClient.value.getIdTokenClaims(...p),
+//   loginWithRedirect: (...p) => authClient.value.loginWithRedirect(...p),
+// getTokenSilently: (...p) => authClient.value.getTokenSilently(...p),
+//   getTokenWithPopup: (...p) => authClient.value.getTokenWithPopup(...p),
+//   logout: (...p) => authClient.value.logout(...p),
 
 // if (
 //   window.location.search.includes("code=") &&
 //   window.location.search.includes("state=")
 // ) {
-//   const { appState } = await auth0Client.handleRedirectCallback();
+//   const { appState } = await authClient.value.handleRedirectCallback();
 //   onredire(appState);
 // }
 
@@ -317,7 +332,7 @@ const useAuth = async ({
 //   () => isLoggedIn.value,
 //   (isLoggedIn) => {
 //     if (isLoggedIn) {
-//       user.value = auth0Client.getUser();
+//       user.value = authClient.value.getUser();
 //     }
 //   }
 // );

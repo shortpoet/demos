@@ -33,7 +33,7 @@ import JsonTree from '~/components/JsonTree.vue'
 import { useFetch } from '~/composables/fetch';
 import { User } from '~/types';
 // import { useAuthStore } from '~/stores/auth';
-import { useAuthPlugin } from '~/composables/auth-plugin';
+import { useAuthPlugin, DEFAULT_REDIRECT_CALLBACK } from '~/composables/auth-plugin';
 
 export default {
   components: {
@@ -73,7 +73,10 @@ export default {
       }
     }
     const auth = useAuthPlugin();
+
     (async () => {
+      await auth.createAuthClient(DEFAULT_REDIRECT_CALLBACK);
+      await auth.onLoad();
       if (auth?.user.value) {
         user = auth?.user;
       }

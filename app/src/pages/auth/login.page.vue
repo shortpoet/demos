@@ -37,7 +37,7 @@ import Login from '~/components/Login.vue';
 export default {
   components: { Link, Login, Suspense },
   setup(props, ctx) {
-    const { slots, attrs } = ctx;
+    // const { slots, attrs } = ctx;
     // console.log(JSON.parse(JSON.stringify(slots)));
     const loading = ref(true);
     setTimeout(() => {

@@ -22,7 +22,7 @@
 
 
 <script lang="ts">
-import { computed, ref, watch } from 'vue';
+import { computed, ref } from 'vue';
 import Counter from '~/components/Counter.vue'
 import Link from '~/components/Link.vue'
 import JsonTree from '~/components/JsonTree.vue'
@@ -59,23 +59,6 @@ export default {
     await authP.onLoad();
     const { user, authLoading } = authP;
 
-    // const { useAuth, defaultOptions } = await import("~/composables/auth");
-    // const { user: u, authLoading: l } = await useAuth(defaultOptions);
-    // user.value = u.value;
-    // authLoading.value = l.value;
-
-    // if (authLoading.value) {
-    //   console.log(`health-tee.page.authLoading.value`, authLoading.value);
-    //   return {
-    //     health,
-    //     loaded,
-    //     healthError,
-    //   }
-    // }
-
-    console.log(`health-tee.page.user.value`, user.value);
-    console.log(`health-tee.page.authLoading.value`, authLoading.value);
-
     const options = { token: user.value ? user.value.token : undefined };
 
     const { valueRef, errorRef, loadingRef } = await useFetchTee<Record<string, any>>("api/health/debug",
@@ -84,20 +67,6 @@ export default {
     health.value = valueRef.value;
     healthError.value = errorRef.value;
     healthLoaded.value = loadingRef.value;
-    console.log(`health-tee.page.health.value`, health.value);
-    // console.log(`health-tee.page.healthError.value`, healthError.value);
-    console.log(`health-tee.page.healthLoaded.value`, healthLoaded.value);
-
-    // watch([valueRef, errorRef, loadingRef], () => {
-    //   health.value = valueRef.value;
-    //   healthError.value = errorRef.value;
-    //   healthLoaded.value = loadingRef.value;
-    // });
-
-
-    watch(authLoading, (cur, prev) => {
-      console.log(`health-tee.page.authLoading changed from ${prev} to ${cur}`);
-    });
 
     return { health, loaded, healthError };
   },
