@@ -43,7 +43,7 @@ interface ClientOptions extends Auth0ClientOptions {
 
 interface Auth0Instance extends Partial<Auth0Client> {
   isLoggedIn: Ref<boolean>;
-  user: Ref<User | undefined>;
+  user: Ref<User>;
   authLoading: Ref<boolean>;
   authError: Ref<any>;
   popupOpen: Ref<boolean>;
@@ -86,7 +86,7 @@ const DEFAULT_REDIRECT_CALLBACK = (appState: any = {}) =>
 const authClient = ref<Auth0Client | null>(null);
 let redirectCallback: (appState: any) => void;
 // const redirectCallback = ref(DEFAULT_REDIRECT_CALLBACK);
-const user = ref<User | undefined>();
+const user = ref<User>({} as User);
 const token = ref<string>();
 const authLoading = ref(true);
 const popupOpen = ref(false);
@@ -154,14 +154,14 @@ const awaitWindowPromise = async (
 
 const useAuthPlugin = (window = defaultWindow) => {
   // await awaitWindowPromise(window);
-  if (!window) {
-    return;
-  }
+  // if (!window) {
+  //   return;
+  // }
   const auth = inject(AuthSymbol);
-  if (!auth) {
-    return;
-  }
-  return auth;
+  // if (!auth) {
+  //   return;
+  // }
+  return auth as Auth0Instance;
 };
 
 const defaultOptions: ClientOptions = {
@@ -229,7 +229,7 @@ async function onLoad() {
   } finally {
     authLoading.value = false;
     console.log(`finally: authLoading plugin -> ${authLoading.value}`);
-    user.value = await authClient.value?.getUser();
+    user.value = (await authClient.value?.getUser()) || ({} as User);
     isLoggedIn.value = (await authClient.value?.isAuthenticated()) || false;
     if (isLoggedIn.value === true && user.value) {
       token.value = (await authClient.value?.getTokenSilently()) || '';
@@ -246,7 +246,7 @@ async function handleRedirectCallback() {
     }
     const { appState } = await authClient.value.handleRedirectCallback();
     // console.log(`handleRedirectCallback: appState: ${appState}`);
-    user.value = await authClient.value.getUser();
+    user.value = (await authClient.value.getUser()) || ({} as User);
     isLoggedIn.value = true;
     // window.history.replaceState({}, document.title, window.location.pathname);
     redirectCallback(appState);
@@ -317,7 +317,7 @@ async function loginWithPopup(o: PopupLoginOptions = {}) {
     authLoading.value = false;
   } finally {
     popupOpen.value = false;
-    user.value = await authClient.value?.getUser();
+    user.value = (await authClient.value?.getUser()) || ({} as User);
     isLoggedIn.value = (await authClient.value?.isAuthenticated()) || false;
     token.value = await authClient.value?.getTokenSilently();
     if (user.value) user.value.token = token.value || '';
@@ -337,6 +337,6 @@ async function logout(
   },
 ) {
   await authClient.value?.logout(o);
-  user.value = undefined;
+  user.value = {} as User;
   isLoggedIn.value = false;
 }
