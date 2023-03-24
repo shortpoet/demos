@@ -1,7 +1,7 @@
 <template>
   <div class="page-container">
     <div>
-      <h1>Health</h1>
+      <h1>Health Plugin</h1>
       <Link :href="`/api-data`" :title="'back'">
       <i class="i-carbon-page-first" inline-block />
       </Link>
@@ -68,6 +68,7 @@ export default {
     if (auth?.user.value) {
       user = auth?.user;
     }
+
     const urlBase = `${import.meta.env.VITE_APP_URL}`;
 
     const options = { user: user.value };

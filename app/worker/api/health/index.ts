@@ -7,7 +7,7 @@ import { createJsonResponse, generateUUID } from '../../util';
 import rawManifest from '__STATIC_CONTENT_MANIFEST';
 import { HealthCheck } from '../types';
 
-const FILE_LOG_LEVEL = 'debug';
+const FILE_LOG_LEVEL = 'error';
 
 export { handleHealth };
 

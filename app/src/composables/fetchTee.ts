@@ -31,7 +31,7 @@ export const requestInit: RequestConfig = {
   // mode: 'cors',
 };
 
-const useFetchTee = async <T>(
+const useFetchTee = async <T extends unknown>(
   path: string,
   options: RequestConfig | null,
   // valueRef: Ref<T> = <Ref<T>>ref(),
@@ -43,7 +43,7 @@ const useFetchTee = async <T>(
 
   const dataLoading = ref(false);
   const error = ref(null);
-  const data: Ref<T | undefined> = ref();
+  const data: Ref<T | any | unknown> = ref();
   if (options === null) {
     options = {};
   }

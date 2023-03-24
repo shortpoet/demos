@@ -7,7 +7,7 @@ import { handleSession } from './auth';
 
 export { handleAPI };
 
-const FILE_LOG_LEVEL = 'info';
+const FILE_LOG_LEVEL = 'error';
 
 async function handleAPI(
   handler: RequestHandler,
@@ -35,7 +35,13 @@ async function handleAPI(
 
   if (url.pathname.startsWith('/api/health')) {
     try {
-      return await handleHealth(handler, env, ctx);
+      const res = await handleHealth(handler, env, ctx);
+      if (logLevel(FILE_LOG_LEVEL, env)) {
+        console.log(
+          `worker.handleAPI.health.res: ${JSON.stringify(res, null, 2)}`,
+        );
+      }
+      return res;
     } catch (error) {
       console.error('worker.handleAPI.health.error');
       console.error(error);
@@ -44,7 +50,14 @@ async function handleAPI(
 
   if (url.pathname.startsWith('/api/auth/session')) {
     try {
-      return await handleSession(handler, env, ctx);
+      const res = await handleSession(handler, env, ctx);
+      if (logLevel(FILE_LOG_LEVEL, env)) {
+        console.log(
+          `worker.handleAPI.session.res: ${JSON.stringify(res, null, 2)}`,
+        );
+      }
+      return res;
+      // return await handleSession(handler, env, ctx);
     } catch (error) {
       console.error('worker.handleSession.error');
       console.error(error);

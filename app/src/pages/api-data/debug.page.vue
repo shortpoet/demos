@@ -32,6 +32,7 @@ import JsonTree from '~/components/JsonTree.vue'
 import { useFetchTee } from '~/composables/fetchTee';
 
 import AuthLayout from '~/layouts/AuthLayout.vue';
+import { useAuthPlugin, DEFAULT_REDIRECT_CALLBACK } from '~/composables/auth-plugin';
 let Layout = AuthLayout;
 export { Layout }
 
@@ -54,9 +55,14 @@ export default {
         error,
       }
     }
-    const { useAuth, defaultOptions } = await import("~/composables/auth");
 
-    const { user, authLoading } = await useAuth(defaultOptions);
+    // const { useAuth, defaultOptions } = await import("~/composables/auth");
+    // const { user, authLoading } = await useAuth(defaultOptions);
+
+    const authP = useAuthPlugin();
+    await authP.createAuthClient(DEFAULT_REDIRECT_CALLBACK);
+    await authP.onLoad();
+    const { user, authLoading } = authP;
 
     // const options = { token: user.value ? user.value.token : null };
     const options = { user: user.value };

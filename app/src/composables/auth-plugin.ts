@@ -1,88 +1,35 @@
-import {
-  Auth0Client,
-  Auth0ClientOptions,
-  createAuth0Client,
-  GetTokenSilentlyOptions,
-  GetTokenWithPopupOptions,
-  IdToken,
-  LogoutOptions,
-  PopupLoginOptions,
-  RedirectLoginOptions,
-  RedirectLoginResult,
-  TokenEndpointOptions,
-  GetTokenSilentlyVerboseResponse,
-} from '@auth0/auth0-spa-js';
-
+// import crypto from 'crypto';
 import { ref, Ref, computed, watch, inject, provide } from 'vue';
 import type { InjectionKey } from 'vue';
 
 import { navigate } from 'vite-plugin-ssr/client/router';
 import { CookieSetOptions } from 'universal-cookie';
-import { User } from '~/types';
+
+import { User, Auth0Instance, ClientOptions, Auth0Client } from '~/types';
 import { useFetchTee } from './fetchTee';
+import {
+  createAuth0Client,
+  GetTokenSilentlyOptions,
+  GetTokenSilentlyVerboseResponse,
+  LogoutOptions,
+  PopupLoginOptions,
+  RedirectLoginOptions,
+} from '@auth0/auth0-spa-js';
+
+import { Buffer } from 'buffer';
 
 export {
   useAuthPlugin,
   DEFAULT_REDIRECT_CALLBACK,
-  Auth0Client,
-  ClientOptions,
   defaultOptions,
   COOKIES_USER_TOKEN,
   cookieOptions,
+  setSession,
+  COOKIES_SESSION_TOKEN,
+  SESSION_TOKEN_EXPIRY,
 };
 
-interface ClientOptions extends Auth0ClientOptions {
-  domain: string;
-  clientId: string;
-  audience?: string;
-  redirect_uri?: string;
-  useRefreshTokens?: boolean;
-  cacheLocation?: 'memory' | 'localstorage';
-  leeway?: number;
-  onRedirectCallback?(appState: any): void;
-}
-
-interface Auth0Instance extends Partial<Auth0Client> {
-  isLoggedIn: Ref<boolean>;
-  user: Ref<User>;
-  authLoading: Ref<boolean>;
-  authError: Ref<any>;
-  popupOpen: Ref<boolean>;
-  createAuthClient: (
-    onRedirectCallback: (appState: any) => void,
-    redirect_uri?: string,
-    options?: ClientOptions,
-  ) => Promise<void>;
-  onLoad: () => Promise<void>;
-  // onLoad: Promise<void>;
-  isAuthenticated: () => Promise<boolean>;
-  loginWithPopup(o?: PopupLoginOptions): Promise<void>;
-  handleRedirectCallback(url?: string): Promise<RedirectLoginResult>;
-  logout(options?: LogoutOptions): Promise<void>;
-  loginWithRedirect(o?: RedirectLoginOptions): Promise<void>;
-  getTokenSilently(options?: GetTokenSilentlyOptions): Promise<string>;
-  getTokenSilently(
-    options: GetTokenSilentlyOptions & { detailedResponse: true },
-  ): Promise<GetTokenSilentlyVerboseResponse>;
-  // getIdTokenClaims(): Promise<IdToken | undefined>;
-  // getTokenWithPopup(o?: GetTokenWithPopupOptions): Promise<string | undefined>;
-}
-
 const AuthSymbol = Symbol() as InjectionKey<Auth0Instance>;
-
-// interface Auth0Instance {
-//   $auth: this;
-// }
-
-const DEFAULT_REDIRECT_CALLBACK = (appState: any = {}) =>
-  // window.history.replaceState(appState, document.title, window.location.pathname);
-  navigate(
-    appState && appState.loginRedirectPath
-      ? appState.loginRedirectPath
-      : window.location.pathname,
-  );
-
-// let instance: Auth0Instance;
 
 const authClient = ref<Auth0Client | null>(null);
 let redirectCallback: (appState: any) => void;
@@ -94,10 +41,12 @@ const popupOpen = ref(false);
 const error = ref<any>();
 const isLoggedIn = ref(false);
 const audience = `https://ssr.shortpoet.com`;
-const scope = 'openid profile email';
+const scope = 'openid profile email offline_access';
 const response_type = 'code';
 
 const COOKIES_USER_TOKEN = `${import.meta.env.VITE_APP_NAME}-user-token`;
+const COOKIES_SESSION_TOKEN = `${import.meta.env.VITE_APP_NAME}-session-token`;
+const SESSION_TOKEN_EXPIRY = 60 * 60; // 1 hour
 
 const cookieOptions: CookieSetOptions = {
   path: '/',
@@ -109,6 +58,16 @@ const cookieOptions: CookieSetOptions = {
   // secure: true,
   // httpOnly: true,
 };
+
+const DEFAULT_REDIRECT_CALLBACK = (appState: any = {}) =>
+  // window.history.replaceState(appState, document.title, window.location.pathname);
+  navigate(
+    appState && appState.loginRedirectPath
+      ? appState.loginRedirectPath
+      : window.location.pathname,
+  );
+
+// let instance: Auth0Instance;
 
 export const provideAuth = () => {
   const auth = {
@@ -187,6 +146,8 @@ const createAuthClient = async ({
   const initOptions: ClientOptions = {
     ...defaultOptions,
     ...options,
+    // useRefreshTokens: true,
+    // useRefreshTokensFallback: true,
     authorizationParams: {
       scope,
       audience,
@@ -201,7 +162,8 @@ const createAuthClient = async ({
   redirectCallback = onRedirectCallback;
 };
 
-async function onLoad() {
+async function onLoad(): Promise<User | null | undefined> {
+  let _user = null;
   try {
     const { useCookies } = await import('@vueuse/integrations/useCookies');
     const cookies = useCookies([COOKIES_USER_TOKEN]);
@@ -213,20 +175,26 @@ async function onLoad() {
     ) {
       const res = await authClient.value?.handleRedirectCallback();
       redirectCallback(res?.appState);
+      return _user;
     } else if (hasToken === true) {
       if (!authClient.value) {
-        return;
+        return _user;
       }
+      console.log(`plugin hasToken: ${hasToken}`);
       const tokenRes = await authClient.value.getTokenSilently({
         detailedResponse: true,
       });
-      // console.log(`tokenRes: ${JSON.stringify(tokenRes)}`);
+      console.log(`tokenRes: ${JSON.stringify(tokenRes)}`);
       token.value = tokenRes?.id_token;
+      user.value = (await authClient.value?.getUser()) || ({} as User);
+      _user = user.value;
+      return _user;
     }
   } catch (err) {
     console.error(`error: ${err}`);
     error.value = err;
     authLoading.value = false;
+    return _user;
   } finally {
     authLoading.value = false;
     console.log(`finally: authLoading plugin -> ${authLoading.value}`);
@@ -235,32 +203,124 @@ async function onLoad() {
     if (isLoggedIn.value === true && user.value) {
       token.value = (await authClient.value?.getTokenSilently()) || '';
       user.value.token = token.value;
-      const seshRes = await setSession(user.value);
-      if (seshRes && seshRes !== 'Ok') {
-        console.error(`seshRes: ${seshRes}`);
-      }
+      _user = user.value;
+      return _user;
     }
   }
 }
-const setSession = async (user: User) => {
+function atob(data: string) {
+  return JSON.parse(Buffer.from(data, 'base64').toString());
+}
+function b64Padding(part: string) {
+  part = part.replace(/_/g, '/').replace(/-/g, '+');
+  switch (part.length % 4) {
+    case 0:
+      break;
+    case 2:
+      part += '==';
+      break;
+    case 3:
+      part += '=';
+      break;
+    default:
+      throw 'Illegal base64url string!';
+  }
+  return part;
+}
+
+const validateSession = async (
+  sessionToken: string,
+  expiry: number,
+): Promise<[boolean, string]> => {
+  const tokenExpirationTime = expiry; // token expires in 1 hour (in seconds)
+
+  const [token, timestamp, rawSignature] = sessionToken.split('.');
+  const payload = `${token}.${timestamp}`;
+
+  // console.log('token', token);
+  // console.log('timestamp', timestamp);
+  // console.log('rawSignature', rawSignature);
+  // console.log('payload', payload);
+
+  const encoder = new TextEncoder();
+  const secret = process.env.__SECRET__;
+  // const secret = import.meta.env.__SECRET__;
+  const secretKeyData = encoder.encode(secret);
+
+  const encoded = encoder.encode(payload.replace(/-/g, '+').replace(/_/g, '/'));
+  // const signature = atob(rawSignature);
+  const signature = Buffer.from(b64Padding(rawSignature), 'base64');
+
+  // console.log('secret', secret);
+  // console.log('secretKeyData', secretKeyData);
+  // console.log('encoded', encoded);
+
+  let out: [boolean, string] = [false, ''];
+  try {
+    const secretKey = await crypto.subtle.importKey(
+      'raw',
+      secretKeyData,
+      { name: 'HMAC', hash: 'SHA-256' },
+      false,
+      ['verify'],
+    );
+    // console.log('secretKey', secretKey);
+
+    // console.log('signature', signature);
+    const signatureIsValid = await crypto.subtle.verify(
+      'HMAC',
+      secretKey,
+      signature,
+      encoded,
+    );
+    const now = Date.now();
+    const tokenAge = now - parseInt(timestamp);
+    const tokenExpired = tokenAge > tokenExpirationTime * 1000;
+    const valid = signatureIsValid && !tokenExpired;
+    console.log('validateSession.tokenExpired', tokenExpired);
+    console.log('validateSession.signatureIsValid', signatureIsValid);
+    console.log('validateSession.valid', valid);
+    out = [valid, token];
+    console.log('validateSession.out', out);
+  } catch (error) {
+    console.log('validateSession.error', error);
+  }
+  return out;
+};
+
+const setSession = async (
+  user: User,
+): Promise<{ result: string; status: string }> => {
   console.log(`setSession.user: ${JSON.stringify(user, null, 2)}`);
   const options = { user };
-  let res;
-  const { data, error, dataLoading } = await useFetchTee<{ result: string }>(
-    'api/auth/session',
-    options,
-  );
+  let res = { result: 'Error', status: 'Error' };
+
+  const { data, error, dataLoading } = await useFetchTee<{
+    sessionToken: string;
+  }>('api/auth/session', options);
+
   if (error.value) {
     console.error(`error: ${error.value}`);
-    res = 'Error';
   }
+
   if (dataLoading.value) {
     console.log(`dataLoading: ${dataLoading.value}`);
-    res = 'Loading';
+    res = { result: 'Loading', status: 'Loading' };
   }
-  if (data.value) {
-    console.log(`data: ${JSON.stringify(data.value, null, 2)}`);
-    res = data.value?.result;
+  // console.log(`data: ${JSON.stringify(data.value, null, 2)}`);
+  if (data.value && data.value.sessionToken) {
+    // console.log(`data: ${JSON.stringify(data.value, null, 2)}`);
+    const [isValid, token] = await validateSession(
+      data.value.sessionToken,
+      SESSION_TOKEN_EXPIRY,
+    );
+    console.log(`isValid: ${isValid}`);
+    console.log(`token: ${token}`);
+    if (!isValid) {
+      res = { result: 'Invalid', status: 'Error' };
+    } else {
+      res = { result: token, status: 'Success' };
+    }
   }
   return res;
 };

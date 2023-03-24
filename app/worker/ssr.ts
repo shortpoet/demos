@@ -1,10 +1,16 @@
+import { getSessionFromCookie, _atob } from 'api';
 import { renderPage } from 'vite-plugin-ssr';
 
 export { handleSsr };
 
 async function handleSsr(handler, env, ctx) {
   const userAgent = handler.req.headers.get('User-Agent') || '';
-  const user = handler.user;
+  let user = null;
+  const session = await getSessionFromCookie(handler, env);
+  if (session) {
+    user = session.user;
+  }
+
   if (env.LOG_LEVEL === 'debug') {
     console.log('ua', userAgent);
   }

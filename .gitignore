@@ -1,4 +1,5 @@
 !**/*.env*
+.dev.vars
 **/*.mf
 
 # Local .terraform directories

@@ -68,7 +68,10 @@ async function handleFetchEvent(
     return await handleStaticAssets(handler.req, env, ctx);
   }
   if (isAPI(url)) {
-    return handleAPI(handler, env, ctx, waitUntil);
+    const apiRes = handleAPI(handler, env, ctx, waitUntil);
+    // console.log('worker.handleFetchEvent.apiRes');
+    // console.log(JSON.stringify(apiRes, null, 2));
+    return apiRes;
   }
 
   const response = await handleSsr(handler, env, ctx);

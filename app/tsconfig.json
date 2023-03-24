@@ -21,7 +21,6 @@
     "forceConsistentCasingInFileNames": true,
     "types": [
       "vite/client",
-      "vite-plugin-ssr",
       "node",
       "vitest"
     ],
@@ -50,5 +49,6 @@
     "src/**/*",
     "src/**/*.vue",
     "test/**/*",
+    "util/**/*"
   ]
 }

@@ -4,7 +4,7 @@ import { Jwt, Key, ValidateJWT, WellKnownResponse } from '../types';
 import { cacheResponse } from '../../util';
 import { RequestHandler } from '../RequestHandler';
 
-export { isValidJwt };
+export { isValidJwt, _atob };
 
 const FILE_LOG_LEVEL = 'error';
 

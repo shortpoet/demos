@@ -35,6 +35,7 @@ import { User } from '~/types';
 // import { useAuthStore } from '~/stores/auth';
 
 import AuthLayout from '~/layouts/AuthLayout.vue';
+import { useAuthPlugin, DEFAULT_REDIRECT_CALLBACK } from '~/composables/auth-plugin';
 let Layout = AuthLayout;
 export { Layout }
 
@@ -46,7 +47,6 @@ export default {
     JsonTree,
   },
   async setup() {
-    let user = ref({} as User);
     const loaded = computed(() => dataLoading && true)
     let dataLoading = ref(false);
     let error = ref(null);
@@ -59,13 +59,21 @@ export default {
         error,
       }
     }
-
-    const { useAuth, defaultOptions } = await import("~/composables/auth");
-    const { user: u } = await useAuth(defaultOptions);
-    user = u;
     const urlBase = `${import.meta.env.VITE_APP_URL}`;
 
-    const options = { token: user.value.token };
+    // let user = ref({} as User);
+    // const { useAuth, defaultOptions } = await import("~/composables/auth");
+    // const { user: u } = await useAuth(defaultOptions);
+    // user = u;
+
+    let user = ref(undefined as User | undefined);
+    const auth = useAuthPlugin();
+    await auth.createAuthClient(DEFAULT_REDIRECT_CALLBACK);
+    await auth.onLoad();
+    if (auth?.user.value) {
+      user = auth?.user;
+    }
+    const options = { token: user.value?.token };
     // const options = { user: user.value };
     ({ dataLoading, error, data } = await useFetch(`${urlBase}/api/health/check`, options));
 

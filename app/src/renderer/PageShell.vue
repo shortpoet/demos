@@ -47,14 +47,20 @@ useHead({
     //   async: true,
     //   onload: async () => {
     //     // console.log('XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX')
-    //     const { onLoad } = await useAuth(defaultOptions);
-    //     // console.log('auth0 loaded');
-    //     await onLoad();
-    //     // the self-executing function below fires multiple times
-    //     // return onLoad
+    //     // console.log
+    //     // const setCookie = (name: string, value: string, days: number) => {
+    //     //   const expires = new Date(Date.now() + days * 864e5).toUTCString()
+    //     //   document.cookie = name + '=' + encodeURIComponent(value) + '; expires=' + expires + '; path=/'
+    //     // }
+    //     // setCookie('auth0.is.authenticated', 'true', 1)
+    //     // const { onLoad } = await useAuth(defaultOptions);
+    //     // // console.log('auth0 loaded');
+    //     // await onLoad();
+    //     // // the self-executing function below fires multiple times
+    //     // // return onLoad
 
-    //     await authP?.createAuthClient(DEFAULT_REDIRECT_CALLBACK);
-    //     await authP?.onLoad();
+    //     // await authP?.createAuthClient(DEFAULT_REDIRECT_CALLBACK);
+    //     // await authP?.onLoad();
 
     //   },
     // },

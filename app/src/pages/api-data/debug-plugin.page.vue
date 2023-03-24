@@ -54,13 +54,11 @@ export default {
     }
 
     const authP = useAuthPlugin();
-
     await authP.createAuthClient(DEFAULT_REDIRECT_CALLBACK);
     await authP.onLoad();
     const { user, authLoading } = authP;
 
     const options = { token: user.value ? user.value.token : undefined };
-
     ({ data, error, dataLoading } = await useFetchTee<Record<string, any>>(
       "api/health/debug",
       options,
