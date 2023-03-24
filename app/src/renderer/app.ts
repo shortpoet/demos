@@ -48,6 +48,7 @@ function createApp(pageContext: PageContext) {
       rootComponent.pageProps = markRaw(pageContext.pageProps || {});
       // without the below line the layout only changes on reload, and then persists weirdly to other navigated pages
       rootComponent.Layout = markRaw(pageContext.exports.Layout || PageShell);
+      rootComponent.user = pageContext.user;
     },
   });
 

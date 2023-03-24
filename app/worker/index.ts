@@ -19,25 +19,16 @@ export default {
   ): Promise<Response> {
     try {
       // BUG: sending env back as response body. includes all static manifest etc.
-
       console.log(`
       \nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n
+      ${new Date().toLocaleTimeString()}
       worker.fetch -> ${request.url}
       \n
       `);
       // console.log(JSON.stringify(request, null, 2));
-      if (request.body) {
-        console.log('worker.RequestHandler.req.body', request.body);
-        if (request.body instanceof ReadableStream) {
-          console.log(
-            'worker.RequestHandler.req.body instanceof ReadableStream',
-          );
-          console.log(await request.clone().body.pipeTo(new WritableStream()));
-        }
-      }
-
       const handler = new RequestHandler(request, env);
       await handler.initData();
+
       // const req = new RequestHandler(request, env, await defineInit(request));
       // console.log('worker.handleFetchEvent.handler');
       // console.log(JSON.stringify(handler, null, 2));

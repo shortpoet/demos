@@ -8,20 +8,20 @@ export { RequestHandler, defineInit };
 
 const FILE_LOG_LEVEL = 'info';
 
-async function defineInit(request: Request): Promise<RequestInit> {
+function defineInit(request: Request): RequestInit {
   return {
     method: request.method,
     headers: request.headers,
     body: request.body,
-    // cf: request.cf,
-    // redirect: request.redirect,
-    // fetcher: request.fetcher,
-    // integrity: request.integrity,
-    // signal: request.signal,
+    cf: request.cf,
+    redirect: request.redirect,
+    fetcher: request.fetcher,
+    integrity: request.integrity,
+    signal: request.signal,
   };
 }
 
-class RequestHandler {
+class RequestHandler<CfHostMetadata = unknown> extends Request<CfHostMetadata> {
   // class RequestHandler<CfHostMetadata = unknown> extends Request<CfHostMetadata> {
   declare req: Request;
   declare url: string;
@@ -31,12 +31,13 @@ class RequestHandler {
   declare params?: Record<string, string>;
   declare user?: User;
   declare data?: any;
+  declare dump?: any;
 
   constructor(req: Request, env: Env, init?: RequestInit) {
     if (logLevel(FILE_LOG_LEVEL, env)) {
       console.log(`worker.RequestHandler: ${req.url}`);
     }
-    // super(req, init);
+    super(req, (init = defineInit(req)));
 
     // const [stream1, stream2] = cloneRequest(req);
     // super(req, {
@@ -47,7 +48,7 @@ class RequestHandler {
     //   `worker.RequestHandler.stream: ${JSON.stringify(stream2, null, 2)}`,
     // );
     this.req = req;
-    this.url = req.url;
+    // this.url = req.url;
     this.query = this._parseQuery(new URL(this.url));
     this.params = this._parseParams(new URL(this.url));
 
@@ -105,6 +106,10 @@ class RequestHandler {
   async initData() {
     console.log(`worker.initData -> ${this.url}`);
     console.log(`method -> ${this.req.method}`);
+    console.log(`body -> ${this.req.body}`);
+    console.log(`bodyUsed -> ${this.req.bodyUsed}`);
+    console.log(`headers -> ${JSON.stringify(this.req.headers, null, 2)}`);
+
     // this results in an error when there is a user object in request
     // but can't see any of the data
     if (this.req.method === 'POST') {
@@ -116,11 +121,11 @@ class RequestHandler {
       //   this.data = j.data;
       // }
       const data = JSON.parse(t);
-      console.log('worker.handleRequest.data', data);
+      // console.log('worker.handleRequest.data', data);
       this.user = data;
       this.data = data.data;
-      console.log('worker.handleRequest.body', this.data);
-      console.log('worker.handleRequest.user', this.user);
+      // console.log('worker.handleRequest.body', this.data);
+      // console.log('worker.handleRequest.user', this.user);
     }
   }
 

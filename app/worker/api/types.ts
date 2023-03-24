@@ -1,5 +1,16 @@
 import { Commit } from 'git-last-commit';
 
+type Session = {
+  id: string;
+  userId: string;
+  user: User;
+  expires: Date;
+  sessionToken: string;
+  accessToken: string;
+  created: Date;
+  updated: Date;
+};
+
 type AuthUser = {
   id: string;
   name: string;
@@ -18,7 +29,7 @@ type GithubUser = {
 
 type User = AuthUser & GithubUser;
 
-export { User };
+export { User, Session };
 
 export type HealthCheck = {
   status: string;

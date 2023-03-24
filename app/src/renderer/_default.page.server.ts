@@ -12,6 +12,7 @@ async function onBeforeRender(pageContext: PageContext) {
   const user = pageContext.user;
   console.log('onBeforeRender');
   console.log(user);
+
   // let redirectTo: string|undefined
 
   // switch (true as boolean) {

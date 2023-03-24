@@ -43,7 +43,7 @@ const useFetchTee = async <T>(
 
   const dataLoading = ref(false);
   const error = ref(null);
-  const data: Ref<any> = ref();
+  const data: Ref<T | undefined> = ref();
   if (options === null) {
     options = {};
   }

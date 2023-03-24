@@ -67,7 +67,19 @@ const handleHealth = async (
         res = await handler.handleRequest(
           env,
           ctx,
-          { req: handler.req, env, ctx, rawManifest: JSON.parse(rawManifest) },
+          {
+            handler: {
+              ...handler,
+              user: {
+                ...handler.user,
+                token: handler.user.token.substring(0, 8) + '...',
+              },
+            },
+            req: handler.req,
+            env,
+            ctx,
+            rawManifest: JSON.parse(rawManifest),
+          },
           200,
           { withAuth: true },
         );

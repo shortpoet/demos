@@ -9,7 +9,7 @@ const __dirname = dirname(__filename);
 
 export { getToml, writeToml, command };
 
-function command(cmd) {
+function command(cmd): Promise<string> {
   return new Promise((resolve, reject) => {
     exec(cmd, (error, stdout, stderr) => {
       if (error) {

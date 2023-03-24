@@ -4,7 +4,7 @@ import { RequestHandler } from '../api';
 import { Env, LogLevel, LOG_LOVELS } from '../types';
 
 export { setCacheOptions, handleOptions, handleCors };
-const FILE_LOG_LEVEL = 'info';
+const FILE_LOG_LEVEL = 'error';
 
 function handleOptions(
   handler: RequestHandler,
@@ -78,16 +78,15 @@ function handleCors(
       'worker.handleOptions.checkOrigin',
       checkOrigin(handler.req || ''),
     );
+    tryLogHeader('Origin', handler.req);
+    tryLogHeader('Authorization', handler.req);
+    tryLogHeader('X-Ping', handler.req);
+    tryLogHeader('Access-Control-Request-Method', handler.req);
+    tryLogHeader('Access-Control-Request-Headers', handler.req);
+    tryLogHeader('sec-fetch-dest', handler.req);
+    tryLogHeader('sec-fetch-mode', handler.req);
+    tryLogHeader('sec-fetch-site', handler.req);
   }
-
-  tryLogHeader('Origin', handler.req);
-  tryLogHeader('Authorization', handler.req);
-  tryLogHeader('X-Ping', handler.req);
-  tryLogHeader('Access-Control-Request-Method', handler.req);
-  tryLogHeader('Access-Control-Request-Headers', handler.req);
-  tryLogHeader('sec-fetch-dest', handler.req);
-  tryLogHeader('sec-fetch-mode', handler.req);
-  tryLogHeader('sec-fetch-site', handler.req);
 
   // const checkOrigin = (request) => {
   //   if (!request.headers) return;

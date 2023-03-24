@@ -3,7 +3,6 @@ main = "./app/worker/index.ts"
 name = "demo-cfw-ssr"
 node_compat = true
 workers_dev = true
-streams_enable_constructors = true
 [dev]
 port = 3000
 [[env.dev.kv_namespaces]]

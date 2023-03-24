@@ -6,11 +6,11 @@ export default (pageContext: PageContext) => {
   console.log(`is logged in ${userIsLoggedIn(pageContext)}`);
   console.log(pageContext.user);
   // Only render the login page to unauthenticated users
-  if (!userIsLoggedIn(pageContext)) {
-    return false;
-  }
+  // if (!userIsLoggedIn(pageContext)) {
+  //   return false;
+  // }
 
-  return true;
+  // return true;
 
   // return {
   //   // We use a high precedence number of `99` to override all other routes.
@@ -18,6 +18,7 @@ export default (pageContext: PageContext) => {
   //   // regardless of the URL.
   //   precedence: 99,
   // };
+  return true;
 };
 
 function userIsLoggedIn(pageContext: PageContext) {

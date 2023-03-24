@@ -3,6 +3,7 @@ import { logLevel } from '../util';
 import { createJsonResponse, handleCors, handleOptions } from '../util';
 import { RequestHandler } from '.';
 import { handleHealth } from './health';
+import { handleSession } from './auth';
 
 export { handleAPI };
 
@@ -37,6 +38,15 @@ async function handleAPI(
       return await handleHealth(handler, env, ctx);
     } catch (error) {
       console.error('worker.handleAPI.health.error');
+      console.error(error);
+    }
+  }
+
+  if (url.pathname.startsWith('/api/auth/session')) {
+    try {
+      return await handleSession(handler, env, ctx);
+    } catch (error) {
+      console.error('worker.handleSession.error');
       console.error(error);
     }
   }

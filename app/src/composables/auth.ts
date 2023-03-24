@@ -18,6 +18,8 @@ import { ref, Ref, computed, watch } from 'vue';
 import { navigate } from 'vite-plugin-ssr/client/router';
 import { CookieSetOptions } from 'universal-cookie';
 import { User } from '~/types';
+import { useFetchTee } from './fetchTee';
+import { usePageContext } from '~/renderer/usePageContext';
 
 export {
   Auth0Client,
@@ -158,9 +160,37 @@ async function onLoad(onRedirectCallback = DEFAULT_REDIRECT_CALLBACK) {
     if (isLoggedIn.value === true && user.value) {
       token.value = await authClient.value.getTokenSilently();
       user.value.token = token.value;
+      const seshRes = await setSession(user.value);
+      // pageContext.user = user.value;
+      if (seshRes && seshRes !== 'Ok') {
+        console.error(`seshRes: ${seshRes}`);
+      }
     }
   }
 }
+// const pageContext = usePageContext();
+const setSession = async (user: User) => {
+  console.log(`setSession.user: ${JSON.stringify(user, null, 2)}`);
+  const options = { user };
+  let res;
+  const { data, error, dataLoading } = await useFetchTee<{ result: string }>(
+    'api/auth/session',
+    options,
+  );
+  if (error.value) {
+    console.error(`error: ${error.value}`);
+    res = 'Error';
+  }
+  if (dataLoading.value) {
+    console.log(`dataLoading: ${dataLoading.value}`);
+    res = 'Loading';
+  }
+  if (data.value) {
+    console.log(`data: ${JSON.stringify(data.value, null, 2)}`);
+    res = data.value?.result;
+  }
+  return res;
+};
 
 const useAuth = async (
   {

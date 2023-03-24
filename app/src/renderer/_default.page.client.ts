@@ -10,6 +10,8 @@ export { render };
 let app: Awaited<Promise<PromiseLike<ReturnType<typeof createApp>>>>;
 async function render(pageContext: PageContextBuiltInClient & PageContext) {
   console.log('client.render');
+  const { user } = pageContext;
+  console.log(`user: ${user}`);
   // const { Page, Layout } = pageContext.exports;
   // console.log(Page, Layout);
   if (!app) {

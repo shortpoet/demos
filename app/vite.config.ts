@@ -20,6 +20,9 @@ export default ({ mode }: { mode: string }) => {
   process.env = { ...process.env, ...loadEnv(mode, process.cwd()) };
 
   return defineConfig({
+    define: {
+      __SECRET__: process.env.__SECRET__,
+    },
     plugins: [
       vue({
         include: [/\.vue$/, /\.md$/],

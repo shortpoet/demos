@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "baseUrl": ".",
     "target": "esnext",
     "module": "esnext",
     "allowSyntheticDefaultImports": true,
@@ -13,5 +14,8 @@
     "types": [
       "@cloudflare/workers-types"
     ]
-  }
+  },
+  "include": [
+    "./**/*"
+  ]
 }
