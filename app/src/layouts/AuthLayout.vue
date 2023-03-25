@@ -31,25 +31,21 @@
 
 <script lang="ts" setup>
 // import { useHead } from '@vueuse/head';
+// import { title, meta, link } from '~/types';
 import { onMounted } from 'vue';
 import Link from '~/components/Link.vue';
-// import { useAuth, defaultOptions } from '~/composables/auth';
 import { useAuthPlugin, DEFAULT_REDIRECT_CALLBACK, setSession, cookieOptions, COOKIES_SESSION_TOKEN, SESSION_TOKEN_EXPIRY } from '~/composables/auth-plugin';
-// import { title, meta, link } from '~/types';
 
 import logoUrl from '../../public/logo.svg';
 
 onMounted(async () => {
-  // if (typeof window === "undefined") {
-  //   return {
-  //   }
-  // }
-
   const authP = useAuthPlugin();
   await authP?.createAuthClient(DEFAULT_REDIRECT_CALLBACK);
   const user = await authP?.onLoad();
   if (user) {
-    console.log('onLoad.setSession.user: ', user);
+    if (import.meta.env.VITE_LOG_LEVEL === 'debug') {
+      console.log('onLoad.setSession.user: ', user);
+    }
     const seshRes = await setSession(user);
     const { useCookies } = await import('@vueuse/integrations/useCookies');
     const cookies = useCookies([COOKIES_SESSION_TOKEN]);
@@ -60,20 +56,12 @@ onMounted(async () => {
       });
       console.log('onLoad.setSession.cookies: ', cookies.getAll());
     } else {
-      // console.error('error setting session: ', seshRes);
+      if (import.meta.env.VITE_LOG_LEVEL === 'debug') {
+        console.error('error setting session: ', seshRes);
+      }
       cookies.remove(COOKIES_SESSION_TOKEN);
     }
   }
-
-
-  // console.log('XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX')
-  // console.log
-  // const setCookie = (name: string, value: string, days: number) => {
-  //   const expires = new Date(Date.now() + days * 864e5).toUTCString()
-  //   document.cookie = name + '=' + encodeURIComponent(value) + '; expires=' + expires + '; path=/'
-  // }
-  // setCookie('auth0.is.authenticated', 'true', 1)
-
 })
 
 // useHead({

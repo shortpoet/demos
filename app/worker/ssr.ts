@@ -1,7 +1,10 @@
 import { getSessionFromCookie, _atob } from 'api';
+import { logLevel } from './util';
 import { renderPage } from 'vite-plugin-ssr';
 
 export { handleSsr };
+
+const FILE_LOG_LEVEL = 'error';
 
 async function handleSsr(handler, env, ctx) {
   const userAgent = handler.req.headers.get('User-Agent') || '';
@@ -11,11 +14,11 @@ async function handleSsr(handler, env, ctx) {
     user = session.user;
   }
 
-  if (env.LOG_LEVEL === 'debug') {
+  if (logLevel(FILE_LOG_LEVEL, env)) {
     console.log('ua', userAgent);
   }
 
-  if (env.LOG_LEVEL === 'debug') {
+  if (logLevel(FILE_LOG_LEVEL, env)) {
     console.log('worker.handleSsr');
   }
   const pageContextInit = {
@@ -24,7 +27,9 @@ async function handleSsr(handler, env, ctx) {
     userAgent,
     user,
   };
-  console.log('worker.handleSsr.pageContextInit', pageContextInit);
+  if (logLevel(FILE_LOG_LEVEL, env)) {
+    console.log('worker.handleSsr.pageContextInit', pageContextInit);
+  }
   const pageContext = await renderPage(pageContextInit);
   const { httpResponse } = pageContext;
   if (!httpResponse) {

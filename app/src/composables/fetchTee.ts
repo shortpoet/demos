@@ -22,6 +22,7 @@ export const requestInit: RequestConfig = {
   method: 'GET',
   headers: {
     'Content-Type': 'application/json',
+    Accept: 'application/json',
     'X-Ping': 'pong',
   },
   redirect: 'follow',
@@ -41,13 +42,30 @@ const useFetchTee = async <T extends unknown>(
   const urlBase = `${import.meta.env.VITE_APP_URL}`;
   const url = `${urlBase}/${path}`;
 
-  const dataLoading = ref(false);
+  const dataLoading = ref(true);
   const error = ref(null);
   const data: Ref<T | any | unknown> = ref();
   if (options === null) {
     options = {};
   }
-  // empty token ?
+  console.info(`fetch.fetching data from: -> ${url}`);
+
+  // console.log(
+  //   'options',
+  //   JSON.stringify(
+  //     {
+  //       ...options,
+  //       headers: {
+  //         ...options.headers,
+  //         Authorization: `Bearer ${options.token?.substring(0, 7)}...}`,
+  //       },
+  //       token: `Bearer ${options.token?.substring(0, 7)}...}`,
+  //     },
+  //     null,
+  //     2,
+  //   ),
+  // );
+
   const token = ref(options.token || options.user?.token);
   const user = ref(options.user);
   // possible leak of private data
@@ -96,20 +114,24 @@ const useFetchTee = async <T extends unknown>(
     error.value = null;
 
     try {
-      console.info(
-        `fetching data with init: -> ${JSON.stringify(
-          safeInit(init),
-          null,
-          2,
-        )}`,
-      );
       const request = new Request(url, init);
-      console.log('request', request);
+      if (import.meta.env.VITE_LOG_LEVEL === 'debug') {
+        console.info(
+          `fetching data with init: -> ${JSON.stringify(
+            safeInit(init),
+            null,
+            2,
+          )}`,
+        );
+        console.log('request', request);
+      }
+
       const response = await fetch(request, {
         ...init,
-        body: JSON.stringify(user.value),
       });
-      // console.log('response', response);
+      if (import.meta.env.VITE_LOG_LEVEL === 'debug') {
+        console.log('response', response);
+      }
       const ct = response.headers.get('Content-Type');
       if (!response.ok) {
         throw new Error(
@@ -140,7 +162,6 @@ const useFetchTee = async <T extends unknown>(
       if (import.meta.env.VITE_LOG_LEVEL === 'debug') {
         console.log('err', err);
       }
-
       error.value = err;
       // error.value = JSON.parse(err.message);
       dataLoading.value = false;
@@ -151,32 +172,5 @@ const useFetchTee = async <T extends unknown>(
 
   await fetchApi();
 
-  // if (error.value) {
-  //   errorRef.value = error.value;
-  //   loadingRef.value = !!dataLoading.value;
-  // } else if (data.value && dataLoading.value === false) {
-  //   console.log('useFetch.hasData', {
-  //     data: data.value,
-  //     dataLoading: dataLoading.value,
-  //   });
-  //   errorRef.value = null;
-  //   valueRef.value = data.value;
-  //   loadingRef.value = !!dataLoading.value;
-  // }
-
-  // valueRef.value = data.value;
-  // loadingRef.value = dataLoading.value;
-  // errorRef.value = error.value;
-
-  // watch(
-  //   () => [authStore.idToken],
-  //   async (cur, prev) => {
-  //     console.log(`idToken changed from ${prev} to ${cur}`);
-  //     user.value = authStore.currentUser;
-  //     isLoggedIn.value = authStore.isLoggedIn;
-  //     token.value = authStore.idToken;
-  //     await fetchApi();
-  //   }
-  // );
   return { fetchApi, data, dataLoading, error };
 };

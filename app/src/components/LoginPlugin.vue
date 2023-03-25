@@ -36,7 +36,6 @@
 
 <script lang="ts">
 import { ref, watch } from 'vue';
-// import { cookieOptions, COOKIES_USER_TOKEN } from '~/composables/auth';
 import { cookieOptions, COOKIES_USER_TOKEN, COOKIES_SESSION_TOKEN, DEFAULT_REDIRECT_CALLBACK, useAuthPlugin } from '~/composables/auth-plugin';
 import { GithubUser } from '~/types';
 
@@ -114,19 +113,17 @@ export default {
       cookies.remove(COOKIES_USER_TOKEN, cookieOptions);
       cookies.remove(COOKIES_SESSION_TOKEN, cookieOptions)
       await logout();
-      // authLoading.value = l.value;
-      // isLoggedIn.value = a.value;
-      // user.value = u.value;
-      // authError.value = e.value;
     };
 
-    console.log("login.component.setup done");
+    if (import.meta.env.VITE_LOG_LEVEL === 'debug') {
+      console.log("login.component.setup done");
+    }
 
-    watch(authLoading, async (cur, prev) => {
-      console.log(`login.component.loading ${cur} ${prev}`);
-      authLoading.value = cur;
-      ({ user, authLoading, authError } = authP);
-    });
+    // watch(authLoading, async (cur, prev) => {
+    //   console.log(`login.component.loading ${cur} ${prev}`);
+    //   authLoading.value = cur;
+    //   ({ user, authLoading, authError } = authP);
+    // });
     return {
       onLogin,
       onLogout,

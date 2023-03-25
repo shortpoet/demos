@@ -5,9 +5,6 @@
       <Link :href="`/api-data`" :title="'back'">
       <i class="i-carbon-page-first" inline-block />
       </Link>
-      <!-- <div v-if="loaded === false">
-        <p>Loading...</p>
-      </div> -->
       <pre v-if="error">{{ error }}</pre>
       <div v-else>
         <JsonTree :data="data" />
@@ -31,7 +28,6 @@ import Link from '~/components/Link.vue'
 import JsonTree from '~/components/JsonTree.vue'
 import { useFetch } from '~/composables/fetch';
 import { User } from '~/types';
-// import { useAuthStore } from '~/stores/auth';
 import { useAuthPlugin, DEFAULT_REDIRECT_CALLBACK } from '~/composables/auth-plugin';
 
 import AuthLayout from '~/layouts/AuthLayout.vue';

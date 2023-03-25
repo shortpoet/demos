@@ -156,7 +156,7 @@ const createAuthClient = async ({
     },
   };
   if (import.meta.env.VITE_LOG_LEVEL === 'debug') {
-    // console.log('createAuthClient', initOptions);
+    console.log('createAuthClient', initOptions);
   }
   authClient.value = await createAuth0Client(initOptions);
   redirectCallback = onRedirectCallback;
@@ -168,7 +168,9 @@ async function onLoad(): Promise<User | null | undefined> {
     const { useCookies } = await import('@vueuse/integrations/useCookies');
     const cookies = useCookies([COOKIES_USER_TOKEN]);
     const hasToken = cookies.get(COOKIES_USER_TOKEN);
-    console.log(`plugin hasToken and bool: ${[hasToken, hasToken === true]}`);
+    if (import.meta.env.VITE_LOG_LEVEL === 'debug') {
+      console.log(`plugin hasToken and bool: ${[hasToken, hasToken === true]}`);
+    }
     if (
       window.location.search.includes('code=') &&
       window.location.search.includes('state=')
@@ -180,11 +182,15 @@ async function onLoad(): Promise<User | null | undefined> {
       if (!authClient.value) {
         return _user;
       }
-      console.log(`plugin hasToken: ${hasToken}`);
+      if (import.meta.env.VITE_LOG_LEVEL === 'debug') {
+        console.log(`plugin hasToken: ${hasToken}`);
+      }
       const tokenRes = await authClient.value.getTokenSilently({
         detailedResponse: true,
       });
-      console.log(`tokenRes: ${JSON.stringify(tokenRes)}`);
+      if (import.meta.env.VITE_LOG_LEVEL === 'debug') {
+        console.log(`tokenRes: ${JSON.stringify(tokenRes)}`);
+      }
       token.value = tokenRes?.id_token;
       user.value = (await authClient.value?.getUser()) || ({} as User);
       _user = user.value;
@@ -197,7 +203,9 @@ async function onLoad(): Promise<User | null | undefined> {
     return _user;
   } finally {
     authLoading.value = false;
-    console.log(`finally: authLoading plugin -> ${authLoading.value}`);
+    if (import.meta.env.VITE_LOG_LEVEL === 'debug') {
+      console.log(`finally: authLoading plugin -> ${authLoading.value}`);
+    }
     user.value = (await authClient.value?.getUser()) || ({} as User);
     isLoggedIn.value = (await authClient.value?.isAuthenticated()) || false;
     if (isLoggedIn.value === true && user.value) {
@@ -237,11 +245,12 @@ const validateSession = async (
   const [token, timestamp, rawSignature] = sessionToken.split('.');
   const payload = `${token}.${timestamp}`;
 
-  // console.log('token', token);
-  // console.log('timestamp', timestamp);
-  // console.log('rawSignature', rawSignature);
-  // console.log('payload', payload);
-
+  if (import.meta.env.VITE_LOG_LEVEL === 'debug') {
+    console.log('token', token);
+    console.log('timestamp', timestamp);
+    console.log('rawSignature', rawSignature);
+    console.log('payload', payload);
+  }
   const encoder = new TextEncoder();
   const secret = process.env.__SECRET__;
   // const secret = import.meta.env.__SECRET__;
@@ -250,10 +259,6 @@ const validateSession = async (
   const encoded = encoder.encode(payload.replace(/-/g, '+').replace(/_/g, '/'));
   // const signature = atob(rawSignature);
   const signature = Buffer.from(b64Padding(rawSignature), 'base64');
-
-  // console.log('secret', secret);
-  // console.log('secretKeyData', secretKeyData);
-  // console.log('encoded', encoded);
 
   let out: [boolean, string] = [false, ''];
   try {
@@ -264,9 +269,7 @@ const validateSession = async (
       false,
       ['verify'],
     );
-    // console.log('secretKey', secretKey);
 
-    // console.log('signature', signature);
     const signatureIsValid = await crypto.subtle.verify(
       'HMAC',
       secretKey,
@@ -277,11 +280,14 @@ const validateSession = async (
     const tokenAge = now - parseInt(timestamp);
     const tokenExpired = tokenAge > tokenExpirationTime * 1000;
     const valid = signatureIsValid && !tokenExpired;
-    console.log('validateSession.tokenExpired', tokenExpired);
-    console.log('validateSession.signatureIsValid', signatureIsValid);
-    console.log('validateSession.valid', valid);
+    if (import.meta.env.VITE_LOG_LEVEL === 'debug') {
+      console.log('validateSession.now', now);
+      console.log('validateSession.tokenAge', tokenAge);
+      console.log('validateSession.tokenExpired', tokenExpired);
+      console.log('validateSession.signatureIsValid', signatureIsValid);
+      console.log('validateSession.valid', valid);
+    }
     out = [valid, token];
-    console.log('validateSession.out', out);
   } catch (error) {
     console.log('validateSession.error', error);
   }
@@ -307,15 +313,14 @@ const setSession = async (
     console.log(`dataLoading: ${dataLoading.value}`);
     res = { result: 'Loading', status: 'Loading' };
   }
-  // console.log(`data: ${JSON.stringify(data.value, null, 2)}`);
   if (data.value && data.value.sessionToken) {
-    // console.log(`data: ${JSON.stringify(data.value, null, 2)}`);
+    if (import.meta.env.VITE_LOG_LEVEL === 'debug') {
+      console.log(`data: ${JSON.stringify(data.value, null, 2)}`);
+    }
     const [isValid, token] = await validateSession(
       data.value.sessionToken,
       SESSION_TOKEN_EXPIRY,
     );
-    console.log(`isValid: ${isValid}`);
-    console.log(`token: ${token}`);
     if (!isValid) {
       res = { result: 'Invalid', status: 'Error' };
     } else {
@@ -332,7 +337,9 @@ async function handleRedirectCallback() {
       return;
     }
     const { appState } = await authClient.value.handleRedirectCallback();
-    // console.log(`handleRedirectCallback: appState: ${appState}`);
+    if (import.meta.env.VITE_LOG_LEVEL === 'debug') {
+      console.log(`handleRedirectCallback: appState: ${appState}`);
+    }
     user.value = (await authClient.value.getUser()) || ({} as User);
     isLoggedIn.value = true;
     // window.history.replaceState({}, document.title, window.location.pathname);
