@@ -325,7 +325,15 @@ const setSession = async (
   }
   if (data.value && data.value.sessionToken) {
     if (import.meta.env.VITE_LOG_LEVEL === 'debug') {
-      console.log(`data: ${JSON.stringify(data.value, null, 2)}`);
+      let logObj = escapeNestedKeys({ ...data.value }, [
+        'token',
+        'body',
+        'Authorization',
+        'accessToken',
+        'sessionToken',
+      ]);
+      console.log('test');
+      console.log(`data: ${JSON.stringify(logObj, null, 2)}`);
     }
     const [isValid, token] = await validateSession(
       data.value.sessionToken,

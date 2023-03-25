@@ -224,9 +224,6 @@ async function isValidJwtSignature(
     console.log(`signature verify response: ${res}\n`);
   }
 
-  console.log('worker.isValidJwtSignature.end');
-  console.log(signature.values());
-  console.log(encoded.values());
   return res;
 }
 

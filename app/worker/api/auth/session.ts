@@ -71,10 +71,10 @@ async function getSessionFromCookie(
   user?: User,
 ): Promise<Session | undefined> {
   const cookieName = 'demo-cfw-ssr-session-token';
-  const sessionCookie = handler.req.headers.get('Cookie');
-  if (logLevel(FILE_LOG_LEVEL, env)) {
-    console.log('worker.getSessionFromCookie.sessionCookie', sessionCookie);
-  }
+  const sessionCookie = decodeURIComponent(handler.req.headers.get('Cookie'));
+  // if (logLevel(FILE_LOG_LEVEL, env)) {
+  //   console.log('worker.getSessionFromCookie.sessionCookie', sessionCookie);
+  // }
   let res;
   if (sessionCookie) {
     const sessionToken = sessionCookie.split(`${cookieName}=`)[1];
@@ -87,9 +87,9 @@ async function getSessionFromCookie(
     if (sessionToken) {
       const session = await env.DEMO_CFW_SSR.get(sessionToken);
 
-      if (logLevel(FILE_LOG_LEVEL, env)) {
-        console.log('worker.session.getSessionFromCookie.session', session);
-      }
+      // if (logLevel(FILE_LOG_LEVEL, env)) {
+      //   console.log('worker.session.getSessionFromCookie.session', session);
+      // }
 
       // if (logLevel(FILE_LOG_LEVEL, env)) {
       //   const envVars = await env.DEMO_CFW_SSR.list();
@@ -114,10 +114,16 @@ async function getSessionFromCookie(
 
       if (session) {
         const sessionJson: Session = JSON.parse(session);
+        console.log('worker.session.getSessionFromCookie.session', sessionJson);
         if (
           new Date(sessionJson.expires).getTime() >
           new Date(Date.now()).getTime()
         ) {
+          console.log(
+            `worker.session.getSessionFromCookie.NOT expired ${new Date(
+              sessionJson.expires,
+            ).getTime()} > ${new Date(Date.now()).getTime()}`,
+          );
           res = sessionJson;
           if (logLevel(FILE_LOG_LEVEL, env)) {
             console.log(
@@ -127,6 +133,12 @@ async function getSessionFromCookie(
           }
           user = sessionJson.user;
         } else {
+          console.log(
+            `worker.session.getSessionFromCookie.expired ${new Date(
+              sessionJson.expires,
+            ).getTime()} < ${new Date(Date.now()).getTime()}`,
+          );
+
           await env.DEMO_CFW_SSR.delete(sessionToken);
         }
       }
@@ -222,10 +234,10 @@ async function handleSession(
           }
           session = await getSessionFromCookie(handler, env);
           if (session !== undefined) {
-            console.log(
-              'worker.api.auth.session.handleSession.post.session',
-              session,
-            );
+            // console.log(
+            //   'worker.api.auth.session.handleSession.post.session',
+            //   session,
+            // );
             res = await handler.handleRequest(env, ctx, session, 200, {
               withAuth: true,
             });
