@@ -2,7 +2,7 @@ import { createSSRApp, defineComponent, h, markRaw, reactive } from 'vue';
 import PageShell from './PageShell.vue';
 import { setPageContext } from './usePageContext';
 import { createHead } from '@vueuse/head';
-import { Component, PageContext } from '~/types/pageContext';
+import { Component, PageContext } from 'app/types/pageContext';
 import '@unocss/reset/tailwind.css';
 import 'uno.css';
 import '~/styles/main.css';
@@ -12,7 +12,7 @@ export { createApp };
 
 function createApp(pageContext: PageContext) {
   console.log('createApp');
-  const { Page, pageProps, user } = pageContext;
+  const { Page, pageProps, session, csrfToken, callbackUrl } = pageContext;
   let rootComponent: Component;
 
   const PageWithWrapper = defineComponent({
@@ -20,7 +20,9 @@ function createApp(pageContext: PageContext) {
       Page: markRaw(Page),
       pageProps: markRaw(pageProps || {}),
       Layout: markRaw(pageContext.exports.Layout || PageShell),
-      user,
+      session,
+      csrfToken,
+      callbackUrl,
     }),
     created() {
       rootComponent = this;
@@ -48,7 +50,9 @@ function createApp(pageContext: PageContext) {
       rootComponent.pageProps = markRaw(pageContext.pageProps || {});
       // without the below line the layout only changes on reload, and then persists weirdly to other navigated pages
       rootComponent.Layout = markRaw(pageContext.exports.Layout || PageShell);
-      rootComponent.user = pageContext.user;
+      rootComponent.session = pageContext.session;
+      rootComponent.csrfToken = pageContext.csrfToken;
+      rootComponent.callbackUrl = pageContext.callbackUrl;
     },
   });
 

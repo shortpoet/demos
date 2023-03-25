@@ -23,15 +23,20 @@ import type { PageContextBuiltIn } from 'vite-plugin-ssr';
 import type { PageContextBuiltInClient } from 'vite-plugin-ssr/client'; // When using Server Routing
 import { HttpResponse } from 'vite-plugin-ssr/dist/cjs/node/runtime/renderPage/createHttpResponseObject';
 import type { ComponentPublicInstance } from 'vue';
-import { User } from '.';
+import { Session } from '~/../types';
 
 type Page = ComponentPublicInstance; // https://stackoverflow.com/questions/63985658/how-to-type-vue-instance-out-of-definecomponent-in-vue-3/63986086#63986086
-type PageProps = {};
+type PageProps = {
+  session: Session;
+  csrfToken: string;
+  callbackUrl: string;
+};
 
 export type PageContextCustom = {
   Page: Page;
   pageProps?: PageProps;
   urlPathname: string;
+  redirectTo?: string;
   exports: {
     documentProps?: {
       title?: string;
@@ -40,7 +45,9 @@ export type PageContextCustom = {
   };
   httpResponse: HttpResponse;
   _allPageIds: string[];
-  user: User | null;
+  session: Session | null;
+  csrfToken: string;
+  callbackUrl: string;
 };
 
 type PageContextServer = PageContextBuiltIn<Page> & PageContextCustom;

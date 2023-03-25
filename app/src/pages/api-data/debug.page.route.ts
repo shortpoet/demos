@@ -1,7 +1,7 @@
 import { PageContextBuiltIn } from 'vite-plugin-ssr';
 import { resolveRoute } from 'vite-plugin-ssr/routing';
 
-import { PageContext } from '~/types';
+import { PageContext } from '~/../types';
 
 export default (pageContext: PageContext) => {
   // console.log('debug.page.route.ts');
@@ -53,5 +53,8 @@ function userIsLoggedIn(pageContext: PageContext) {
   // console.log('userIsLoggedIn');
   // console.log(pageContext.user);
   // return true;
-  return pageContext.user !== null && pageContext.user !== undefined;
+  return (
+    pageContext.session?.user !== null &&
+    pageContext.session?.user !== undefined
+  );
 }

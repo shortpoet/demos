@@ -1,5 +1,5 @@
 import { PageContextBuiltInClient } from 'vite-plugin-ssr/client';
-import { PageContext } from '~/types/pageContext';
+import { PageContext } from 'app/types/pageContext';
 import { createApp } from './app';
 import { getPageTitle } from './getPageTitle';
 
@@ -10,8 +10,8 @@ export { render };
 let app: Awaited<Promise<PromiseLike<ReturnType<typeof createApp>>>>;
 async function render(pageContext: PageContextBuiltInClient & PageContext) {
   console.log('client.render');
-  const { user } = pageContext;
-  console.log(`user: ${user}`);
+  const { session } = pageContext;
+  console.log(`session: ${session}`);
   // const { Page, Layout } = pageContext.exports;
   // console.log(Page, Layout);
   if (!app) {
