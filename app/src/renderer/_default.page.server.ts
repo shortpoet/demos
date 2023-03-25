@@ -44,6 +44,7 @@ const passToClient = [
   'session',
   'csrfToken',
   'callbackUrl',
+  'redirectTo',
 ];
 
 async function render(pageContext: PageContextServer) {
@@ -86,6 +87,7 @@ async function render(pageContext: PageContextServer) {
       // We can add some `pageContext` here, which is useful if we want to do page redirection https://vite-plugin-ssr.com/page-redirection
       enableEagerStreaming: true,
       session,
+      redirectTo,
     },
   };
 }

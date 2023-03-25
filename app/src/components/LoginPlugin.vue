@@ -35,9 +35,9 @@
 </template>
 
 <script lang="ts">
-import { ref, watch } from 'vue';
+import { ref } from 'vue';
 import { cookieOptions, COOKIES_USER_TOKEN, COOKIES_SESSION_TOKEN, DEFAULT_REDIRECT_CALLBACK, useAuthPlugin } from '~/composables/auth-plugin';
-import { GithubUser } from '~/types';
+import { GithubUser } from '~/../types';
 
 export default {
   props: {

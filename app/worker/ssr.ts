@@ -1,13 +1,14 @@
-import { getSessionFromCookie, _atob } from 'api';
+import { getSessionFromCookie, RequestHandler, _atob } from 'api';
 import { logLevel } from './util';
 import { renderPage } from 'vite-plugin-ssr';
 import { PageContext } from '../types';
+import { Env } from 'types';
 
 export { handleSsr };
 
 const FILE_LOG_LEVEL = 'error';
 
-async function handleSsr(handler, env, ctx) {
+async function handleSsr(handler: RequestHandler, env: Env, ctx) {
   const userAgent = handler.req.headers.get('User-Agent') || '';
   const session = await getSessionFromCookie(handler, env);
 
@@ -18,7 +19,10 @@ async function handleSsr(handler, env, ctx) {
   if (logLevel(FILE_LOG_LEVEL, env)) {
     console.log('worker.handleSsr');
   }
-  const pageContextInit = {
+
+  let res;
+  let statusCode;
+  let pageContextInit = {
     urlOriginal: handler.req.url,
     fetch: (...args: Parameters<typeof fetch>) => fetch(...args),
     userAgent,
@@ -27,27 +31,47 @@ async function handleSsr(handler, env, ctx) {
   if (logLevel(FILE_LOG_LEVEL, env)) {
     console.log('worker.handleSsr.pageContextInit', pageContextInit);
   }
-  const pageContext = await renderPage(pageContextInit);
-  const { httpResponse } = pageContext;
-  if (!httpResponse) {
-    const { redirectTo } = (<unknown>pageContext) as PageContext & {
-      httpResponse: null;
-    };
-    if (redirectTo) {
-      return new Response(null, {
-        status: 302,
-        headers: { Location: redirectTo },
-      });
-    }
+  let pageContext = await renderPage(pageContextInit);
+  let { httpResponse } = pageContext;
+  let { contentType } = httpResponse;
 
+  const { redirectTo } = (<unknown>pageContext) as PageContext & {
+    httpResponse: null;
+  };
+
+  // if (redirectTo) {
+  //   const { origin } = new URL(handler.url);
+  //   const destinationURL = `${origin}${redirectTo}`;
+  //   pageContextInit = {
+  //     urlOriginal: destinationURL,
+  //     fetch: (...args: Parameters<typeof fetch>) => fetch(...args),
+  //     userAgent,
+  //     session,
+  //   };
+  //   pageContext = await renderPage(pageContextInit);
+  //   statusCode = 307;
+  //   httpResponse = pageContext.httpResponse;
+  //   httpResponse.statusCode = statusCode;
+  //   httpResponse.contentType = contentType;
+  //   console.log('redirecting to', destinationURL);
+  //   // 301 is permanent, 302 is temporary,
+  //   // 307 is temporary but preserves the HTTP method, 303 is temporary and always uses GET
+  //   // return Response.redirect(destinationURL, statusCode);
+  // }
+
+  ({ statusCode } = httpResponse);
+  ({ contentType } = httpResponse);
+  const { readable, writable } = new TransformStream();
+  httpResponse.pipe(writable);
+
+  res = new Response(readable, {
+    headers: { 'content-type': contentType },
+    status: statusCode,
+  });
+
+  if (!httpResponse) {
     return null;
   } else {
-    const { statusCode, contentType } = httpResponse;
-    const { readable, writable } = new TransformStream();
-    httpResponse.pipe(writable);
-    return new Response(readable, {
-      headers: { 'content-type': contentType },
-      status: statusCode,
-    });
+    return res;
   }
 }

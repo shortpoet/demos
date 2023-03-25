@@ -51,5 +51,5 @@ const attrsObj = {
 };
 </script>
 <script lang="ts">
-export { onBeforeRender } from './onBeforeRender'
+// export { onBeforeRender } from './onBeforeRender'
 </script>
