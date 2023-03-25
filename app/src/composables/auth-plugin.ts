@@ -17,6 +17,7 @@ import {
 } from '@auth0/auth0-spa-js';
 
 import { Buffer } from 'buffer';
+import { escapeNestedKeys } from '~/../util';
 
 export {
   useAuthPlugin,
@@ -189,7 +190,7 @@ async function onLoad(): Promise<User | null | undefined> {
         detailedResponse: true,
       });
       if (import.meta.env.VITE_LOG_LEVEL === 'debug') {
-        console.log(`tokenRes: ${JSON.stringify(tokenRes)}`);
+        console.log(`tokenRes: ${JSON.stringify(tokenRes).substring(0, 24)}`);
       }
       token.value = tokenRes?.id_token;
       user.value = (await authClient.value?.getUser()) || ({} as User);
@@ -246,10 +247,10 @@ const validateSession = async (
   const payload = `${token}.${timestamp}`;
 
   if (import.meta.env.VITE_LOG_LEVEL === 'debug') {
-    console.log('token', token);
-    console.log('timestamp', timestamp);
-    console.log('rawSignature', rawSignature);
-    console.log('payload', payload);
+    console.log('validateSession.1.token', token);
+    console.log('validateSession.1.timestamp', timestamp);
+    console.log('validateSession.1.rawSignature', rawSignature);
+    console.log('validateSession.1.payload', payload);
   }
   const encoder = new TextEncoder();
   const secret = process.env.__SECRET__;
@@ -281,11 +282,11 @@ const validateSession = async (
     const tokenExpired = tokenAge > tokenExpirationTime * 1000;
     const valid = signatureIsValid && !tokenExpired;
     if (import.meta.env.VITE_LOG_LEVEL === 'debug') {
-      console.log('validateSession.now', now);
-      console.log('validateSession.tokenAge', tokenAge);
-      console.log('validateSession.tokenExpired', tokenExpired);
-      console.log('validateSession.signatureIsValid', signatureIsValid);
-      console.log('validateSession.valid', valid);
+      console.log('validateSession.2.now', now);
+      console.log('validateSession.2.tokenAge', tokenAge);
+      console.log('validateSession.2.tokenExpired', tokenExpired);
+      console.log('validateSession.2.signatureIsValid', signatureIsValid);
+      console.log('validateSession.2.valid', valid);
     }
     out = [valid, token];
   } catch (error) {
@@ -298,7 +299,12 @@ const setSession = async (
   user: User,
 ): Promise<{ result: string; status: string }> => {
   if (import.meta.env.VITE_LOG_LEVEL === 'debug') {
-    console.log(`setSession.user: ${JSON.stringify(user, null, 2)}`);
+    let logObj = escapeNestedKeys({ ...user }, [
+      'token',
+      'body',
+      'Authorization',
+    ]);
+    console.log(`setSession.user: ${JSON.stringify(logObj, null, 2)}`);
   }
   const options = { user };
   let res = { result: 'Error', status: 'Error' };

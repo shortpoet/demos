@@ -49,15 +49,19 @@ onMounted(async () => {
     const seshRes = await setSession(user);
     const { useCookies } = await import('@vueuse/integrations/useCookies');
     const cookies = useCookies([COOKIES_SESSION_TOKEN]);
+
     if (seshRes && seshRes.status === 'Success') {
       cookies.set(COOKIES_SESSION_TOKEN, seshRes.result, {
         ...cookieOptions,
         maxAge: SESSION_TOKEN_EXPIRY,
       });
+
       if (import.meta.env.VITE_LOG_LEVEL === 'debug') {
         console.log('onLoad.setSession.cookies: ', cookies.getAll());
       }
+
     } else {
+
       if (import.meta.env.VITE_LOG_LEVEL === 'debug') {
         console.error('error setting session: ', seshRes);
       }

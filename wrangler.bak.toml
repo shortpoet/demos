@@ -1,23 +1,24 @@
-name = "demo-cfw-ssr"
-compatibility_date = "2022-05-03"
+compatibility_date = "2023-02-28"
 main = "./app/worker/index.ts"
+name = "demo-cfw-ssr"
 node_compat = true
 workers_dev = true
 [dev]
 port = 3000
-[[env.dev.vars]]
-ENVIRONMENT = "dev"
-LOG_LEVEL = "debug"
 [[env.dev.kv_namespaces]]
 binding = "DEMO_CFW_SSR"
-id = "s"
-preview_id = "s"
-[[env.prod.vars]]
-ENVIRONMENT = "prod"
-LOG_LEVEL = "error"
+id = "3740e85e3b174682964efa26066fa5c4"
+preview_id = "3740e85e3b174682964efa26066fa5c4"
+[env.dev.vars]
+ENVIRONMENT = "dev"
+LOG_LEVEL = "info"
+AUTH0_DOMAIN = "shortpoet.auth0.com"
 [[env.prod.kv_namespaces]]
 binding = "DEMO_CFW_SSR"
 id = "s"
 preview_id = "s"
+[env.prod.vars]
+ENVIRONMENT = "prod"
+LOG_LEVEL = "error"
 [site]
 bucket = "./app/build/client"

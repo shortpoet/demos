@@ -9,23 +9,59 @@ const FILE_LOG_LEVEL = 'debug';
 export { handleSession, getSessionFromCookie };
 
 async function clearExpiredSessions(env: Env) {
-  const value = await env.DEMO_CFW_SSR.list();
-  for (const key in value.keys) {
-    if (logLevel(FILE_LOG_LEVEL, env)) {
-      console.log(
-        'worker.session.clearExpiredSessions.value.keys',
-        JSON.stringify(value.keys[key], null, 2),
-      );
-    }
-    if (value.keys[key].expiration < Date.now()) {
+  const envVars = await env.DEMO_CFW_SSR.list();
+  for (const key in envVars.keys) {
+    // if (logLevel(FILE_LOG_LEVEL, env)) {
+    //   console.log(
+    //     'worker.session.clearExpiredSessions.envVars.keys',
+    //     JSON.stringify(envVars.keys[key], null, 2),
+    //   );
+    // }
+
+    const session: Session = JSON.parse(
+      await env.DEMO_CFW_SSR.get(envVars.keys[key].name),
+    );
+    if (new Date(session.expires).getTime() < new Date(Date.now()).getTime()) {
       if (logLevel(FILE_LOG_LEVEL, env)) {
         console.log(
-          'worker.session.clearExpiredSessions.value.keys.expiration.delete',
-          value.keys[key],
+          'worker.session.clearExpiredSessions.envVars.keys.expiration.delete',
+          JSON.stringify(session, null, 2),
         );
       }
-      await env.DEMO_CFW_SSR.delete(value.keys[key].name);
+      await env.DEMO_CFW_SSR.delete(envVars.keys[key].name);
     }
+  }
+}
+
+async function clearAllKeys(env: Env) {
+  const excludes = ['gitInfo'];
+  const envVars = await env.DEMO_CFW_SSR.list();
+  for (const key in envVars.keys) {
+    if (excludes.includes(envVars.keys[key].name)) {
+      continue;
+    }
+    if (logLevel(FILE_LOG_LEVEL, env)) {
+      console.log(
+        'worker.session.clearAllKeys.envVars.keys DELETE',
+        JSON.stringify(envVars.keys[key].name, null, 2),
+      );
+    }
+    await env.DEMO_CFW_SSR.delete(envVars.keys[key].name);
+  }
+}
+async function clearAllSessions(env: Env) {
+  const envVars = await env.DEMO_CFW_SSR.list();
+  for (const key in envVars.keys) {
+    if (!envVars.keys[key].name.startsWith('@session@')) {
+      continue;
+    }
+    if (logLevel(FILE_LOG_LEVEL, env)) {
+      console.log(
+        'worker.session.clearAllKeys.envVars.keys',
+        JSON.stringify(envVars.keys[key], null, 2),
+      );
+    }
+    await env.DEMO_CFW_SSR.delete(envVars.keys[key].name);
   }
 }
 
@@ -54,30 +90,34 @@ async function getSessionFromCookie(
       if (logLevel(FILE_LOG_LEVEL, env)) {
         console.log('worker.session.getSessionFromCookie.session', session);
       }
-      const value = await env.DEMO_CFW_SSR.list();
-      if (logLevel(FILE_LOG_LEVEL, env)) {
-        console.log(
-          'worker.session.getSessionFromCookie.env.DEMO_CFW_SSR.keys',
-          value.keys,
-        );
-        for (let [k, v] of Object.entries(value.keys)) {
-          console.log(
-            `worker.session.getSessionFromCookie.env.DEMO_CFW_SSR.keys.${JSON.stringify(
-              k,
-            )}: \t ${JSON.stringify(v)}`,
-          );
-        }
-        for (const key in value.keys) {
-          console.log(
-            'worker.session.value.getSessionFromCookie.keys',
-            JSON.stringify(value.keys[key], null, 2),
-          );
-        }
-      }
+
+      // if (logLevel(FILE_LOG_LEVEL, env)) {
+      //   const envVars = await env.DEMO_CFW_SSR.list();
+      //   console.log(
+      //     'worker.session.getSessionFromCookie.env.DEMO_CFW_SSR.keys',
+      //     envVars.keys,
+      //   );
+      //   for (let [k, v] of Object.entries(envVars.keys)) {
+      //     console.log(
+      //       `worker.session.getSessionFromCookie.env.DEMO_CFW_SSR.keys.${JSON.stringify(
+      //         k,
+      //       )}: \t ${JSON.stringify(v)}`,
+      //     );
+      //   }
+      //   for (const key in envVars.keys) {
+      //     console.log(
+      //       'worker.session.envVars.getSessionFromCookie.keys',
+      //       JSON.stringify(envVars.keys[key], null, 2),
+      //     );
+      //   }
+      // }
 
       if (session) {
         const sessionJson: Session = JSON.parse(session);
-        if (sessionJson.expires > new Date(Date.now())) {
+        if (
+          new Date(sessionJson.expires).getTime() >
+          new Date(Date.now()).getTime()
+        ) {
           res = sessionJson;
           if (logLevel(FILE_LOG_LEVEL, env)) {
             console.log(
@@ -87,7 +127,7 @@ async function getSessionFromCookie(
           }
           user = sessionJson.user;
         } else {
-          // await env.DEMO_CFW_SSR.delete(sessionToken);
+          await env.DEMO_CFW_SSR.delete(sessionToken);
         }
       }
     }
@@ -99,7 +139,7 @@ async function generateSessionToken(
   env: Env,
   sessionId: string,
 ): Promise<string> {
-  // const token = crypto.getRandomValues(new Uint32Array(1))[0].toString(16);
+  // const token = crypto.getRandomenvVarss(new Uint32Array(1))[0].toString(16);
   const encoder = new TextEncoder();
   const secretKeyData = encoder.encode(await env.__SECRET__);
   let out;
@@ -122,8 +162,9 @@ async function generateSessionToken(
     const signature = new Uint8Array(sign);
     const signatureBase64 = Buffer.from(signature).toString('base64');
     if (logLevel(FILE_LOG_LEVEL, env)) {
-      console.log('signature', signature);
-      console.log('signatureBase64', signatureBase64);
+      console.log('generateSessionToken.sign', sign);
+      console.log('generateSessionToken.signature', signature.values());
+      console.log('generateSessionToken.signatureBase64', signatureBase64);
     }
     out = `${payload}.${signatureBase64}`;
   } catch (error) {
@@ -141,6 +182,8 @@ async function handleSession(
   const method = handler.req.method;
   let res;
   await clearExpiredSessions(env);
+  // await clearAllKeys(env);
+  // await clearAllSessions(env);
 
   if (url.pathname.startsWith('/api/auth/session')) {
     if (logLevel(FILE_LOG_LEVEL, env)) {
@@ -189,11 +232,11 @@ async function handleSession(
           } else {
             const generateSessionId = (length: number) => {
               const charset = '0123456789abcdef';
-              let retVal = '';
+              let retVal = '@session@';
               for (let i = 0, n = charset.length; i < length; ++i) {
                 retVal += charset.charAt(Math.floor(Math.random() * n));
               }
-              console.log('generateSessionId', retVal);
+              console.log(`\ngenerateSessionId: \n${retVal}\n`);
               return retVal;
             };
             const sessionId = generateSessionId(16);

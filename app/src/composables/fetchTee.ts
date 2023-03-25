@@ -1,3 +1,4 @@
+import { escapeNestedKeys, safeInit } from '~/../util';
 import { Ref, ref, watch } from 'vue';
 import { User } from '~/types';
 
@@ -50,24 +51,6 @@ const useFetchTee = async <T extends unknown>(
   }
   console.info(`fetch.fetching data from: -> ${url}`);
 
-  if (import.meta.env.VITE_LOG_LEVEL === 'debug') {
-    console.log(
-      'options',
-      JSON.stringify(
-        {
-          ...options,
-          headers: {
-            ...options.headers,
-            Authorization: `Bearer ${options.token?.substring(0, 7)}...}`,
-          },
-          token: `Bearer ${options.token?.substring(0, 7)}...}`,
-        },
-        null,
-        2,
-      ),
-    );
-  }
-
   const token = ref(options.token || options.user?.token);
   const user = ref(options.user);
   // possible leak of private data
@@ -95,35 +78,21 @@ const useFetchTee = async <T extends unknown>(
         method: 'GET',
       };
 
-  const safeInit = (init: any) => ({
-    ...init,
-    headers: {
-      ...init.headers,
-      Authorization: init.token
-        ? `Bearer ${init.token?.substring(0, 7)}...}`
-        : null,
-    },
-    token: init.token ? init.token?.substring(0, 7) : null,
-    user: {
-      ...init.user,
-      token:
-        init.user && init.user.token ? init.user?.token?.substring(0, 7) : null,
-    },
-    body: init.body ? JSON.stringify(init.body).substring(0, 50) : null,
-  });
   const fetchApi = async () => {
     dataLoading.value = true;
     error.value = null;
 
     try {
       const request = new Request(url, init);
+
       if (import.meta.env.VITE_LOG_LEVEL === 'debug') {
+        let logObj = escapeNestedKeys({ ...init }, [
+          'token',
+          'body',
+          'Authorization',
+        ]);
         console.info(
-          `fetching data with init: -> ${JSON.stringify(
-            safeInit(init),
-            null,
-            2,
-          )}`,
+          `fetching data with init: -> ${JSON.stringify(logObj, null, 2)}`,
         );
         console.log('request', request);
       }

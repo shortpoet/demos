@@ -144,6 +144,8 @@ async function isValidJwtSignature(
   env: Env,
   ctx: ExecutionContext,
 ) {
+  // console.log('worker.isValidJwtSignature');
+  // console.log(token);
   if (logLevel(FILE_LOG_LEVEL, env)) {
     console.log('worker.isValidJwtSignature');
     const logToken = {
@@ -221,6 +223,10 @@ async function isValidJwtSignature(
   if (logLevel(FILE_LOG_LEVEL, env)) {
     console.log(`signature verify response: ${res}\n`);
   }
+
+  console.log('worker.isValidJwtSignature.end');
+  console.log(signature.values());
+  console.log(encoded.values());
   return res;
 }
 
