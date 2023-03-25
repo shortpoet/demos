@@ -297,7 +297,9 @@ const validateSession = async (
 const setSession = async (
   user: User,
 ): Promise<{ result: string; status: string }> => {
-  console.log(`setSession.user: ${JSON.stringify(user, null, 2)}`);
+  if (import.meta.env.VITE_LOG_LEVEL === 'debug') {
+    console.log(`setSession.user: ${JSON.stringify(user, null, 2)}`);
+  }
   const options = { user };
   let res = { result: 'Error', status: 'Error' };
 
@@ -306,11 +308,13 @@ const setSession = async (
   }>('api/auth/session', options);
 
   if (error.value) {
-    console.error(`error: ${error.value}`);
+    if (import.meta.env.VITE_LOG_LEVEL === 'debug')
+      console.error(`error: ${error.value}`);
   }
 
   if (dataLoading.value) {
-    console.log(`dataLoading: ${dataLoading.value}`);
+    if (import.meta.env.VITE_LOG_LEVEL === 'debug')
+      console.log(`dataLoading: ${dataLoading.value}`);
     res = { result: 'Loading', status: 'Loading' };
   }
   if (data.value && data.value.sessionToken) {

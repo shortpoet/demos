@@ -4,7 +4,7 @@ import { createJsonResponse, generateUUID, logLevel } from '../../util';
 import { RequestHandler } from '../RequestHandler';
 import { Session, User } from '../types';
 
-const FILE_LOG_LEVEL = 'error';
+const FILE_LOG_LEVEL = 'debug';
 
 export { handleSession, getSessionFromCookie };
 
@@ -13,14 +13,14 @@ async function clearExpiredSessions(env: Env) {
   for (const key in value.keys) {
     if (logLevel(FILE_LOG_LEVEL, env)) {
       console.log(
-        'worker.handleSsr.value.keys',
+        'worker.session.clearExpiredSessions.value.keys',
         JSON.stringify(value.keys[key], null, 2),
       );
     }
     if (value.keys[key].expiration < Date.now()) {
       if (logLevel(FILE_LOG_LEVEL, env)) {
         console.log(
-          'worker.handleSsr.value.keys.expiration.delete',
+          'worker.session.clearExpiredSessions.value.keys.expiration.delete',
           value.keys[key],
         );
       }
@@ -37,39 +37,57 @@ async function getSessionFromCookie(
   const cookieName = 'demo-cfw-ssr-session-token';
   const sessionCookie = handler.req.headers.get('Cookie');
   if (logLevel(FILE_LOG_LEVEL, env)) {
-    console.log('worker.handleSsr.sessionCookie', sessionCookie);
+    console.log('worker.getSessionFromCookie.sessionCookie', sessionCookie);
   }
   let res;
   if (sessionCookie) {
     const sessionToken = sessionCookie.split(`${cookieName}=`)[1];
     if (logLevel(FILE_LOG_LEVEL, env)) {
-      console.log('worker.handleSsr.sessionToken', sessionToken);
+      console.log(
+        'worker.session.getSessionFromCookie.sessionToken',
+        sessionToken,
+      );
     }
     if (sessionToken) {
       const session = await env.DEMO_CFW_SSR.get(sessionToken);
+
       if (logLevel(FILE_LOG_LEVEL, env)) {
-        console.log('worker.handleSsr.session', session);
+        console.log('worker.session.getSessionFromCookie.session', session);
       }
       const value = await env.DEMO_CFW_SSR.list();
       if (logLevel(FILE_LOG_LEVEL, env)) {
-        console.log('worker.handleSsr.value', value.keys);
+        console.log(
+          'worker.session.getSessionFromCookie.env.DEMO_CFW_SSR.keys',
+          value.keys,
+        );
+        for (let [k, v] of Object.entries(value.keys)) {
+          console.log(
+            `worker.session.getSessionFromCookie.env.DEMO_CFW_SSR.keys.${JSON.stringify(
+              k,
+            )}: \t ${JSON.stringify(v)}`,
+          );
+        }
         for (const key in value.keys) {
           console.log(
-            'worker.handleSsr.value.keys',
+            'worker.session.value.getSessionFromCookie.keys',
             JSON.stringify(value.keys[key], null, 2),
           );
         }
       }
+
       if (session) {
         const sessionJson: Session = JSON.parse(session);
         if (sessionJson.expires > new Date(Date.now())) {
           res = sessionJson;
           if (logLevel(FILE_LOG_LEVEL, env)) {
-            console.log('worker.handleSsr.sessionJson', sessionJson);
+            console.log(
+              'worker.session.getSessionFromCookie.sessionJson',
+              sessionJson,
+            );
           }
           user = sessionJson.user;
         } else {
-          await env.DEMO_CFW_SSR.delete(sessionToken);
+          // await env.DEMO_CFW_SSR.delete(sessionToken);
         }
       }
     }
@@ -160,41 +178,52 @@ async function handleSession(
             console.log('worker.api.auth.session.handleSession.post');
           }
           session = await getSessionFromCookie(handler, env);
-          if (session) {
+          if (session !== undefined) {
+            console.log(
+              'worker.api.auth.session.handleSession.post.session',
+              session,
+            );
             res = await handler.handleRequest(env, ctx, session, 200, {
               withAuth: true,
             });
-            break;
-          }
-          const generateSessionId = (length) =>
-            crypto.getRandomValues(new Uint8Array(length)).join('');
-          const sessionId = generateSessionId(16);
-          const sessionToken = await generateSessionToken(env, sessionId);
-          if (logLevel(FILE_LOG_LEVEL, env)) {
-            console.log(`sessionToken: 
+          } else {
+            const generateSessionId = (length: number) => {
+              const charset = '0123456789abcdef';
+              let retVal = '';
+              for (let i = 0, n = charset.length; i < length; ++i) {
+                retVal += charset.charAt(Math.floor(Math.random() * n));
+              }
+              console.log('generateSessionId', retVal);
+              return retVal;
+            };
+            const sessionId = generateSessionId(16);
+            const sessionToken = await generateSessionToken(env, sessionId);
+            if (logLevel(FILE_LOG_LEVEL, env)) {
+              console.log(`sessionToken: 
           XXXXXXXXXXXXXXXXXXXXX
           ${sessionToken}
           `);
-            console.log(`sessionId:
+              console.log(`sessionId:
           XXXXXXXXXXXXXXXXXXXXX
           ${sessionId}
           `);
-          }
-          session = {
-            id: sessionId,
-            user: handler.user,
-            userId: handler.user.sub,
-            created: new Date(Date.now()),
-            updated: new Date(Date.now()),
-            expires: new Date(Date.now() + 1000 * 60 * 60 * 3),
-            accessToken: handler.user.token,
-            sessionToken,
-          };
-          await env.DEMO_CFW_SSR.put(sessionId, JSON.stringify(session));
+            }
+            session = {
+              id: sessionId,
+              user: handler.user,
+              userId: handler.user.sub,
+              created: new Date(Date.now()),
+              updated: new Date(Date.now()),
+              expires: new Date(Date.now() + 1000 * 60 * 60 * 3),
+              accessToken: handler.user.token,
+              sessionToken,
+            };
+            await env.DEMO_CFW_SSR.put(sessionId, JSON.stringify(session));
 
-          res = await handler.handleRequest(env, ctx, { sessionToken }, 204, {
-            withAuth: true,
-          });
+            res = await handler.handleRequest(env, ctx, { sessionToken }, 204, {
+              withAuth: true,
+            });
+          }
           break;
         case 'DELETE':
           await env.DEMO_CFW_SSR.delete(handler.user.sub);

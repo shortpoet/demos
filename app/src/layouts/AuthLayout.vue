@@ -54,7 +54,9 @@ onMounted(async () => {
         ...cookieOptions,
         maxAge: SESSION_TOKEN_EXPIRY,
       });
-      console.log('onLoad.setSession.cookies: ', cookies.getAll());
+      if (import.meta.env.VITE_LOG_LEVEL === 'debug') {
+        console.log('onLoad.setSession.cookies: ', cookies.getAll());
+      }
     } else {
       if (import.meta.env.VITE_LOG_LEVEL === 'debug') {
         console.error('error setting session: ', seshRes);

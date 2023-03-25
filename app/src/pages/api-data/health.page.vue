@@ -26,11 +26,11 @@ import { computed, Ref, ref } from 'vue';
 import Counter from '~/components/Counter.vue'
 import Link from '~/components/Link.vue'
 import JsonTree from '~/components/JsonTree.vue'
-import { useFetch } from '~/composables/fetch';
 import { useAuthPlugin, DEFAULT_REDIRECT_CALLBACK } from '~/composables/auth-plugin';
 import { User } from '~/types';
 
 import AuthLayout from '~/layouts/AuthLayout.vue';
+import { useFetchTee } from '~/composables/fetchTee';
 let Layout = AuthLayout;
 export { Layout }
 
@@ -53,7 +53,7 @@ export default {
         error,
       }
     }
-    const urlBase = `${import.meta.env.VITE_APP_URL}`;
+    // const urlBase = `${import.meta.env.VITE_APP_URL}`;
 
     // let user = ref({} as User);
     // const { useAuth, defaultOptions } = await import("~/composables/auth");
@@ -69,7 +69,7 @@ export default {
     }
     const options = { token: user.value?.token };
     // const options = { user: user.value };
-    ({ dataLoading, error, data } = await useFetch(`${urlBase}/api/health/check`, options));
+    ({ dataLoading, error, data } = await useFetchTee(`api/health/check`, options));
 
     return { data, loaded, error, user };
   },

@@ -50,21 +50,23 @@ const useFetchTee = async <T extends unknown>(
   }
   console.info(`fetch.fetching data from: -> ${url}`);
 
-  // console.log(
-  //   'options',
-  //   JSON.stringify(
-  //     {
-  //       ...options,
-  //       headers: {
-  //         ...options.headers,
-  //         Authorization: `Bearer ${options.token?.substring(0, 7)}...}`,
-  //       },
-  //       token: `Bearer ${options.token?.substring(0, 7)}...}`,
-  //     },
-  //     null,
-  //     2,
-  //   ),
-  // );
+  if (import.meta.env.VITE_LOG_LEVEL === 'debug') {
+    console.log(
+      'options',
+      JSON.stringify(
+        {
+          ...options,
+          headers: {
+            ...options.headers,
+            Authorization: `Bearer ${options.token?.substring(0, 7)}...}`,
+          },
+          token: `Bearer ${options.token?.substring(0, 7)}...}`,
+        },
+        null,
+        2,
+      ),
+    );
+  }
 
   const token = ref(options.token || options.user?.token);
   const user = ref(options.user);

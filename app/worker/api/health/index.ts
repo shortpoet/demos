@@ -64,6 +64,14 @@ const handleHealth = async (
     }
     if (method === 'GET' || method === 'POST') {
       try {
+        let sanitizedToken = null;
+        if (handler.user && handler.user.token) {
+          sanitizedToken = handler.user.token.substring(0, 7);
+          if (logLevel(FILE_LOG_LEVEL, env)) {
+            console.log('worker.health.handleHealth.debug.sanitizedToken');
+            console.log(sanitizedToken);
+          }
+        }
         res = await handler.handleRequest(
           env,
           ctx,
@@ -72,7 +80,7 @@ const handleHealth = async (
               ...handler,
               user: {
                 ...handler.user,
-                token: handler.user.token.substring(0, 8) + '...',
+                token: !!sanitizedToken,
               },
             },
             req: handler.req,
@@ -107,7 +115,7 @@ const handleHealth = async (
           ctx,
           await healthCheckJson(handler, env),
           200,
-          { withAuth: true },
+          { withAuth: false },
         );
       } catch (error) {
         console.error('worker.health.handleHealth.check.error');

@@ -27,7 +27,7 @@ export default {
       `);
       // console.log(JSON.stringify(request, null, 2));
       const handler = new RequestHandler(request, env);
-      await handler.initData();
+      await handler.initData(env);
 
       // const req = new RequestHandler(request, env, await defineInit(request));
       // console.log('worker.handleFetchEvent.handler');

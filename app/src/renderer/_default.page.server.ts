@@ -11,7 +11,7 @@ export { onBeforeRender };
 async function onBeforeRender(pageContext: PageContext) {
   const user = pageContext.user;
   console.log('onBeforeRender');
-  console.log(user);
+  console.log(`is logged in ${user !== null && user !== undefined}`);
 
   // let redirectTo: string|undefined
 

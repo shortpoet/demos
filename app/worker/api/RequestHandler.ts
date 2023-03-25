@@ -6,7 +6,7 @@ import { isValidJwt } from './auth/jwt';
 
 export { RequestHandler, defineInit };
 
-const FILE_LOG_LEVEL = 'info';
+const FILE_LOG_LEVEL = 'error';
 
 function defineInit(request: Request): RequestInit {
   return {
@@ -103,13 +103,23 @@ class RequestHandler<CfHostMetadata = unknown> extends Request<CfHostMetadata> {
     };
   };
 
-  async initData() {
+  async initData(env) {
     console.log(`worker.initData -> ${this.url}`);
     console.log(`method -> ${this.req.method}`);
     console.log(`body -> ${this.req.body}`);
     console.log(`bodyUsed -> ${this.req.bodyUsed}`);
-    console.log(`headers -> ${JSON.stringify(this.req.headers, null, 2)}`);
-
+    let headerslength = 0;
+    let headerString = '';
+    for (let entry of this.req.headers.entries()) {
+      const [key, value] = entry;
+      // console.log(`${key}: ${value}`);
+      headerString += `\n${key}: ${value}\n`;
+      headerslength++;
+    }
+    console.log(`headers length -> ${headerslength} \n`);
+    if (logLevel(FILE_LOG_LEVEL, env)) {
+      console.log(`headers ->  \n${headerString}\n`);
+    }
     // this results in an error when there is a user object in request
     // but can't see any of the data
     if (this.req.method === 'POST') {
@@ -139,8 +149,6 @@ class RequestHandler<CfHostMetadata = unknown> extends Request<CfHostMetadata> {
       headers?: Record<string, string>;
     } = { withAuth: false, headers: {} },
   ): Promise<Response> {
-    // console.log(`worker.handleRequest: ${this.url}`);
-    // console.log('worker.handleRequest.options', options);
     let res;
 
     if (options.withAuth) {
