@@ -4,11 +4,15 @@ import getGitInfo from './get-git-info';
 
 import * as dotenv from 'dotenv';
 import { createNamespace, getNamespace, parseId, writeKV } from './kv';
-import { command, getToml, writeToml } from './util';
+import { command, getToml, writeFile, writeToml } from './util';
 import { generateSecret, passGet, passWrite, writeSecret } from './secret';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+
+console.log('wrangle.ts');
+console.log(__filename);
+console.log(__dirname);
 
 let KV_DEBUG = false;
 
@@ -61,7 +65,7 @@ async function setGitconfig(id, env) {
 
 async function setSecrets(env) {
   const secret = generateSecret(16);
-  console.log(secret);
+  // console.log(secret);
   await passWrite(
     `Cloud/auth0/${process.env.VITE_APP_NAME}/__SECRET__`,
     secret,
@@ -70,8 +74,12 @@ async function setSecrets(env) {
   const clientId = await passGet(
     `Cloud/auth0/${process.env.VITE_APP_NAME}/client_id`,
   );
-  console.log(clientId);
+  // console.log(clientId);
   await writeSecret('AUTH0_CLIENT_ID', clientId, env);
+  await writeFile(
+    path.join(__dirname, `../../.${env}.vars`),
+    `__SECRET__='${secret}'\n`,
+  );
 }
 
 async function setVars(id, env, envVars) {

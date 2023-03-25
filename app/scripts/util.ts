@@ -7,7 +7,7 @@ import { exec } from 'node:child_process';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-export { getToml, writeToml, command };
+export { getToml, writeToml, command, writeFile };
 
 function command(cmd): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -42,6 +42,14 @@ const writeToml = (data: string) => {
       path.join(__dirname, '../../wrangler.toml'),
       json2toml(data),
     );
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+const writeFile = (file: string, data: string) => {
+  try {
+    fs.writeFileSync(file, data);
   } catch (error) {
     console.error(error);
   }
