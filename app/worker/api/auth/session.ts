@@ -9,7 +9,7 @@ const FILE_LOG_LEVEL = 'error';
 export { handleSession, getSessionFromCookie };
 
 async function clearExpiredSessions(env: Env) {
-  const envVars = await env.DEMO_CFW_SSR.list();
+  const envVars = await env.DEMO_CFW_SSR_SESSIONS.list();
   for (const key in envVars.keys) {
     // if (logLevel(FILE_LOG_LEVEL, env)) {
     //   console.log(
@@ -19,7 +19,7 @@ async function clearExpiredSessions(env: Env) {
     // }
 
     const session: Session = JSON.parse(
-      await env.DEMO_CFW_SSR.get(envVars.keys[key].name),
+      await env.DEMO_CFW_SSR_SESSIONS.get(envVars.keys[key].name),
     );
     if (new Date(session.expires).getTime() < new Date(Date.now()).getTime()) {
       if (logLevel(FILE_LOG_LEVEL, env)) {
@@ -28,14 +28,14 @@ async function clearExpiredSessions(env: Env) {
           JSON.stringify(session, null, 2),
         );
       }
-      await env.DEMO_CFW_SSR.delete(envVars.keys[key].name);
+      await env.DEMO_CFW_SSR_SESSIONS.delete(envVars.keys[key].name);
     }
   }
 }
 
 async function clearAllKeys(env: Env) {
   const excludes = ['gitInfo'];
-  const envVars = await env.DEMO_CFW_SSR.list();
+  const envVars = await env.DEMO_CFW_SSR_SESSIONS.list();
   for (const key in envVars.keys) {
     if (excludes.includes(envVars.keys[key].name)) {
       continue;
@@ -46,11 +46,11 @@ async function clearAllKeys(env: Env) {
         JSON.stringify(envVars.keys[key].name, null, 2),
       );
     }
-    await env.DEMO_CFW_SSR.delete(envVars.keys[key].name);
+    await env.DEMO_CFW_SSR_SESSIONS.delete(envVars.keys[key].name);
   }
 }
 async function clearAllSessions(env: Env) {
-  const envVars = await env.DEMO_CFW_SSR.list();
+  const envVars = await env.DEMO_CFW_SSR_SESSIONS.list();
   for (const key in envVars.keys) {
     if (!envVars.keys[key].name.startsWith('@session@')) {
       continue;
@@ -61,7 +61,7 @@ async function clearAllSessions(env: Env) {
         JSON.stringify(envVars.keys[key], null, 2),
       );
     }
-    await env.DEMO_CFW_SSR.delete(envVars.keys[key].name);
+    await env.DEMO_CFW_SSR_SESSIONS.delete(envVars.keys[key].name);
   }
 }
 
@@ -85,21 +85,21 @@ async function getSessionFromCookie(
       );
     }
     if (sessionToken) {
-      const session = await env.DEMO_CFW_SSR.get(sessionToken);
+      const session = await env.DEMO_CFW_SSR_SESSIONS.get(sessionToken);
 
       // if (logLevel(FILE_LOG_LEVEL, env)) {
       //   console.log('worker.session.getSessionFromCookie.session', session);
       // }
 
       // if (logLevel(FILE_LOG_LEVEL, env)) {
-      //   const envVars = await env.DEMO_CFW_SSR.list();
+      //   const envVars = await env.DEMO_CFW_SSR_SESSIONS.list();
       //   console.log(
-      //     'worker.session.getSessionFromCookie.env.DEMO_CFW_SSR.keys',
+      //     'worker.session.getSessionFromCookie.env.DEMO_CFW_SSR_SESSIONS.keys',
       //     envVars.keys,
       //   );
       //   for (let [k, v] of Object.entries(envVars.keys)) {
       //     console.log(
-      //       `worker.session.getSessionFromCookie.env.DEMO_CFW_SSR.keys.${JSON.stringify(
+      //       `worker.session.getSessionFromCookie.env.DEMO_CFW_SSR_SESSIONS.keys.${JSON.stringify(
       //         k,
       //       )}: \t ${JSON.stringify(v)}`,
       //     );
@@ -139,7 +139,7 @@ async function getSessionFromCookie(
             ).getTime()} < ${new Date(Date.now()).getTime()}`,
           );
 
-          await env.DEMO_CFW_SSR.delete(sessionToken);
+          await env.DEMO_CFW_SSR_SESSIONS.delete(sessionToken);
         }
       }
     }
@@ -223,7 +223,9 @@ async function handleSession(
             console.log('worker.api.auth.session.handleSession.get');
           }
           const sessionTokenParam = url.searchParams.get('sessionToken');
-          session = JSON.parse(await env.DEMO_CFW_SSR.get(sessionTokenParam));
+          session = JSON.parse(
+            await env.DEMO_CFW_SSR_SESSIONS.get(sessionTokenParam),
+          );
           res = await handler.handleRequest(env, ctx, session, 200, {
             withAuth: true,
           });
@@ -273,7 +275,10 @@ async function handleSession(
               accessToken: handler.user.token,
               sessionToken,
             };
-            await env.DEMO_CFW_SSR.put(sessionId, JSON.stringify(session));
+            await env.DEMO_CFW_SSR_SESSIONS.put(
+              sessionId,
+              JSON.stringify(session),
+            );
 
             res = await handler.handleRequest(env, ctx, { sessionToken }, 204, {
               withAuth: true,
@@ -281,7 +286,7 @@ async function handleSession(
           }
           break;
         case 'DELETE':
-          await env.DEMO_CFW_SSR.delete(handler.user.sub);
+          await env.DEMO_CFW_SSR_SESSIONS.delete(handler.user.sub);
           res = await handler.handleRequest(env, ctx, { result: 'Ok' }, 204, {
             withAuth: true,
           });

@@ -5,7 +5,9 @@ import { RequestHandler } from '..';
 import { createJsonResponse, generateUUID } from '../../util';
 // @ts-expect-error
 import rawManifest from '__STATIC_CONTENT_MANIFEST';
-import { HealthCheck } from '../types';
+import { HealthCheck } from '../../../types';
+import { KVNamespace } from '@cloudflare/workers-types';
+import { escapeNestedKeys } from '../../../util';
 
 const FILE_LOG_LEVEL = 'error';
 
@@ -49,6 +51,20 @@ const healthCheckJson = async (handler: RequestHandler, env: Env) => {
   return res;
 };
 
+const parseEnv = async (env: KVNamespace) => {
+  const envVars = await env.list();
+  const out = {};
+  for (let [k, v] of Object.entries(envVars.keys)) {
+    let logObj = escapeNestedKeys(JSON.parse(await env.get(v.name)), [
+      'token',
+      'accessToken',
+    ]);
+
+    out[v.name] = logObj;
+  }
+  return out;
+};
+
 const handleHealth = async (
   handler: RequestHandler,
   env: Env,
@@ -84,7 +100,8 @@ const handleHealth = async (
               },
             },
             req: handler.req,
-            env,
+            // TODO this is expensive, only do it if needed; add a flag to the request using params
+            env: { ...env, DEMO_CFW_SSR: await parseEnv(env.DEMO_CFW_SSR) },
             ctx,
             rawManifest: JSON.parse(rawManifest),
           },

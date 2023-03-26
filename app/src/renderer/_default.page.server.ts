@@ -17,9 +17,11 @@ async function onBeforeRender(pageContext: PageContext) {
   );
 
   let redirectTo: string | undefined;
+  const protectedRoutes = ['/api-data/debug', '/api-data/debug-plugin'];
+  const path = pageContext.urlPathname;
 
   switch (true as boolean) {
-    case !user:
+    case protectedRoutes.includes(path) && !user:
       redirectTo = '/auth/login';
       break;
     // case !user.status.EMAIL_VERIFIED:

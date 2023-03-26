@@ -11,7 +11,7 @@ import { provideAuth } from '~/composables/auth-plugin';
 export { createApp };
 
 function createApp(pageContext: PageContext) {
-  console.log('createApp');
+  // console.log('createApp');
   const { Page, pageProps, session, csrfToken, callbackUrl } = pageContext;
   let rootComponent: Component;
 

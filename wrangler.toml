@@ -9,6 +9,14 @@ port = 3000
 binding = "DEMO_CFW_SSR"
 id = "3740e85e3b174682964efa26066fa5c4"
 preview_id = "3740e85e3b174682964efa26066fa5c4"
+[[env.dev.kv_namespaces]]
+binding = "DEMO_CFW_SSR_SESSIONS"
+id = "a41123f53b804770b6808ef4b924f930"
+preview_id = "a41123f53b804770b6808ef4b924f930"
+[[env.dev.kv_namespaces]]
+binding = "DEMO_CFW_SSR_USERS"
+id = "ef2b919ed69a49c5bf33349b2c943fc7"
+preview_id = "ef2b919ed69a49c5bf33349b2c943fc7"
 [env.dev.vars]
 AUTH0_DOMAIN = "shortpoet.auth0.com"
 ENVIRONMENT = "dev"

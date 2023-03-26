@@ -4,7 +4,14 @@ import getGitInfo from './get-git-info';
 
 import * as dotenv from 'dotenv';
 
-export { createNamespace, writeKV, getNamespace, parseId };
+export {
+  createNamespace,
+  writeKV,
+  getNamespace,
+  parseId,
+  deleteNamespace,
+  getPreview,
+};
 import { KV_DEBUG as debug } from './wrangle';
 import { getToml, writeToml } from './util';
 
@@ -18,8 +25,8 @@ function executeWranglerCommand(command: string, env: string) {
   return execSync(`npx wrangler --env ${env} ${command}`, { encoding: 'utf8' });
 }
 
-const parseId = (binding: string, env: Env) =>
-  `${binding.toLowerCase().replace(/_/g, '-')}-${env}-${env}-${binding}`;
+const parseId = (binding: string, env: Env, appName: string) =>
+  `${appName}-${env}-${env}-${binding}`;
 
 // const binding = getBinding(env);
 
@@ -30,7 +37,10 @@ function getNamespaces(env: Env) {
 }
 
 function getNamespace(id: string, env: Env) {
-  return getNamespaces(env).find((i) => i.title === id);
+  const n = getNamespaces(env);
+  // console.log(n);
+  // console.log(`getN - id: ${id}`);
+  return n.find((i) => i.title === id);
 }
 
 // const namespace = getNamespace();
@@ -50,8 +60,8 @@ function deleteNamespace(env: Env, namespaceId: string, previewId: string) {
   console.log(deleteRes);
 }
 
-function createNamespace(bindingName: string, env: Env) {
-  const id = parseId(bindingName, env);
+function createNamespace(bindingName: string, env: Env, appName: string) {
+  const id = parseId(bindingName, env, appName);
   const cmd = `kv:namespace create ${bindingName}`;
   const cmdPrev = `kv:namespace create ${bindingName} --preview`;
   // if (debug) process.exit(0);
@@ -67,12 +77,20 @@ function createNamespace(bindingName: string, env: Env) {
   // updateToml(`env.${env}.kv_namespaces.0.title`, id);
   const config = getToml();
 
-  config['env'][`${env}`]['kv_namespaces'][0] = {
-    ...config['env'][`${env}`]['kv_namespaces'][0],
-    id: namespaceId,
-    preview_id: namespaceId,
-  };
+  // config['env'][`${env}`]['kv_namespaces'][0] = {
+  //   ...config['env'][`${env}`]['kv_namespaces'][0],
+  //   id: namespaceId,
+  //   preview_id: namespaceId,
+  // };
 
+  config['env'][`${env}`]['kv_namespaces'] = [
+    ...config['env'][`${env}`]['kv_namespaces'],
+    {
+      binding: bindingName,
+      id: namespaceId,
+      preview_id: namespaceId,
+    },
+  ];
   writeToml(config);
 }
 

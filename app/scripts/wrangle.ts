@@ -3,7 +3,14 @@ import { fileURLToPath } from 'node:url';
 import getGitInfo from './get-git-info';
 
 import * as dotenv from 'dotenv';
-import { createNamespace, getNamespace, parseId, writeKV } from './kv';
+import {
+  createNamespace,
+  getNamespace,
+  parseId,
+  writeKV,
+  deleteNamespace,
+  getPreview,
+} from './kv';
 import { command, getToml, writeFile, writeToml } from './util';
 import { generateSecret, passGet, passWrite, writeSecret } from './secret';
 
@@ -108,19 +115,36 @@ async function setVars(id, env, envVars) {
   console.log(newVars);
   // writeToml(config);
 }
-
 async function main(env, debug) {
   const envFile =
     env === 'dev' ? '.env' : env === 'preview' ? '.env.preview' : '.env.uat';
   const config = dotenv.config({
     path: path.join(__dirname, `../${envFile}`),
   });
+  const appName = process.env.VITE_APP_NAME;
   const bindingName = process.env.VITE_APP_NAME.toUpperCase().replace(
     /-/g,
     '_',
   );
-  const id = parseId(bindingName, env);
 
+  const otherBindings = [`${bindingName}_SESSIONS`, `${bindingName}_USERS`];
+
+  for (const binding of otherBindings) {
+    // console.log(`binding: ${binding}`);
+    const id = parseId(binding, env, appName);
+    // console.log(`id: ${id}`);
+    const namespace = getNamespace(id, env);
+    // console.log(`namespace: ${namespace}`);
+    const preview = getPreview(id, env);
+    // console.log(`preview: ${preview}`);
+
+    // await deleteNamespace(env, namespace.id, preview.id);
+    if (!namespace) {
+      createNamespace(binding, env, appName);
+    }
+  }
+
+  const id = parseId(bindingName, env, appName);
   if (debug || process.env.VITLE_LOG_LEVEL === 'debug') {
     console.log(config);
     console.log('bindingName', bindingName);
@@ -129,7 +153,7 @@ async function main(env, debug) {
   }
 
   if (!getNamespace(id, env)) {
-    createNamespace(bindingName, env);
+    createNamespace(bindingName, env, appName);
   }
   await setGitconfig(id, env);
 

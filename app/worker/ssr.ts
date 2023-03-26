@@ -6,7 +6,7 @@ import { Env } from 'types';
 
 export { handleSsr };
 
-const FILE_LOG_LEVEL = 'debug';
+const FILE_LOG_LEVEL = 'error';
 
 async function handleSsr(handler: RequestHandler, env: Env, ctx) {
   const log = logger(FILE_LOG_LEVEL, env);
@@ -45,6 +45,7 @@ async function handleSsr(handler: RequestHandler, env: Env, ctx) {
     ${JSON.stringify(redirectTo, null, 2)}
     \nEND\tredirectTo\n
   `);
+
     if (redirectTo) {
       const { origin } = new URL(handler.req.url);
       const redirectToAbsolute = redirectTo.startsWith('/')

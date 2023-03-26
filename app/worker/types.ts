@@ -7,6 +7,8 @@ declare const ENVIRONMENT: string;
 
 interface Env {
   DEMO_CFW_SSR: KVNamespace;
+  DEMO_CFW_SSR_SESSIONS: KVNamespace;
+  DEMO_CFW_SSR_USERS: KVNamespace;
   __STATIC_CONTENT: KVNamespace;
   __STATIC_CONTENT_MANIFEST: AssetManifestType;
   ENVIRONMENT: 'dev' | 'prod';

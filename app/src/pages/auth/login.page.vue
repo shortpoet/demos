@@ -24,7 +24,7 @@
 </template>
 
 <script lang="ts">
-import { ref } from 'vue';
+// import { ref } from 'vue';
 import Link from '~/components/Link.vue';
 import LoginPlugin from '~/components/LoginPlugin.vue';
 
@@ -32,34 +32,16 @@ import AuthLayout from '~/layouts/AuthLayout.vue';
 let Layout = AuthLayout;
 export { Layout }
 
-// import { PageContext } from '~/../types';
-
-// export { onBeforeRender };
-
-// async function onBeforeRender(pageContext: PageContext) {
-//   const user = pageContext.session?.user;
-//   console.log('onBeforeRender - > user');
-//   console.log(user?.sub);
-//   console.log(`is logged in ${user !== null && user !== undefined}`);
-//   console.log(`redirectTo: ${user ? '/' : undefined}`);
-
-//   return {
-//     pageContext: {
-//       redirectTo: user ? '/' : undefined,
-//     },
-//   };
-// }
-
 export default {
   components: { Link, LoginPlugin },
-  setup(props, ctx) {
-    // const { slots, attrs } = ctx;
-    // console.log(JSON.parse(JSON.stringify(slots)));
-    const loading = ref(true);
-    setTimeout(() => {
-      loading.value = false;
-    }, 50);
-    return { loading };
-  }
+  // setup(props, ctx) {
+  //   // const { slots, attrs } = ctx;
+  //   // console.log(JSON.parse(JSON.stringify(slots)));
+  //   const loading = ref(true);
+  //   setTimeout(() => {
+  //     loading.value = false;
+  //   }, 50);
+  //   return { loading };
+  // }
 }
 </script>

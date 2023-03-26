@@ -10,11 +10,12 @@ export { render };
 
 let app: Awaited<Promise<PromiseLike<ReturnType<typeof createApp>>>>;
 async function render(pageContext: PageContextBuiltInClient & PageContext) {
-  console.log('client.render');
+  // console.log('client.render');
   const { session, redirectTo } = pageContext;
-  console.log(`session: ${session}`);
+  // console.log(`session: ${session}`);
 
   if (redirectTo) {
+    // console.log(`redirectTo: ${redirectTo}`);
     navigate(redirectTo);
     return;
   }

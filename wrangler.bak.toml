@@ -7,16 +7,20 @@ workers_dev = true
 port = 3000
 [[env.dev.kv_namespaces]]
 binding = "DEMO_CFW_SSR"
-id = "3740e85e3b174682964efa26066fa5c4"
-preview_id = "3740e85e3b174682964efa26066fa5c4"
+id = "5dfd5a54a7174c83b56d5c55bd752c77"
+preview_id = "5dfd5a54a7174c83b56d5c55bd752c77"
+[[env.dev.kv_namespaces]]
+binding = "DEMO_CFW_SSR_SESSIONS"
+id = "a41123f53b804770b6808ef4b924f930"
+preview_id = "a41123f53b804770b6808ef4b924f930"
 [env.dev.vars]
+AUTH0_DOMAIN = "shortpoet.auth0.com"
 ENVIRONMENT = "dev"
 LOG_LEVEL = "info"
-AUTH0_DOMAIN = "shortpoet.auth0.com"
 [[env.prod.kv_namespaces]]
 binding = "DEMO_CFW_SSR"
-id = "s"
-preview_id = "s"
+id = "5c6a1909d0844b4296607e021240e9f1"
+preview_id = "5c6a1909d0844b4296607e021240e9f1"
 [env.prod.vars]
 ENVIRONMENT = "prod"
 LOG_LEVEL = "error"
