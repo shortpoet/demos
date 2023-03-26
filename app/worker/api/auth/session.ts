@@ -2,9 +2,9 @@ import { isValidJwt } from '.';
 import { Env } from '../../types';
 import { createJsonResponse, generateUUID, logLevel } from '../../util';
 import { RequestHandler } from '../RequestHandler';
-import { Session, User } from '../types';
+import { Session, User } from '../../../types';
 
-const FILE_LOG_LEVEL = 'debug';
+const FILE_LOG_LEVEL = 'error';
 
 export { handleSession, getSessionFromCookie };
 
@@ -114,7 +114,7 @@ async function getSessionFromCookie(
 
       if (session) {
         const sessionJson: Session = JSON.parse(session);
-        console.log('worker.session.getSessionFromCookie.session', sessionJson);
+        // console.log('worker.session.getSessionFromCookie.session', sessionJson);
         if (
           new Date(sessionJson.expires).getTime() >
           new Date(Date.now()).getTime()

@@ -5,18 +5,11 @@ import { resolveRoute } from 'vite-plugin-ssr/routing';
 import { PageContext } from '~/../types';
 
 export default (pageContext: PageContext) => {
-  if (!pageContext.session?.user) {
-    console.log('debug.page.route.ts: user is not logged in');
-    // DO NOT do this it creates a vicious endless loop
-    // navigate('/auth/login');
-    // JUST DON"T
-    return {
-      pageContext: {
-        redirectTo: '/auth/login',
-      },
-    };
+  if (userIsLoggedIn(pageContext)) {
+    console.log('debug.page.route.ts: user is logged in');
+    return false;
   }
-  return resolveRoute('/api-data/debug', pageContext.urlPathname);
+  return true;
 };
 
 // export default (pageContext: PageContext) => {

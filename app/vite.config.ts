@@ -25,7 +25,10 @@ export default ({ mode }: { mode: string }) => {
   return defineConfig({
     define: {
       'process.env': process.env,
+      // 'process.env.NEXTAUTH_URL': JSON.stringify(process.env.NEXTAUTH_URL)
       // __SECRET__: env.__SECRET__,
+      __VUE_OPTIONS_API__: true,
+      __VUE_PROD_DEVTOOLS__: false,
     },
     plugins: [
       vue({

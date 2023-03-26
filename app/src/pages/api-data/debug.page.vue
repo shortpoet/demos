@@ -36,7 +36,7 @@ import { useAuthPlugin, DEFAULT_REDIRECT_CALLBACK } from '~/composables/auth-plu
 let Layout = AuthLayout;
 export { Layout }
 
-export { onBeforeRender } from './onBeforeRender'
+// export { onBeforeRender } from './onBeforeRender'
 
 export default {
   components: {

@@ -11,8 +11,10 @@ export { onBeforeRender };
 async function onBeforeRender(pageContext: PageContext) {
   const session = pageContext.session;
   const user = pageContext.session?.user;
-  console.log('onBeforeRender');
-  console.log(`is logged in ${user !== null && user !== undefined}`);
+  console.log('_default.server.onBeforeRender');
+  console.log(
+    `_default.server.is logged in ${user !== null && user !== undefined}`,
+  );
 
   let redirectTo: string | undefined;
 
@@ -31,7 +33,6 @@ async function onBeforeRender(pageContext: PageContext) {
   return {
     pageContext: {
       redirectTo,
-      session,
     },
   };
 }
@@ -48,7 +49,7 @@ const passToClient = [
 ];
 
 async function render(pageContext: PageContextServer) {
-  console.log('server.render');
+  console.log('_default.server.render');
   const app = createApp(pageContext);
   const appHtml = await renderToString(app);
 
@@ -75,11 +76,11 @@ async function render(pageContext: PageContextServer) {
     </body>
     </html>`;
 
-  // if (redirectTo) {
-  //   return {
-  //     pageContext: { redirectTo, session },
-  //   };
-  // }
+  if (redirectTo) {
+    return {
+      pageContext: { redirectTo },
+    };
+  }
 
   return {
     documentHtml,

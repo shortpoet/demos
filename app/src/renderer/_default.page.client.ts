@@ -14,10 +14,10 @@ async function render(pageContext: PageContextBuiltInClient & PageContext) {
   const { session, redirectTo } = pageContext;
   console.log(`session: ${session}`);
 
-  // if (redirectTo) {
-  //   navigate(redirectTo);
-  //   return;
-  // }
+  if (redirectTo) {
+    navigate(redirectTo);
+    return;
+  }
 
   // const { Page, Layout } = pageContext.exports;
   // console.log(Page, Layout);

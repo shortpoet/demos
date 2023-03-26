@@ -32,6 +32,24 @@ import AuthLayout from '~/layouts/AuthLayout.vue';
 let Layout = AuthLayout;
 export { Layout }
 
+// import { PageContext } from '~/../types';
+
+// export { onBeforeRender };
+
+// async function onBeforeRender(pageContext: PageContext) {
+//   const user = pageContext.session?.user;
+//   console.log('onBeforeRender - > user');
+//   console.log(user?.sub);
+//   console.log(`is logged in ${user !== null && user !== undefined}`);
+//   console.log(`redirectTo: ${user ? '/' : undefined}`);
+
+//   return {
+//     pageContext: {
+//       redirectTo: user ? '/' : undefined,
+//     },
+//   };
+// }
+
 export default {
   components: { Link, LoginPlugin },
   setup(props, ctx) {
