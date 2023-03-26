@@ -1,5 +1,5 @@
 import { Env } from '../types';
-import { cloneRequest, cloneResponse, logLevel } from '../util';
+import { cloneRequest, cloneResponse, isAssetURL, logLevel } from '../util';
 import { BodyContext, User } from './types';
 import { createJsonResponse } from '../util';
 import { isValidJwt } from './auth/jwt';
@@ -104,10 +104,6 @@ class RequestHandler<CfHostMetadata = unknown> extends Request<CfHostMetadata> {
   };
 
   async initData(env) {
-    console.log(`worker.initData -> ${this.url}`);
-    console.log(`method -> ${this.req.method}`);
-    console.log(`body -> ${this.req.body}`);
-    console.log(`bodyUsed -> ${this.req.bodyUsed}`);
     let headerslength = 0;
     let headerString = '';
     for (let entry of this.req.headers.entries()) {
@@ -116,7 +112,13 @@ class RequestHandler<CfHostMetadata = unknown> extends Request<CfHostMetadata> {
       headerString += `\n${key}: ${value}\n`;
       headerslength++;
     }
-    console.log(`headers length -> ${headerslength} \n`);
+    if (!isAssetURL(new URL(this.url))) {
+      console.log(`worker.initData -> ${this.url}`);
+      console.log(`method -> ${this.req.method}`);
+      console.log(`body -> ${this.req.body}`);
+      console.log(`bodyUsed -> ${this.req.bodyUsed}`);
+      console.log(`headers length -> ${headerslength} \n`);
+    }
     if (logLevel(FILE_LOG_LEVEL, env)) {
       console.log(`headers ->  \n${headerString}\n`);
     }

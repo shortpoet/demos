@@ -67,7 +67,7 @@ async function setSecrets(env) {
   const secret = generateSecret(16);
   // console.log(secret);
   await passWrite(
-    `Cloud/auth0/${process.env.VITE_APP_NAME}/__SECRET__`,
+    `Cloud/auth0/${process.env.VITE_APP_NAME}/${env}/__SECRET__`,
     secret,
   );
   await writeSecret('__SECRET__', secret, env);

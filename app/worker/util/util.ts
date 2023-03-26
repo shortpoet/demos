@@ -1,6 +1,6 @@
 import { Env, LogLevel, LOG_LOVELS } from '../types';
 
-export { logLevel, isAssetURL, redirectToHttps, isAPI };
+export { logger, logLevel, isAssetURL, redirectToHttps, isAPI, isJsonURL };
 
 const logLevel = (level: LogLevel, env: Env): boolean => {
   const envLevel = env.LOG_LEVEL;
@@ -9,6 +9,18 @@ const logLevel = (level: LogLevel, env: Env): boolean => {
   const out = currentIndex >= targetIndex;
   // console.log("logLevel", { level, envLevel, currentIndex, targetIndex, out });
   return out;
+};
+
+const logger = (level: LogLevel, env: Env) => (msg: any) => {
+  if (logLevel(level, env)) {
+    typeof msg === 'string'
+      ? console.log(msg)
+      : console.log(
+          ...Object.entries(msg).map(([key, val]) =>
+            typeof val === 'string' ? val : `${key}: ${JSON.stringify(val)}`,
+          ),
+        );
+  }
 };
 
 const redirectToHttps = (url: URL) =>
@@ -20,3 +32,5 @@ const redirectToHttps = (url: URL) =>
 const isAssetURL = (url: URL) => url.pathname.startsWith('/assets/');
 
 const isAPI = (url: URL) => url.pathname.startsWith('/api/');
+
+const isJsonURL = (url: URL) => url.pathname.endsWith('.json');

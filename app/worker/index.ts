@@ -5,11 +5,11 @@ import {
   MethodNotAllowedError,
   NotFoundError,
 } from '@cloudflare/kv-asset-handler/dist/types';
-import { isAPI, isAssetURL, logLevel } from './util';
+import { isAPI, isAssetURL, logger, logLevel } from './util';
 import { Env } from './types';
 import { defineInit, RequestHandler } from './api';
 import { handleAPI } from './api';
-const FILE_LOG_LEVEL = 'error';
+const FILE_LOG_LEVEL = 'debug';
 export default {
   async fetch(
     request: Request,
@@ -19,12 +19,14 @@ export default {
   ): Promise<Response> {
     try {
       // BUG: sending env back as response body. includes all static manifest etc.
-      console.log(`
+      if (!isAssetURL(new URL(request.url))) {
+        console.log(`
       \nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n
       ${new Date().toLocaleTimeString()}
       worker.fetch -> ${request.url}
       \n
       `);
+      }
       // console.log(JSON.stringify(request, null, 2));
       const handler = new RequestHandler(request, env);
       await handler.initData(env);
@@ -56,15 +58,12 @@ async function handleFetchEvent(
   ctx: ExecutionContext,
   waitUntil: (promise: Promise<any>) => void,
 ): Promise<Response> {
-  if (logLevel(FILE_LOG_LEVEL, env)) {
-    console.log('worker.handleFetchEvent');
-  }
+  const log = logger(FILE_LOG_LEVEL, env);
+  log('worker.handleFetchEvent');
   const url = new URL(handler.url);
 
   if (isAssetURL(url)) {
-    if (logLevel(FILE_LOG_LEVEL, env)) {
-      console.log('worker.handleFetchstaticAssets');
-    }
+    log('worker.handleFetchEvent.isAssetURL');
     return await handleStaticAssets(handler.req, env, ctx);
   }
   if (isAPI(url)) {
@@ -75,7 +74,10 @@ async function handleFetchEvent(
   }
 
   const response = await handleSsr(handler, env, ctx);
+  console.log(
+    `worker.handleFetchEvent.response: ${JSON.stringify(response, null, 2)}`,
+  );
+  log(response);
   if (response !== null) return response;
-
   return new Response('Not Found', { status: 404 });
 }
