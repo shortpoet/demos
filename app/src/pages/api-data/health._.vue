@@ -1,7 +1,7 @@
 <template>
   <div class="page-container">
     <div>
-      <h1>{{ title }}</h1>
+      <h1>Health</h1>
       <Link :href="`/api-data`" :title="'back'">
       <i class="i-carbon-page-first" inline-block />
       </Link>
@@ -25,12 +25,12 @@
 </style>
   
 <script lang="ts">
-import { computed, PropType } from 'vue';
+import { computed } from 'vue';
 import Counter from '~/components/Counter.vue'
 import Link from '~/components/Link.vue'
 import JsonTree from '~/components/JsonTree.vue'
 import { useAuthPlugin, DEFAULT_REDIRECT_CALLBACK } from '~/composables/auth-plugin';
-import { RequestConfig, requestInit, useFetchTee } from '~/composables/fetchTee';
+import { useFetchTee } from '~/composables/fetchTee';
 
 export default {
   components: {
@@ -38,34 +38,7 @@ export default {
     Link,
     JsonTree,
   },
-  props: {
-    title: {
-      type: String,
-      required: true,
-    },
-    urlPath: {
-      type: String,
-      required: true,
-      validator: (url: string) => {
-        return !url.startsWith('http://') || !url.startsWith('https://') || !url.startsWith('www.') || !url.startsWith('localhost') || !url.startsWith('/')
-      }
-    },
-    options: {
-      type: Object as PropType<RequestConfig>,
-      // Make sure to use arrow functions if your TypeScript version is less than 4.7
-      default: () => new Request('', requestInit),
-      validator: (options: RequestConfig) => {
-        return options.method === 'GET' ||
-          options.method === 'POST' ||
-          options.method === 'PUT' ||
-          options.method === 'DELETE' ||
-          options.method === 'PATCH' ||
-          options.method === 'OPTIONS'
-      }
-    }
-  },
-
-  async setup(props) {
+  async setup() {
     if (typeof window === "undefined") {
       return {
         data: null,
@@ -78,13 +51,9 @@ export default {
 
     await createAuthClient(DEFAULT_REDIRECT_CALLBACK);
     await onLoad();
-    const options = {
-      ...props.options,
-      token: props.options.withAuth ? user.value?.token : undefined,
-      user: props.options.withAuth ? user.value : undefined,
-    };
+    const options = { token: user.value?.token };
     // const options = { user: user.value };
-    const { dataLoading, error, data } = await useFetchTee(props.urlPath, options);
+    const { dataLoading, error, data } = await useFetchTee(`api/health/check`, options);
     const loaded = computed(() => dataLoading.value === false && authLoading.value === false)
     return { data, loaded, error, user };
   },

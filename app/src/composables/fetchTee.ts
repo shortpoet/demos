@@ -1,6 +1,6 @@
 import { escapeNestedKeys, safeInit } from '~/../util';
 import { Ref, ref, watch } from 'vue';
-import { User } from '~/types';
+import { User } from '~/../types';
 
 export { useFetchTee };
 
@@ -10,6 +10,7 @@ export interface RequestConfig {
   headers?: Record<string, string>; // *default, no-cache, reload, force-cache, only-if-cached
   body?: string; // body data type must match "Content-Type" header
   redirect?: RequestRedirect; // manual, *follow, error
+  withAuth?: boolean;
   token?: string;
   user?: User;
   // Cloudflare Error: The 'mode, credentials' field on 'RequestInitializerDict' is not implemented.
