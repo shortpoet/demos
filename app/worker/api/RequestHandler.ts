@@ -1,6 +1,6 @@
 import { Env } from '../types';
 import { cloneRequest, cloneResponse, isAssetURL, logLevel } from '../util';
-import { BodyContext, User } from './types';
+import { BodyContext, User } from '../../types';
 import { createJsonResponse } from '../util';
 import { isValidJwt } from './auth/jwt';
 
