@@ -2,7 +2,9 @@ import { PageContext } from '~/../types';
 
 export { onBeforeRender };
 
-async function onBeforeRender(pageContext: PageContext) {
+async function onBeforeRender(
+  pageContext: PageContext,
+): Promise<{ pageContext: Partial<PageContext> }> {
   const user = pageContext.session?.user;
   const path = pageContext.urlPathname;
 
@@ -16,6 +18,9 @@ async function onBeforeRender(pageContext: PageContext) {
   return {
     pageContext: {
       redirectTo,
+      pageProps: {
+        isAdmin: user?.role === 'admin',
+      },
     },
   };
 }

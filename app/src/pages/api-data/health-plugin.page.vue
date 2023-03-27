@@ -26,7 +26,7 @@ import { computed, Ref, ref } from 'vue';
 import Counter from '~/components/Counter.vue'
 import Link from '~/components/Link.vue'
 import JsonTree from '~/components/JsonTree.vue'
-import { User } from '~/types';
+import { User } from '~/../types';
 import { useAuthPlugin, DEFAULT_REDIRECT_CALLBACK } from '~/composables/auth-plugin';
 
 import AuthLayout from '~/layouts/AuthLayout.vue';
