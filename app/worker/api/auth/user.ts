@@ -1,6 +1,11 @@
 import { isValidJwt } from '.';
 import { Env } from '../../types';
-import { createJsonResponse, generateUUID, logLevel } from '../../util';
+import {
+  createJsonResponse,
+  generateTypedUUID,
+  generateUUID,
+  logLevel,
+} from '../../util';
 import { RequestHandler } from '../RequestHandler';
 import { User } from '../../../types';
 
@@ -17,14 +22,16 @@ const getUser = async (id: string, env: Env): Promise<User> => {
 };
 
 const putUser = async (user: User, env: Env): Promise<void> => {
-  await env.DEMO_CFW_SSR_USERS.put(user.id, JSON.stringify(user));
+  await env.DEMO_CFW_SSR_USERS.put(user.sub, JSON.stringify(user));
 };
 
 const sessionUser = async (user: User, env: Env): Promise<User> => {
-  const existing = await getUser(user.id, env);
+  const admins = env.ADMIN_USERS.split(',');
+  const existing = await getUser(user.sub, env);
   if (existing) {
     return existing;
   }
+  user = { ...user, id: generateTypedUUID(8, 'user'), role: role };
   await putUser(user, env);
   return user;
 };
