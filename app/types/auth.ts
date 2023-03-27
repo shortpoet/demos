@@ -35,7 +35,9 @@ type Session = {
 
 type AuthUser = {
   id: string;
+  sub: string;
   name: string;
+  role: string;
   token: string;
   email?: string;
 };

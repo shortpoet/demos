@@ -1,8 +1,9 @@
 import { isValidJwt } from '.';
 import { Env } from '../../types';
-import { createJsonResponse, generateUUID, logLevel } from '../../util';
+import { createJsonResponse, generateTypedUUID, generateUUID, logLevel } from '../../util';
 import { RequestHandler } from '../RequestHandler';
 import { Session, User } from '../../../types';
+import { getUser } from './user';
 
 const FILE_LOG_LEVEL = 'error';
 
@@ -244,17 +245,9 @@ async function handleSession(
               withAuth: true,
             });
           } else {
-            const generateSessionId = (length: number) => {
-              const charset = '0123456789abcdef';
-              let retVal = '@session@';
-              for (let i = 0, n = charset.length; i < length; ++i) {
-                retVal += charset.charAt(Math.floor(Math.random() * n));
-              }
-              console.log(`\ngenerateSessionId: \n${retVal}\n`);
-              return retVal;
-            };
-            const sessionId = generateSessionId(16);
+            const sessionId = generateTypedUUID(16, 'session');
             const sessionToken = await generateSessionToken(env, sessionId);
+            const user = await sessionUser(handler.user.sub, env);
             if (logLevel(FILE_LOG_LEVEL, env)) {
               console.log(`sessionToken: 
           XXXXXXXXXXXXXXXXXXXXX
@@ -267,7 +260,7 @@ async function handleSession(
             }
             session = {
               id: sessionId,
-              user: handler.user,
+              user: ,
               userId: handler.user.sub,
               created: new Date(Date.now()),
               updated: new Date(Date.now()),

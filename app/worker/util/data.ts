@@ -1,4 +1,4 @@
-export { generateUUID, msToTime };
+export { generateUUID, msToTime, generateTypedUUID };
 
 function generateUUID(length: number) {
   const alphabet = 'abcdefghijklmnopqrstuvwxyz0123456789';
@@ -7,6 +7,16 @@ function generateUUID(length: number) {
     .join('');
   return alphanumericId;
 }
+
+const generateTypedUUID = (length: number, type: string) => {
+  const charset = '0123456789abcdef';
+  let retVal = `@${type}@`;
+  for (let i = 0, n = charset.length; i < length; ++i) {
+    retVal += charset.charAt(Math.floor(Math.random() * n));
+  }
+  console.log(`\generateTypedUUID: \n${retVal}\n`);
+  return retVal;
+};
 
 function msToTime(duration) {
   const milliseconds = Math.floor((duration % 1000) / 100),

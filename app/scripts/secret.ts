@@ -1,7 +1,43 @@
 import crypto from 'crypto';
-import { command } from './util';
+import path, { dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { command, readFile, writeFile } from './util';
 
-export { writeSecret, generateSecret, passGet, passWrite };
+export { writeSecret, generateSecret, passGet, passWrite, setSecretFile };
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+async function setSecretFile(
+  key: string,
+  passKey: string,
+  env: string,
+  generateLength?: number,
+) {
+  let secret;
+  if (generateLength) {
+    secret = generateSecret(generateLength);
+    await passWrite(passKey, secret);
+  } else {
+    secret = await passGet(passKey);
+  }
+  // console.log(clientId);
+  await writeSecret(key, secret, env);
+  const file = path.join(__dirname, `../../.${env}.vars`);
+  const existing = await readFile(file);
+  const lines = existing.split('\n').filter((line) => line.trim() !== '');
+  const keyValuePairs = lines.map((line) => {
+    const [key, value] = line.trim().split('=');
+    return { key, value };
+  });
+
+  keyValuePairs.find((pair) => pair.key === key)
+    ? (keyValuePairs.find((pair) => pair.key === key).value = secret)
+    : keyValuePairs.push({ key, value: secret });
+  const newLines = keyValuePairs.map(({ key, value }) => `${key}=${value}`);
+
+  await writeFile(file, newLines.join('\n'));
+}
 
 async function writeSecret(key: string, value: string, env: string) {
   console.log(`writing ${key} to ${env}\n`);

@@ -12,7 +12,13 @@ import {
   getPreview,
 } from './kv';
 import { command, getToml, writeFile, writeToml } from './util';
-import { generateSecret, passGet, passWrite, writeSecret } from './secret';
+import {
+  generateSecret,
+  passGet,
+  passWrite,
+  setSecretFile,
+  writeSecret,
+} from './secret';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -71,21 +77,29 @@ async function setGitconfig(id, env) {
 }
 
 async function setSecrets(env) {
-  const secret = generateSecret(16);
-  // console.log(secret);
-  await passWrite(
+  setSecretFile(
+    '__SECRET__',
     `Cloud/auth0/${process.env.VITE_APP_NAME}/${env}/__SECRET__`,
-    secret,
+    env,
+    16,
   );
-  await writeSecret('__SECRET__', secret, env);
-  const clientId = await passGet(
+
+  setSecretFile(
+    'AUTH0_CLIENT_ID',
     `Cloud/auth0/${process.env.VITE_APP_NAME}/client_id`,
+    env,
   );
-  // console.log(clientId);
-  await writeSecret('AUTH0_CLIENT_ID', clientId, env);
-  await writeFile(
-    path.join(__dirname, `../../.${env}.vars`),
-    `__SECRET__='${secret}'\n`,
+
+  setSecretFile(
+    'AUTH0_CLIENT_SECRET',
+    `Cloud/auth0/${process.env.VITE_APP_NAME}/client_secret`,
+    env,
+  );
+
+  setSecretFile(
+    'ADMIN_USERS',
+    `Cloud/auth0/${process.env.VITE_APP_NAME}/admin_users`,
+    env,
   );
 }
 

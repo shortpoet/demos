@@ -13,6 +13,7 @@ interface Env {
   __STATIC_CONTENT_MANIFEST: AssetManifestType;
   ENVIRONMENT: 'dev' | 'prod';
   __SECRET__: string;
+  ADMIN_USERS: string;
   AUTH0_DOMAIN: string;
   AUTH0_CLIENT_ID: string;
   AUTH0_REDIRECT_URI: string;

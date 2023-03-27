@@ -7,7 +7,7 @@ import { exec } from 'node:child_process';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-export { getToml, writeToml, command, writeFile };
+export { getToml, writeToml, command, writeFile, readFile };
 
 function command(cmd): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -47,9 +47,17 @@ const writeToml = (data: string) => {
   }
 };
 
-const writeFile = (file: string, data: string) => {
+const writeFile = async (file: string, data: string) => {
   try {
-    fs.writeFileSync(file, data);
+    await fs.promises.writeFile(file, data);
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+const readFile = async (file: string) => {
+  try {
+    return await fs.promises.readFile(file, 'utf8');
   } catch (error) {
     console.error(error);
   }
