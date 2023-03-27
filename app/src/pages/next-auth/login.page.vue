@@ -4,7 +4,7 @@
     <i class="i-carbon-page-first" inline-block /><span>back</span>
     </Link>
 
-    <LoginPlugin>
+    <Login>
       <template #login="loginProps">
         <button class="btn m-3 text-sm bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full"
           id="login-button" :disabled="loginProps.isLoggedIn" @click="loginProps.onLogin">Log in</button>
@@ -19,17 +19,17 @@
           id="logout-button" :disabled="logoutProps.authError" @click="logoutProps.onLogout">Log
           out</button>
       </template>
-    </LoginPlugin>
+    </Login>
   </div>
 </template>
 
 <script lang="ts">
 // import { ref } from 'vue';
 import Link from '~/components/Link.vue';
-import LoginPlugin from '~/components/Login.vue';
+import Login from '~/components/LoginNext.vue';
 
 export default {
-  components: { Link, LoginPlugin },
+  components: { Link, Login },
   // setup(props, ctx) {
   //   // const { slots, attrs } = ctx;
   //   // console.log(JSON.parse(JSON.stringify(slots)));

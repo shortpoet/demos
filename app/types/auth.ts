@@ -18,6 +18,7 @@ export {
   ClientOptions,
   Auth0Instance,
   Auth0Client,
+  NextAuthInstance,
 };
 
 import { Commit } from 'git-last-commit';
@@ -136,7 +137,7 @@ interface ClientOptions extends Auth0ClientOptions {
 
 interface Auth0Instance extends Partial<Auth0Client> {
   isLoggedIn: Ref<boolean>;
-  user: Ref<User>;
+  user: Ref<User | undefined>;
   authLoading: Ref<boolean>;
   authError: Ref<any>;
   popupOpen: Ref<boolean>;
@@ -156,6 +157,32 @@ interface Auth0Instance extends Partial<Auth0Client> {
   getTokenSilently(
     options: GetTokenSilentlyOptions & { detailedResponse: true },
   ): Promise<GetTokenSilentlyVerboseResponse>;
+  // getIdTokenClaims(): Promise<IdToken | undefined>;
+  // getTokenWithPopup(o?: GetTokenWithPopupOptions): Promise<string | undefined>;
+}
+
+interface NextAuthInstance extends Partial<Auth0Client> {
+  isLoggedIn: Ref<boolean>;
+  user: Ref<User | undefined>;
+  authLoading: Ref<boolean>;
+  authError: Ref<any>;
+  popupOpen: Ref<boolean>;
+  // createAuthClient: (
+  //   onRedirectCallback: (appState: any) => void,
+  //   redirect_uri?: string,
+  //   options?: ClientOptions,
+  // ) => Promise<void>;
+  // onLoad: () => Promise<User | null | undefined>;
+  // // onLoad: Promise<void>;
+  // isAuthenticated: () => Promise<boolean>;
+  // loginWithPopup(o?: PopupLoginOptions): Promise<void>;
+  // handleRedirectCallback(url?: string): Promise<RedirectLoginResult>;
+  // logout(options?: LogoutOptions): Promise<void>;
+  // loginWithRedirect(o?: RedirectLoginOptions): Promise<void>;
+  // getTokenSilently(options?: GetTokenSilentlyOptions): Promise<string>;
+  // getTokenSilently(
+  //   options: GetTokenSilentlyOptions & { detailedResponse: true },
+  // ): Promise<GetTokenSilentlyVerboseResponse>;
   // getIdTokenClaims(): Promise<IdToken | undefined>;
   // getTokenWithPopup(o?: GetTokenWithPopupOptions): Promise<string | undefined>;
 }
