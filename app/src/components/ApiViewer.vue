@@ -30,7 +30,7 @@ import Counter from '~/components/Counter.vue'
 import Link from '~/components/Link.vue'
 import JsonTree from '~/components/JsonTree.vue'
 import { useAuthPlugin, DEFAULT_REDIRECT_CALLBACK } from '~/composables/auth-plugin';
-import { RequestConfig, requestInit, useFetch } from '~/composables/fetch
+import { RequestConfig, requestInit, useFetch } from '~/composables/fetch';
 
 export default {
   components: {
