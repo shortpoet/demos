@@ -45,7 +45,7 @@ import Link from '~/components/Link.vue';
 import { useAuthPlugin, DEFAULT_REDIRECT_CALLBACK, setSession, cookieOptions, COOKIES_SESSION_TOKEN, SESSION_TOKEN_EXPIRY } from '~/composables/auth-plugin';
 import AuthLayout from '~/layouts/UserLayout.vue';
 import AdminLayout from '~/layouts/AdminLayout.vue';
-import { usePageContext } from '~/renderer/usePageContext';
+import { usePageContext } from '~/composables/pageContext';
 
 import logoUrl from '../../public/logo.svg';
 // const slots = useSlots();

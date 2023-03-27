@@ -1,7 +1,7 @@
 import { createSSRApp, defineComponent, h, markRaw, reactive } from 'vue';
-import PageShell from './PageShell.vue';
+import PageShell from '~/layouts/PageShell.vue';
 
-import { setPageContext } from './usePageContext';
+import { setPageContext } from '~/composables/pageContext';
 import { createHead } from '@vueuse/head';
 import { Component, PageContext } from 'app/types/pageContext';
 import '@unocss/reset/tailwind.css';
