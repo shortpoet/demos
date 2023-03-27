@@ -103,9 +103,9 @@ const handleHealth = async (
             // TODO this is expensive, only do it if needed; add a flag to the request using params
             env: {
               ...env,
-              DEMO_CFW_SSR: await parseEnv(env.DEMO_CFW_SSR),
-              DEMO_CFW_SSR_USERS: await parseEnv(env.DEMO_CFW_SSR_USERS),
-              DEMO_CFW_SSR_SESSIONS: await parseEnv(env.DEMO_CFW_SSR_SESSIONS),
+              // DEMO_CFW_SSR: await parseEnv(env.DEMO_CFW_SSR),
+              // DEMO_CFW_SSR_USERS: await parseEnv(env.DEMO_CFW_SSR_USERS),
+              // DEMO_CFW_SSR_SESSIONS: await parseEnv(env.DEMO_CFW_SSR_SESSIONS),
             },
             ctx,
             rawManifest: JSON.parse(rawManifest),

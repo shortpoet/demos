@@ -13,12 +13,13 @@
     </div>
     <Suspense>
       <template v-if="loading">
-        <p>Loading...</p>
-        <h1>DAYUM SON</h1>
+        <p inline-block>Suspense Loading...</p>
+        <h1 inline-block>DAYUM SON</h1>
+        <slot name="fallback" />
       </template>
       <template v-else>
         <div class="suspense-wrapper">
-          <component :is="pageComponent" :loading="loading">
+          <component :is="pageComponent">
             <slot name="default" />
           </component>
         </div>

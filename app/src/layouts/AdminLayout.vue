@@ -1,9 +1,7 @@
 <template>
   <div class="content admin-layout">
-    <slot name="fallback" v-if="loading">
-      <p>Loading...</p>
-    </slot>
-    <slot name="default" v-else />
+    <h1>ADMIN LAYOUT TEST</h1>
+    <slot name="default" />
   </div>
 </template>
 
@@ -12,7 +10,5 @@
 </style>
 
 <script lang="ts" setup>
-defineProps<{
-  loading: boolean;
-}>();
+// this isn't reloaded when navigating to a new page that is a chile of this layout
 </script>
