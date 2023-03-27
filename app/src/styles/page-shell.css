@@ -2,12 +2,11 @@
   display: flex;
   max-width: 900px;
   margin: auto;
-  background-color: cornflowerblue;
 }
 
 .content {
   padding: 20px;
-  border-left: 2px solid #ccc;
+  border-left: 2px solid #eee;
   padding-bottom: 50px;
   min-height: 100vh;
 }

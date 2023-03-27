@@ -51,5 +51,15 @@ const attrsObj = {
 };
 </script>
 <script lang="ts">
+// import AuthLayout from '~/layouts/AuthLayout.vue';
+import AdminLayout from '~/layouts/AdminLayout.vue';
+import SuspenseLayout from '~/layouts/SuspenseLayout.vue';
+
+// import { usePageContext } from '~/renderer/usePageContext';
+// let Layout = pageContext.pageProps?.isAdmin ? AdminLayout : AuthLayout;
+// let Layout = AuthLayout;
+// let Layout = SuspenseLayout;
+// export { Layout }
 // export { onBeforeRender } from './onBeforeRender'
+
 </script>

@@ -1,5 +1,8 @@
 import { createSSRApp, defineComponent, h, markRaw, reactive } from 'vue';
 import PageShell from './PageShell.vue';
+import AdminLayout from '~/layouts/AdminLayout.vue';
+import SuspenseLayout from '~/layouts/SuspenseLayout.vue';
+
 import { setPageContext } from './usePageContext';
 import { createHead } from '@vueuse/head';
 import { Component, PageContext } from 'app/types/pageContext';
@@ -13,6 +16,9 @@ export { createApp };
 function createApp(pageContext: PageContext) {
   // console.log('createApp');
   const { Page, pageProps, session, csrfToken, callbackUrl } = pageContext;
+  const isAdmin = pageProps?.isAdmin;
+  const Layout = SuspenseLayout;
+  // const Layout = isAdmin ? AdminLayout : PageShell;
   let rootComponent: Component;
 
   const PageWithWrapper = defineComponent({

@@ -35,6 +35,7 @@ type PageProps = {
 
 export type PageContextCustom = {
   Page: Page;
+  Layout: Component;
   pageProps?: PageProps;
   urlPathname: string;
   redirectTo?: string;

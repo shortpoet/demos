@@ -28,10 +28,16 @@ import Link from '~/components/Link.vue'
 import JsonTree from '~/components/JsonTree.vue'
 import { User } from '~/../types';
 import { useAuthPlugin, DEFAULT_REDIRECT_CALLBACK } from '~/composables/auth-plugin';
+import { useFetchTee } from '~/composables/fetchTee';
 
 import AuthLayout from '~/layouts/AuthLayout.vue';
-import { useFetchTee } from '~/composables/fetchTee';
-let Layout = AuthLayout;
+import AdminLayout from '~/layouts/AdminLayout.vue';
+import SuspenseLayout from '~/layouts/SuspenseLayout.vue';
+
+// import { usePageContext } from '~/renderer/usePageContext';
+// let Layout = pageContext.pageProps?.isAdmin ? AdminLayout : AuthLayout;
+// let Layout = AuthLayout;
+let Layout = SuspenseLayout;
 export { Layout }
 
 export default {

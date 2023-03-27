@@ -83,7 +83,6 @@ async function getSessionFromCookie(
   // }
   let res;
   if (sessionCookie) {
-    console.log(sessionCookie);
     const sessionToken = sessionCookie
       .split(`; `)
       .find((row) => {

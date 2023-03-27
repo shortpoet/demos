@@ -31,12 +31,15 @@ import { User } from '~/../types';
 import { useFetchTee } from '~/composables/fetchTee';
 
 import AuthLayout from '~/layouts/AuthLayout.vue';
-// import AdminLayout from '~/layouts/AdminLayout.vue';
-import { usePageContext } from '~/renderer/usePageContext';
-// let Layout = pageContext.pageProps?.isAdmin ? AdminLayout : AuthLayout;
+import AdminLayout from '~/layouts/AdminLayout.vue';
+import SuspenseLayout from '~/layouts/SuspenseLayout.vue';
 
-let Layout = AuthLayout;
+// import { usePageContext } from '~/renderer/usePageContext';
+// let Layout = pageContext.pageProps?.isAdmin ? AdminLayout : AuthLayout;
+// let Layout = AuthLayout;
+let Layout = SuspenseLayout;
 export { Layout }
+
 
 export default {
   components: {
@@ -45,8 +48,8 @@ export default {
     JsonTree,
   },
   async setup() {
-    const pageContext = usePageContext();
-    console.log('pageContext', pageContext);
+    // const pageContext = usePageContext();
+    // console.log('pageContext', pageContext);
     const loaded = computed(() => dataLoading && true)
     let dataLoading = ref(false);
     let error = ref(null);

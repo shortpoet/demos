@@ -12,17 +12,15 @@
       <Link href="/auth0">Auth0</Link>
     </div>
     <Suspense>
-      <template #fallback>
+      <template #fallback v-if="loading">
         <p>Loading...</p>
       </template>
-      <template #default>
+      <template #default v-else>
         <div class="content">
           <slot />
         </div>
       </template>
     </Suspense>
-
-
   </div>
 </template>
 <style scoped>
@@ -32,12 +30,14 @@
 <script lang="ts" setup>
 // import { useHead } from '@vueuse/head';
 // import { title, meta, link } from '~/types';
-import { onMounted } from 'vue';
+import { onMounted, ref } from 'vue';
 import Link from '~/components/Link.vue';
 import { useAuthPlugin, DEFAULT_REDIRECT_CALLBACK, setSession, cookieOptions, COOKIES_SESSION_TOKEN, SESSION_TOKEN_EXPIRY } from '~/composables/auth-plugin';
 
 import logoUrl from '../../public/logo.svg';
-
+// const slots = useSlots();
+// const loginSlot = slots.login;
+const loading = ref(true);
 onMounted(async () => {
   const authP = useAuthPlugin();
   await authP?.createAuthClient(DEFAULT_REDIRECT_CALLBACK);
@@ -59,7 +59,6 @@ onMounted(async () => {
       if (import.meta.env.VITE_LOG_LEVEL === 'debug') {
         console.log('onLoad.setSession.cookies: ', cookies.getAll());
       }
-
     } else {
 
       if (import.meta.env.VITE_LOG_LEVEL === 'debug') {
@@ -68,6 +67,7 @@ onMounted(async () => {
       cookies.remove(COOKIES_SESSION_TOKEN);
     }
   }
+  loading.value = false;
 })
 
 // useHead({
