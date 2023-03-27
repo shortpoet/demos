@@ -1,16 +1,6 @@
 <template>
   <div class="layout">
-    <div class="navigation">
-      <a href="/" class="logo">
-        <img :src="logoUrl" height="64" width="64" alt="logo" />
-      </a>
-      <Link href="/">Home</Link>
-      <Link href="/about">About</Link>
-      <Link href="/star-wars">Star Wars</Link>
-      <Link href="/api-data">Api Data</Link>
-      <Link href="/auth">Auth</Link>
-      <Link href="/auth0">Auth0</Link>
-    </div>
+    <MainNav />
     <div class="content">
       <slot />
     </div>
@@ -20,11 +10,7 @@
 <script lang="ts" setup>
 import { useHead } from '@vueuse/head';
 import { computed } from 'vue';
-import Link from '~/components/Link.vue';
-// import { useAuth, defaultOptions } from '~/composables/auth';
-// import { useAuthPlugin, DEFAULT_REDIRECT_CALLBACK } from '~/composables/auth-plugin';
-
-import logoUrl from '../../public/logo.svg';
+import MainNav from '~/components/MainNav.vue';
 
 const title = 'Carlos Soriano'
 const description = `
@@ -35,8 +21,6 @@ const description = `
 const image = `https://${import.meta.env.VITE_APP_URL}/pwa-512x512.png`
 const imageType = 'image/png'
 const imageAlt = `A PWABuilder logo.`
-
-// const authP = useAuthPlugin();
 
 useHead({
   title: title,

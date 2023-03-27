@@ -71,7 +71,7 @@ function createApp(pageContext: PageContext) {
 }
 
 // Same as `Object.assign()` but with type inference
-function objectAssign<Obj, ObjAddendum>(
+function objectAssign<Obj extends object, ObjAddendum extends object>(
   obj: Obj,
   objAddendum: ObjAddendum,
 ): asserts obj is Obj & ObjAddendum {

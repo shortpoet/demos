@@ -1,7 +1,7 @@
 import { PageContextBuiltInClient } from 'vite-plugin-ssr/client';
 import { PageContext } from 'app/types/pageContext';
 import { createApp } from './app';
-import { getPageTitle } from './getPageTitle';
+import { usePageTitle } from '../composables/pageTitle';
 import { navigate } from 'vite-plugin-ssr/client/router';
 
 export const clientRouting = true;
@@ -28,5 +28,6 @@ async function render(pageContext: PageContextBuiltInClient & PageContext) {
   } else {
     app.changePage(pageContext);
   }
-  document.title = getPageTitle(pageContext);
+  const { title } = usePageTitle(pageContext);
+  document.title = title;
 }

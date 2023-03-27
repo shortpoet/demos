@@ -1,16 +1,6 @@
 <template>
   <div class="layout">
-    <div class="navigation">
-      <a href="/" class="logo">
-        <img :src="logoUrl" height="64" width="64" alt="logo" />
-      </a>
-      <Link href="/">Home</Link>
-      <Link href="/about">About</Link>
-      <Link href="/star-wars">Star Wars</Link>
-      <Link href="/api-data">Api Data</Link>
-      <Link href="/auth">Auth</Link>
-      <Link href="/auth0">Auth0</Link>
-    </div>
+    <MainNav />
     <Suspense>
       <template v-if="loading">
         <div flex flex-col class="items-center justify-center p-5">
@@ -41,13 +31,12 @@
 // import { useHead } from '@vueuse/head';
 // import { title, meta, link } from '~/types';
 import { computed, onMounted, ref } from 'vue';
-import Link from '~/components/Link.vue';
 import { useAuthPlugin, DEFAULT_REDIRECT_CALLBACK, setSession, cookieOptions, COOKIES_SESSION_TOKEN, SESSION_TOKEN_EXPIRY } from '~/composables/auth-plugin';
 import AuthLayout from '~/layouts/UserLayout.vue';
 import AdminLayout from '~/layouts/AdminLayout.vue';
 import { usePageContext } from '~/composables/pageContext';
+import MainNav from '~/components/MainNav.vue';
 
-import logoUrl from '../../public/logo.svg';
 // const slots = useSlots();
 // const loginSlot = slots.login;
 const loading = ref(true);
