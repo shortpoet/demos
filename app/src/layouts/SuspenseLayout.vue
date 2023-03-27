@@ -12,22 +12,20 @@
       <Link href="/auth0">Auth0</Link>
     </div>
     <Suspense>
-      <template #fallback v-if="loading">
+      <template v-if="loading">
         <p>Loading...</p>
+        <h1>DAYUM SON</h1>
       </template>
-      <template #default v-else>
-        <!-- <div class="content"> -->
-        <!-- <slot /> -->
-        <component :is="pageComponent">
-          <slot />
-          <!-- <div class="content">
-            <slot />
-          </div> -->
-        </component>
-        <!-- </div> -->
+      <template v-else>
+        <div class="suspense-wrapper">
+          <component :is="pageComponent" :loading="loading">
+            <slot name="default" />
+          </component>
+        </div>
       </template>
     </Suspense>
 
+    <!-- https://stackoverflow.com/questions/53430731/vuejs-nested-slots-how-to-pass-slot-to-grandchild -->
 
   </div>
 </template>
@@ -41,7 +39,7 @@
 import { computed, onMounted, ref } from 'vue';
 import Link from '~/components/Link.vue';
 import { useAuthPlugin, DEFAULT_REDIRECT_CALLBACK, setSession, cookieOptions, COOKIES_SESSION_TOKEN, SESSION_TOKEN_EXPIRY } from '~/composables/auth-plugin';
-import AuthLayout from '~/layouts/_AuthLayout.vue';
+import AuthLayout from '~/layouts/AuthLayout.vue';
 import AdminLayout from '~/layouts/AdminLayout.vue';
 import { usePageContext } from '~/renderer/usePageContext';
 
@@ -50,7 +48,7 @@ import logoUrl from '../../public/logo.svg';
 // const loginSlot = slots.login;
 const loading = ref(true);
 const pageContext = usePageContext();
-console.log('suspenseLayout.pageContext: ', pageContext.pageProps?.isAdmin);
+console.log('suspenseLayout.pageContext: isAdmin -> ', pageContext.pageProps?.isAdmin);
 let Layout = pageContext.pageProps?.isAdmin ? AdminLayout : AuthLayout;
 const pageComponent = computed(() => {
   return Layout;
@@ -58,6 +56,13 @@ const pageComponent = computed(() => {
 
 
 onMounted(async () => {
+  // console.log('suspenseLayout.onMounted.before');
+  // await setTimeout(() => {
+  //   console.log('suspenseLayout.onMounted.timeout');
+  //   loading.value = false;
+  // }, 1000);
+  // console.log('suspenseLayout.onMounted.after: loading ->', loading.value);
+
   const authP = useAuthPlugin();
   await authP?.createAuthClient(DEFAULT_REDIRECT_CALLBACK);
   const user = await authP?.onLoad();

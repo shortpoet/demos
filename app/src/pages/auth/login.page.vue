@@ -28,10 +28,6 @@
 import Link from '~/components/Link.vue';
 import LoginPlugin from '~/components/LoginPlugin.vue';
 
-import AuthLayout from '~/layouts/AuthLayout.vue';
-let Layout = AuthLayout;
-export { Layout }
-
 export default {
   components: { Link, LoginPlugin },
   // setup(props, ctx) {

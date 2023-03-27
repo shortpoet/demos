@@ -7,9 +7,6 @@
 <script lang="ts">
 // import { useHead } from '@vueuse/head';
 // layout is for auth load
-import AuthLayout from '~/layouts/AuthLayout.vue';
-let Layout = AuthLayout;
-export { Layout }
 
 export default {
   setup() {
