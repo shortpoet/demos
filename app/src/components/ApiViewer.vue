@@ -30,7 +30,7 @@ import Counter from '~/components/Counter.vue'
 import Link from '~/components/Link.vue'
 import JsonTree from '~/components/JsonTree.vue'
 import { useAuthPlugin, DEFAULT_REDIRECT_CALLBACK } from '~/composables/auth-plugin';
-import { RequestConfig, requestInit, useFetchTee } from '~/composables/fetchTee';
+import { RequestConfig, requestInit, useFetch } from '~/composables/fetch
 
 export default {
   components: {
@@ -84,7 +84,7 @@ export default {
       user: props.options.withAuth ? user.value : undefined,
     };
     // const options = { user: user.value };
-    const { dataLoading, error, data } = await useFetchTee(props.urlPath, options);
+    const { dataLoading, error, data } = await useFetch(props.urlPath, options);
     const loaded = computed(() => dataLoading.value === false && authLoading.value === false)
     return { data, loaded, error, user };
   },

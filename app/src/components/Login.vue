@@ -1,6 +1,6 @@
 <template>
-  <div v-if="loading">
-    Loading...
+  <div v-if="authLoading">
+    authLoading...
   </div>
   <div v-else-if="authError">
     <div>
@@ -18,11 +18,11 @@
       <slot name="login-popup" :onLoginPopup="onLoginPopup" :isLoggedIn="isLoggedIn" />
     </div>
     <div>
-      <slot name="logout" :onLogout="onLogout" :isLoggedIn="isLoggedIn" :authError="authError" />
+      <slot name="logout" :onLogout="onLogout" :isLoggedIn="isLoggedIn" />
     </div>
     <ul>
       <li>User Info</li>
-      <div v-if="!user" i-carbon-bot />
+      <div v-if="!user.sub" i-carbon-bot />
       <div v-else>
         <li>
           <img :src="user.picture" class="w-8 h-8 rounded-full" />
@@ -35,109 +35,103 @@
 </template>
 
 <script lang="ts">
-import { ref, watch } from 'vue';
-import { cookieOptions, COOKIES_USER_TOKEN } from '~/composables/auth';
-import { GithubUser } from '~/types';
+import { ref } from 'vue';
+import { cookieOptions, COOKIES_USER_TOKEN, COOKIES_SESSION_TOKEN, DEFAULT_REDIRECT_CALLBACK, useAuthPlugin } from '~/composables/auth-plugin';
+import { GithubUser } from '~/../types';
 
 export default {
   props: {
-    // usePopup: {
-    //   type: Boolean,
-    //   required: false,
-    //   default: true,
-    // },
+    usePopup: {
+      type: Boolean,
+      required: false,
+      default: true,
+    },
   },
   async setup(props, ctx) {
-    // this triggers oauth refresh i want
-    // this needs to be added to pages that use auth0
-    // useHead({
-    // });
-    // well i thought so
-    // acutlly it needs to be here i think otherwise there is a race condition
-    // or not 😅
-    // because now we are using suspense
-    // too tricky to get the watch correct
     let onLogin = ref((event: any) => { console.log(`login.component.womp login ${event}`); });
     let onLogout = ref((event: any) => { console.log(`login.component.womp logout ${event}`); });
     let onLoginPopup = ref((event: any) => { console.log(`login.component.womp login popup ${event}`); });
+
     let isLoggedIn = ref(false);
     let authError = ref(null);
     let user = ref({} as GithubUser);
-    let loading = ref(true);
-    // onMounted(() => console.log("onMounted gets called before mounted() because it is in setup"));
-    // (async () => {
-    if (typeof window !== "undefined" && typeof window.document !== "undefined") {
-      const { useAuth, defaultOptions } = await import("~/composables/auth");
-      const { isLoggedIn: a, user: u, authLoading: l, authError: e } = await useAuth(defaultOptions);
-      const { loginWithRedirect, logout, loginWithPopup } = await useAuth(defaultOptions);
-      // console.log("login.typeof window !== 'undefined' -> can now load things that would break SSR");
-      const { useCookies } = await import('@vueuse/integrations/useCookies');
-      const cookies = useCookies([COOKIES_USER_TOKEN]);
+    let authLoading = ref(true);
 
-      loading.value = l.value;
-      // console.log(`login.component.loading.value ${loading.value}`);
-      isLoggedIn.value = a.value;
-      user.value = u.value;
-      authError.value = e.value;
-      onLogin.value = async (event: any) => {
-        console.log("login.component.onLogin");
-        // cookie options must be in both set and remove
-        cookies.set(COOKIES_USER_TOKEN, true, cookieOptions)
-        await loginWithRedirect();
-        loading.value = l.value;
-        isLoggedIn.value = a.value;
-        user.value = u.value;
-        authError.value = e.value;
-      };
-      onLoginPopup.value = async (event: any) => {
-        console.log("login.component.onLoginPopup");
-        cookies.set(COOKIES_USER_TOKEN, true, cookieOptions)
-        await loginWithPopup();
-        loading.value = l.value;
-        isLoggedIn.value = a.value;
-        user.value = u.value;
-        authError.value = e.value;
-      };
-      onLogout.value = async (event: any) => {
-        console.log("login.component.onLogout");
-        cookies.remove(COOKIES_USER_TOKEN, cookieOptions);
-        await logout();
-        loading.value = l.value;
-        isLoggedIn.value = a.value;
-        user.value = u.value;
-        authError.value = e.value;
-      };
-    }
-    // })();
-    // console.log("login.component.setup done");
     const c = ctx;
     const slots = c.slots;
     const loginSlot = slots.login;
-    const logoutSlot = slots.logout;
-    const loginPopupSlot = slots.loginPopup;
 
-    watch(loading, async (cur, prev) => {
-      // console.log(`login.component.loading ${cur} ${prev}`);
-      loading.value = cur;
-      if (typeof window !== "undefined" && typeof window.document !== "undefined") {
-        const { useAuth, defaultOptions } = await import("~/composables/auth");
-        const { isLoggedIn: a, user: u, authLoading: l, authError: e } = await useAuth(defaultOptions);
-        loading.value = l.value;
-        isLoggedIn.value = a.value;
-        user.value = u.value;
-        authError.value = e.value;
+
+    if (typeof window === "undefined") {
+      return {
+        onLogin,
+        onLogout,
+        onLoginPopup,
+        loginSlot,
+        isLoggedIn,
+        user,
+        authLoading,
+        authError,
       }
-    });
+    }
+    console.log("login.typeof window !== 'undefined' -> can now load things that would break SSR");
+
+    const authP = useAuthPlugin();
+
+    await authP.createAuthClient(DEFAULT_REDIRECT_CALLBACK);
+    await authP.onLoad();
+
+    try {
+      // at some point this might throw the refresh_token not found error
+      // await authP.onLoad();
+    } catch (error) {
+      //
+      console.error(`login.component.authP.onLoad() error: ${error}`);
+    }
+    ({ user, authLoading, authError } = authP);
+    const { loginWithRedirect, logout, loginWithPopup } = authP;
+
+    const { useCookies } = await import('@vueuse/integrations/useCookies');
+    const cookies = useCookies([COOKIES_USER_TOKEN]);
+
+    console.log(`login.component.authLoading.value ${authLoading.value}`);
+
+    onLogin.value = async (event: any) => {
+      console.log("login.component.onLogin");
+      // cookie options must be in both set and remove
+      cookies.set(COOKIES_USER_TOKEN, true, cookieOptions)
+      await loginWithRedirect();
+
+    };
+    onLoginPopup.value = async (event: any) => {
+      console.log("login.component.onLoginPopup");
+      cookies.set(COOKIES_USER_TOKEN, true, cookieOptions)
+      await loginWithPopup();
+    };
+    onLogout.value = async (event: any) => {
+      console.log("login.component.onLogout");
+      cookies.remove(COOKIES_USER_TOKEN, cookieOptions);
+      cookies.remove(COOKIES_SESSION_TOKEN, cookieOptions)
+      await logout();
+    };
+
+    if (import.meta.env.VITE_LOG_LEVEL === 'debug') {
+      console.log("login.component.setup done");
+    }
+
+    // watch(authLoading, async (cur, prev) => {
+    //   console.log(`login.component.loading ${cur} ${prev}`);
+    //   authLoading.value = cur;
+    //   ({ user, authLoading, authError } = authP);
+    // });
     return {
       onLogin,
       onLogout,
       onLoginPopup,
       loginSlot,
-      logoutSlot,
-      loginPopupSlot,
       isLoggedIn,
       user,
-      loading,
+      authLoading,
       authError,
     }
   },

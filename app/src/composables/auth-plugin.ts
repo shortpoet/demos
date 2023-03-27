@@ -5,8 +5,8 @@ import type { InjectionKey } from 'vue';
 import { navigate } from 'vite-plugin-ssr/client/router';
 import { CookieSetOptions } from 'universal-cookie';
 
-import { User, Auth0Instance, ClientOptions, Auth0Client } from '~/types';
-import { useFetchTee } from './fetchTee';
+import { User, Auth0Instance, ClientOptions, Auth0Client } from '~/../types';
+import { useFetch } from './fetch';
 import {
   createAuth0Client,
   GetTokenSilentlyOptions,
@@ -30,7 +30,7 @@ export {
   SESSION_TOKEN_EXPIRY,
 };
 
-const AuthSymbol = Symbol() as InjectionKey<Auth0Instance>;
+const AuthSymbol: InjectionKey<Auth0Instance> = Symbol();
 
 const authClient = ref<Auth0Client | null>(null);
 let redirectCallback: (appState: any) => void;
@@ -113,15 +113,9 @@ const awaitWindowPromise = async (
   return window;
 };
 
-const useAuthPlugin = (window = defaultWindow) => {
-  // await awaitWindowPromise(window);
-  // if (!window) {
-  //   return;
-  // }
+const useAuthPlugin = () => {
   const auth = inject(AuthSymbol);
-  // if (!auth) {
-  //   return;
-  // }
+  if (!auth) throw new Error('setPageContext() not called in parent');
   return auth as Auth0Instance;
 };
 
@@ -309,7 +303,7 @@ const setSession = async (
   const options = { user };
   let res = { result: 'Error', status: 'Error' };
 
-  const { data, error, dataLoading } = await useFetchTee<{
+  const { data, error, dataLoading } = await useFetch<{
     sessionToken: string;
   }>('api/auth/session', options);
 

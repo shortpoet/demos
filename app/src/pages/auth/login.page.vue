@@ -26,7 +26,7 @@
 <script lang="ts">
 // import { ref } from 'vue';
 import Link from '~/components/Link.vue';
-import LoginPlugin from '~/components/LoginPlugin.vue';
+import LoginPlugin from '~/components/Login.vue';
 
 export default {
   components: { Link, LoginPlugin },

@@ -30,7 +30,7 @@ import Counter from '~/components/Counter.vue'
 import Link from '~/components/Link.vue'
 import JsonTree from '~/components/JsonTree.vue'
 import { useAuthPlugin, DEFAULT_REDIRECT_CALLBACK } from '~/composables/auth-plugin';
-import { useFetchTee } from '~/composables/fetchTee';
+import { useFetch } from '~/composables/fetch';
 
 export default {
   components: {
@@ -53,7 +53,7 @@ export default {
     await onLoad();
     const options = { token: user.value?.token };
     // const options = { user: user.value };
-    const { dataLoading, error, data } = await useFetchTee(`api/health/check`, options);
+    const { dataLoading, error, data } = await useFetch(`api/health/check`, options);
     const loaded = computed(() => dataLoading.value === false && authLoading.value === false)
     return { data, loaded, error, user };
   },
