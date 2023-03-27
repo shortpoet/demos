@@ -9,7 +9,7 @@ import { isAPI, isAssetURL, logger, logLevel } from './util';
 import { Env } from './types';
 import { defineInit, RequestHandler } from './api';
 import { handleAPI } from './api';
-const FILE_LOG_LEVEL = 'debug';
+const FILE_LOG_LEVEL = 'error';
 export default {
   async fetch(
     request: Request,

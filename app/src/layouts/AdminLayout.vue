@@ -1,6 +1,6 @@
 <template>
   <div class="content admin-layout">
-    <h1>ADMIN LAYOUT TEST</h1>
+    <h1>ADMIN LAYOUT</h1>
     <slot name="default" />
   </div>
 </template>
