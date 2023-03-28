@@ -6,12 +6,14 @@ import {
   generateUUID,
   getCookie,
   logLevel,
+  parseCookie,
 } from '../../util';
 import { RequestHandler } from '../RequestHandler';
 import { Session, User } from '../../../types';
 import { getUser, sessionUser } from '../auth/user';
 import { getToken } from '@auth/core/jwt';
-import authHandler from './auth';
+import { Auth } from '@auth/core';
+import AuthHandler from './auth';
 
 const FILE_LOG_LEVEL = 'error';
 
@@ -32,7 +34,7 @@ const callbackCookie =
   (useSecureCookie ? '__Secure-' : '') + 'next-auth.callback-url';
 
 const transformGetRequest = (handler: RequestHandler) => {
-  const cookies = handler.req.headers.get('cookie') || '';
+  const cookies = handler.req.headers.get('Cookie') || '';
   const csrfToken = (getCookie(cookies, csrfCookie) || '').split('|')[0];
   const body: BodyInit = JSON.stringify({
     ...handler.query,
@@ -74,6 +76,7 @@ const handleRequest = async (handler: RequestHandler, env: Env) => {
     return Response.redirect('/next-auth/login', 307);
   if (!needsLogin && sessionToken)
     return new Response('Already logged-in', { status: 403 });
+
   handler.req.query.nextauth = action;
   authHandler(handler.req, handler.res);
 };
@@ -83,8 +86,8 @@ const handleRequest = async (handler: RequestHandler, env: Env) => {
 
 const exposeSession = async (handler: RequestHandler) => {
   // Fetch session
-  const options = handler.req.headers.cookie
-    ? { headers: { cookie: handler.req.headers.cookie } }
+  const options = handler.req.headers.get('Cookie')
+    ? { headers: { cookie: handler.req.headers.get('Cookie') } }
     : {};
 
   const sessionRes = await fetch(`${uri}/session`, options);
@@ -92,18 +95,24 @@ const exposeSession = async (handler: RequestHandler) => {
   // Pass session to next()
   handler.res.locals.session = session;
   // Include set-cookie in response
-  const cookies = sessionRes.headers.raw()['set-cookie'] || [];
-  handler.res.setHeader('Set-Cookie', cookies);
-  // Parse set-cookie
-  const parsed = setCookie.parse(cookies, { map: true });
+
+  const setCookies = sessionRes.headers.get('set-cookie');
+  if (setCookies) {
+    handler.res.headers.set('set-cookie', setCookies);
+  }
+  const cookies = handler.req.headers.get('Cookie') || '';
+
+  const parsed = parseCookie(setCookies);
   // Pass csrfToken to next()
   const csrfToken: string =
-    (parsed[csrfCookie] || {}).value || handler.req.cookies[csrfCookie];
+    getCookie(cookies, csrfCookie) ||
+    parsed[csrfCookie] ||
+    handler.req.headers.get(csrfCookie);
 
   handler.res.locals.csrfToken = csrfToken.split('|')[0];
   // Pass callbackUrl to next()
   const callbackUrl: string =
-    (parsed[callbackCookie] || {}).value || handler.req.cookies[callbackCookie];
+    parsed[callbackCookie] || handler.req.headers.get(callbackCookie);
   handler.res.locals.callbackUrl = callbackUrl;
 };
 
@@ -115,6 +124,9 @@ async function handleNextAuth(
   const url = new URL(handler.req.url);
   const method = handler.req.method;
   let res;
+
+  const authHandler = (req, res) => Auth(req, AuthHandler(env));
+  handler.nextAuth = authHandler;
 
   // const nextauth = req.path.split('/');
   // nextauth.splice(0, 3);

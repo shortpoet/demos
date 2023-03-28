@@ -5,24 +5,26 @@ import { createJsonResponse } from '../util';
 import { isValidJwt } from './auth/jwt';
 import type {
   Request as WorkerRequest,
-  // Fetcher,
+  Fetcher,
 } from '@cloudflare/workers-types';
+import AuthHandler from './next/auth';
+import { Auth } from '@auth/core';
 
 export { RequestHandler, defineInit };
 
 const FILE_LOG_LEVEL = 'error';
 
-// class MyFetcher extends Fetcher {
+// class MyFetcher implements Fetcher {
 //   async fetch(
-//     input: RequestInfo,
-//     init?: RequestInit<RequestInitCfProperties>,
+//     input: Request,
+//     init?: RequestInit,
 //   ): Promise<Response> {
 //     const response = await fetch(input, init);
 //     return response;
 //   }
 // }
 
-function defineInit(request: WorkerRequest): RequestInit {
+function defineInit(request: WorkerRequest): Partial<RequestInit> {
   const headers = new Headers();
   request.headers.forEach((value, key) => {
     headers.set(key, value);
@@ -51,10 +53,22 @@ function defineInit(request: WorkerRequest): RequestInit {
   };
 }
 
+interface ResponsePlus extends Response {
+  readonly headers: Headers;
+  readonly ok: boolean;
+  readonly redirected: boolean;
+  readonly status: number;
+  readonly statusText: string;
+  readonly type: ResponseType;
+  readonly url: string;
+  clone(): Response;
+  locals?: Record<string, any>;
+}
+
 class RequestHandler {
   // class RequestHandler<CfHostMetadata = unknown> extends Request<CfHostMetadata> {
-  private _res?: Response;
-  declare req: WorkerRequest;
+  private _res?: ResponsePlus;
+  declare req: Request;
   declare reqOriginal: WorkerRequest;
   declare url: URL;
   declare isAuthenticated: boolean;
@@ -64,6 +78,7 @@ class RequestHandler {
   declare user?: User;
   declare data?: any;
   declare dump?: any;
+  declare nextAuth?: typeof Auth;
 
   constructor(req: WorkerRequest, env: Env, init?: RequestInit) {
     if (logLevel(FILE_LOG_LEVEL, env)) {
@@ -99,7 +114,7 @@ class RequestHandler {
     //   this.data = this._parseBodyData(this._parseBody(clone.body)).data;
     // }
   }
-  get res(): Response {
+  get res(): ResponsePlus {
     if (!this._res) {
       throw new Error('Response not set');
     }
@@ -146,8 +161,7 @@ class RequestHandler {
   async initData(env) {
     let headerslength = 0;
     let headerString = '';
-    for (let entry of this.req.headers.entries()) {
-      const [key, value] = entry;
+    for (let [key, value] of Object.entries(this.req.headers)) {
       // console.log(`${key}: ${value}`);
       headerString += `\n${key}: ${value}\n`;
       headerslength++;

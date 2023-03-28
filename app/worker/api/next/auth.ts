@@ -1,12 +1,11 @@
 import GitHub from '@auth/core/providers/github';
 
-import Auth, { type AuthConfig } from '@auth/core';
+import { AuthConfig } from '@auth/core';
 import Credentials from '@auth/core/providers/credentials';
 import { Provider } from '@auth/core/providers';
-import { getToken } from '@auth/core/jwt';
 import { Env } from 'types';
 
-const authConfig = (env: Env): AuthConfig => {
+const AuthHandler = (env: Env): AuthConfig => {
   return {
     providers: [
       GitHub({ clientId: '', clientSecret: '' }),
@@ -24,7 +23,7 @@ const authConfig = (env: Env): AuthConfig => {
             placeholder: 'supersecret',
           },
         },
-        async authorize(credentials) {
+        async authorize({ email, password }, request) {
           const response = await fetch(request);
           if (!response.ok) return null;
           return (await response.json()) ?? null;
@@ -38,6 +37,4 @@ const authConfig = (env: Env): AuthConfig => {
 
 // const request = new Request('https://example.com');
 
-const authHandler = (req, res) => NextAuth(req, res, authOptions);
-
-export default authHandler;
+export default AuthHandler;
