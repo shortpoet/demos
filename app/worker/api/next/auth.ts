@@ -6,6 +6,7 @@ import { Provider } from '@auth/core/providers';
 import { Env } from 'types';
 
 const AuthHandler = (env: Env): AuthConfig => {
+  console.log(`create auth handler`);
   return {
     providers: [
       GitHub({ clientId: '', clientSecret: '' }),

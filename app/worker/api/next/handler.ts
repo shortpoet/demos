@@ -103,10 +103,13 @@ const handleRequest = async (handler: RequestHandler, env: Env) => {
       handler.res,
     );
     log(`res: ${res}`);
-    log(JSON.stringify(res, null, 2));
-    handler.req = res.req;
+    log(JSON.stringify(res.clone().json(), null, 2));
     return res;
-    return handleSsr(handler, env);
+    // const init = new Request(nextAuthUrl, {
+    //   method: 'GET',
+    // });
+    // handler.req = init;
+    // return handleSsr(handler, env);
   } catch (error) {
     console.log('error', error);
   }
@@ -161,7 +164,10 @@ async function handleNextAuth(
   );
   let res;
 
-  const authHandler = (req, res) => Auth(req, AuthHandler(env));
+  const authHandler = (req, res) => {
+    console.log(`$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$\n\tauthHandler`);
+    return Auth(req, AuthHandler(env));
+  };
   handler.nextAuth = authHandler;
 
   // const nextauth = req.path.split('/');

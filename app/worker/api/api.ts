@@ -8,7 +8,7 @@ import { handleNextAuth } from './next/handler';
 
 export { handleAPI };
 
-const FILE_LOG_LEVEL = 'error';
+const FILE_LOG_LEVEL = 'debug';
 
 async function handleAPI(
   handler: RequestHandler,
@@ -47,5 +47,7 @@ async function handleAPI(
     );
     console.error(error);
   }
+  log(`\n\t<- END API HANDLE\n`);
+  log(`${JSON.stringify(res)}`);
   return res;
 }
