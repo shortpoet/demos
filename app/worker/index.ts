@@ -52,7 +52,13 @@ export default {
     }
   },
 };
-
+declare module globalThis {
+  let process: { env: Env };
+}
+export interface Env {
+  JWT_SECRET: string;
+  NEXTAUTH_URL: string;
+}
 async function handleFetchEvent(
   handler: RequestHandler,
   env: Env,
@@ -63,7 +69,8 @@ async function handleFetchEvent(
   log('worker.handleFetchEvent');
   const url = new URL(handler.url);
 
-  await exposeSession(handler);
+  // endless redirect
+  // await exposeSession(handler, env);
 
   if (isAssetURL(url)) {
     log('worker.handleFetchEvent.isAssetURL');

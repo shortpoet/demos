@@ -24,6 +24,7 @@ preview_id = "ef2b919ed69a49c5bf33349b2c943fc7"
 AUTH0_DOMAIN = "shortpoet.auth0.com"
 ENVIRONMENT = "dev"
 LOG_LEVEL = "info"
+NEXTAUTH_URL = "http://localhost:3000/api/next-auth"
 [[env.prod.kv_namespaces]]
 binding = "DEMO_CFW_SSR"
 id = "5c6a1909d0844b4296607e021240e9f1"
@@ -31,5 +32,6 @@ preview_id = "5c6a1909d0844b4296607e021240e9f1"
 [env.prod.vars]
 ENVIRONMENT = "prod"
 LOG_LEVEL = "error"
+NEXTAUTH_URL = "http://localhost:3000/api/next-auth"
 [site]
 bucket = "./app/build/client"

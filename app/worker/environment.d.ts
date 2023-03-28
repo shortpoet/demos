@@ -7,6 +7,7 @@ declare global {
       NODE_ENV: 'development' | 'production';
       ENVIRONMENT: 'dev' | 'prod';
       __SECRET__: string;
+      NEXTAUTH_URL: string;
     }
   }
 }

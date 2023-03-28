@@ -19,21 +19,21 @@ const FILE_LOG_LEVEL = 'error';
 
 export { handleNextAuth, exposeSession };
 
-const uri = process.env.NEXTAUTH_URL;
-
-if (!uri) {
-  throw new Error('Please add your NEXTAUTH_URL to .env');
-}
-
 const AuthError = class AuthError extends Error {};
 
-const useSecureCookie = (uri || '').startsWith('https://');
-// const sessionCookie =  (useSecureCookie ? '__Secure-' : '') + 'next-auth.session-token'
-const csrfCookie = (useSecureCookie ? '__Host-' : '') + 'next-auth.csrf-token';
-const callbackCookie =
-  (useSecureCookie ? '__Secure-' : '') + 'next-auth.callback-url';
+const cookieNames = (env: Env) => {
+  const useSecureCookie = (env.NEXTAUTH_URL || '').startsWith('https://');
+  // const sessionCookie =  (useSecureCookie ? '__Secure-' : '') + 'next-auth.session-token'
+  const csrfCookie =
+    (useSecureCookie ? '__Host-' : '') + 'next-auth.csrf-token';
+  const callbackCookie =
+    (useSecureCookie ? '__Secure-' : '') + 'next-auth.callback-url';
+  return { csrfCookie, callbackCookie };
+};
 
-const transformGetRequest = (handler: RequestHandler) => {
+const transformGetRequest = (handler: RequestHandler, env: Env) => {
+  const uri = env.NEXTAUTH_URL;
+  const { csrfCookie } = cookieNames(env);
   const cookies = handler.req.headers.get('Cookie') || '';
   const csrfToken = (getCookie(cookies, csrfCookie) || '').split('|')[0];
   const body: BodyInit = JSON.stringify({
@@ -68,7 +68,7 @@ const handleRequest = async (handler: RequestHandler, env: Env) => {
 
   if (action[0] === 'callback') {
     if (handler.req.method === 'GET') {
-      transformGetRequest(handler.req as any);
+      transformGetRequest(handler.req as any, env);
     }
     const body: BodyInit = sessionToken ?? undefined;
     const init = defineInitR(handler.req, {
@@ -92,13 +92,13 @@ const handleRequest = async (handler: RequestHandler, env: Env) => {
 // import cookieParser from 'cookie-parser';
 // import setCookie from 'set-cookie-parser';
 
-const exposeSession = async (handler: RequestHandler) => {
+const exposeSession = async (handler: RequestHandler, env: Env) => {
   // Fetch session
   const options = handler.req.headers.get('Cookie')
     ? { headers: { cookie: handler.req.headers.get('Cookie') } }
     : {};
 
-  const sessionRes = await fetch(`${uri}/session`, options);
+  const sessionRes = await fetch(`${env.NEXTAUTH_URL}/session`, options);
   const session: Session = await sessionRes.json();
   // Pass session to next()
   handler.res.locals.session = session;
@@ -110,6 +110,7 @@ const exposeSession = async (handler: RequestHandler) => {
   }
   const cookies = handler.req.headers.get('Cookie') || '';
 
+  const { csrfCookie, callbackCookie } = cookieNames(env);
   const parsed = parseCookie(setCookies);
   // Pass csrfToken to next()
   const csrfToken: string =
