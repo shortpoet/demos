@@ -97,7 +97,7 @@ const useFetch = async <T extends unknown>(
         );
         console.log('request', request);
       }
-
+      // console.log(await readBody(request.body));
       const response = await fetch(request, {
         ...init,
       });

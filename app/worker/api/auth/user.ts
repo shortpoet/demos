@@ -16,7 +16,7 @@ const putUser = async (user: User, env: Env): Promise<void> => {
 };
 
 const sessionUser = async (user: User, env: Env): Promise<User> => {
-  // console.log('sessionUser.start', JSON.stringify(user, null, 2));
+  console.log('sessionUser.start', JSON.stringify(user, null, 2));
   const admins = env.ADMIN_USERS.split(',');
   const role = admins.includes(user.sub) ? 'admin' : 'user';
   let existing = await getUser(user.sub, env);
@@ -25,11 +25,12 @@ const sessionUser = async (user: User, env: Env): Promise<User> => {
       existing = { ...user, role: role };
       await putUser(user, env);
     }
+    console.log('sessionUser.existing.end', JSON.stringify(existing, null, 2));
     return existing;
   } else {
-    user = { ...user, id: generateTypedUUID(8, 'user'), role: role };
+    user = { id: generateTypedUUID(8, 'user'), role: role, ...user };
     await putUser(user, env);
-    // console.log('sessionUser.end', JSON.stringify(user, null, 2));
+    console.log('sessionUser.newuser.end', JSON.stringify(user, null, 2));
     return user;
   }
 };

@@ -11,7 +11,7 @@ import { RequestHandler } from '../RequestHandler';
 import { Session, User } from '../../../types';
 import { getUser, sessionUser } from './user';
 
-const FILE_LOG_LEVEL = 'error';
+const FILE_LOG_LEVEL = 'debug';
 
 export { handleSession, getSessionFromCookie };
 
@@ -52,7 +52,7 @@ async function clearAllKeys(kv: KVNamespace, env: Env, excludes = []) {
         JSON.stringify(envVars.keys[key].name, null, 2),
       );
     }
-    await env.DEMO_CFW_SSR_SESSIONS.delete(envVars.keys[key].name);
+    await kv.delete(envVars.keys[key].name);
   }
 }
 
@@ -200,9 +200,9 @@ async function handleSession(
   const method = handler.req.method;
   let res;
   await clearExpiredSessions(env);
-  // await clearAllKeys(env.DEMO_CFW_SSR, env, ['gitInfo']);
-  // await clearAllKeys(env.DEMO_CFW_SSR_SESSIONS, env);
-  // await clearAllKeys(env.DEMO_CFW_SSR_USERS, env);
+  await clearAllKeys(env.DEMO_CFW_SSR, env, ['gitInfo']);
+  await clearAllKeys(env.DEMO_CFW_SSR_SESSIONS, env);
+  await clearAllKeys(env.DEMO_CFW_SSR_USERS, env);
   // await clearAllSessions(env);
 
   if (url.pathname.startsWith('/api/auth/session')) {
@@ -254,6 +254,7 @@ async function handleSession(
           } else {
             const sessionId = generateTypedUUID(16, 'session');
             const sessionToken = await generateSessionToken(env, sessionId);
+            console.log(handler.user);
             const user = await sessionUser(handler.user, env);
             if (logLevel(FILE_LOG_LEVEL, env)) {
               console.log(`sessionToken: 

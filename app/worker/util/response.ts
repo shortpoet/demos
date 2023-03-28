@@ -9,6 +9,7 @@ export {
   cloneRequest,
   getCookie,
   parseCookie,
+  readBody,
 };
 const FILE_LOG_LEVEL = 'error';
 
@@ -30,6 +31,12 @@ function getCookie(cookies: string, name: string): string {
   const parsed = parseCookie(cookies);
   return parsed[name];
 }
+const readBody = async (body: any) => {
+  const reader = body.getReader();
+  const result = await reader.read();
+  const decoder = new TextDecoder('utf-8');
+  return decoder.decode(result.value);
+};
 
 function cloneResponse(response: Response): Response[] {
   const { body } = response;

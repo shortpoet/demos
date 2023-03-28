@@ -12,6 +12,7 @@ import {
   isSSR,
   logger,
   logLevel,
+  readBody,
 } from './util';
 import { Env } from './types';
 import {
@@ -40,7 +41,10 @@ export default {
       \n
       `);
       }
-      // console.log(JSON.stringify(request, null, 2));
+      console.log(JSON.stringify(request, null, 2));
+      // if (request.body) {
+      //   console.log(JSON.stringify(await readBody(request.body), null, 2));
+      // }
       const handler = new RequestHandler(request, env);
       await handler.initData(env);
 

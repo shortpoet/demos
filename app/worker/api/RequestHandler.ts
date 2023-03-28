@@ -31,10 +31,10 @@ class MyFetcher {
   }
 }
 
-function defineInit(
+async function defineInit(
   request: WorkerRequest,
   options: DefineInitOptions = {},
-): RequestInit {
+): Promise<RequestInit> {
   const { method = request.method } = options;
   const headers = new Headers(request.headers);
   if (options.headers) {
@@ -46,7 +46,7 @@ function defineInit(
 
   const body =
     method !== 'HEAD' && method !== 'GET'
-      ? options.body ?? JSON.stringify(request.body)
+      ? options.body ?? (await request.text())
       : undefined;
 
   const redirect = options.redirect ?? 'follow';
@@ -122,7 +122,7 @@ class RequestHandler {
   // class RequestHandler<CfHostMetadata = unknown> extends Request<CfHostMetadata> {
   private _res?: ResponsePlus;
   declare req: Request;
-  declare reqOriginal: WorkerRequest;
+  declare reqOriginal: Request;
   declare url: URL;
   declare isAuthenticated: boolean;
   private declare token: string;
@@ -134,7 +134,7 @@ class RequestHandler {
   declare dump?: any;
   declare nextAuth?: any;
 
-  constructor(req: WorkerRequest, env: Env, init?: RequestInit) {
+  constructor(req: Request, env: Env, init?: RequestInit) {
     if (logLevel(FILE_LOG_LEVEL, env)) {
       console.log(`worker.RequestHandler: ${req.url}`);
     }
@@ -148,8 +148,8 @@ class RequestHandler {
     //   `worker.RequestHandler.stream: ${JSON.stringify(stream2, null, 2)}`,
     // );
     this.url = new URL(req.url);
-    this.req = new Request(this.url, defineInit(req));
     this.reqOriginal = req;
+    this.req = new Request(req.url, req);
 
     // this.url = req.url;
     this.query = this._parseQuery(new URL(this.url));
@@ -240,6 +240,8 @@ class RequestHandler {
     if (logLevel(FILE_LOG_LEVEL, env)) {
       console.log(`headers ->  \n${headerString}\n`);
     }
+    // this.req = new Request(this.url, await defineInit(this.reqOriginal, env));
+
     // this results in an error when there is a user object in request
     // but can't see any of the data
     if (this.req.method === 'POST') {
