@@ -118,12 +118,18 @@ const useFetch = async <T extends unknown>(
       let out;
 
       if (import.meta.env.VITE_LOG_LEVEL === 'debug') {
-        console.log('res', JSON.stringify(response, null, 2));
-        const clone = await response.clone();
-        const jClone = await clone.clone().json();
-        const msg = (await clone.text()) || 'empty text res';
-        console.log('text clone', msg.substring(0, 50));
-        console.log('json clone', jClone);
+        // console.log('res', JSON.stringify(response, null, 2));
+        // ct === 'application/json' && console.log('json', await response.json());
+        ct === 'application/json' &&
+          console.log('json clone', await response.clone().json());
+        // ct === 'text/plain' && console.log('text', await response.text());
+        ct === 'text/plain' &&
+          console.log('text clone', await response.clone().text());
+        // const clone = await response.clone();
+        // const jClone = await clone.clone().json();
+        // const msg = (await clone.text()) || 'empty text res';
+        // console.log('text clone', msg.substring(0, 50));
+        // console.log('json clone', jClone);
       }
       ct === 'application/json'
         ? (out = await response.json())

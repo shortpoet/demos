@@ -103,7 +103,7 @@ const handleRequest = async (handler: RequestHandler, env: Env) => {
       handler.res,
     );
     log(`res: ${res}`);
-    log(JSON.stringify(res.clone().json(), null, 2));
+    log(`${JSON.stringify(res.clone().text(), null, 2)}`);
     return res;
     // const init = new Request(nextAuthUrl, {
     //   method: 'GET',
