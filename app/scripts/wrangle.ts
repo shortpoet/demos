@@ -137,6 +137,29 @@ async function setVars(id, env, envVars) {
   console.log(newVars);
   // writeToml(config);
 }
+
+async function assertBinding(bindingName, env, appName) {
+  const id = parseId(bindingName, env, appName);
+  if (!getNamespace(id, env)) {
+    createNamespace(bindingName, env, appName);
+  }
+}
+
+async function setBindings(bindingName, appName, env, debug) {
+  if (debug || process.env.VITLE_LOG_LEVEL === 'debug') {
+    console.log('bindingName', bindingName);
+    KV_DEBUG = true;
+  }
+
+  assertBinding(bindingName, env, appName);
+  const otherBindings = [`${bindingName}_SESSIONS`, `${bindingName}_USERS`];
+
+  for (const binding of otherBindings) {
+    // console.log(`binding: ${binding}`);
+    assertBinding(binding, env, appName);
+  }
+}
+
 async function main(env, debug) {
   const envFile =
     env === 'dev' ? '.env' : env === 'preview' ? '.env.preview' : '.env.uat';
@@ -148,35 +171,14 @@ async function main(env, debug) {
     /-/g,
     '_',
   );
-
-  const otherBindings = [`${bindingName}_SESSIONS`, `${bindingName}_USERS`];
-
-  for (const binding of otherBindings) {
-    // console.log(`binding: ${binding}`);
-    const id = parseId(binding, env, appName);
-    // console.log(`id: ${id}`);
-    const namespace = getNamespace(id, env);
-    // console.log(`namespace: ${namespace}`);
-    const preview = getPreview(id, env);
-    // console.log(`preview: ${preview}`);
-
-    // await deleteNamespace(env, namespace.id, preview.id);
-    if (!namespace) {
-      createNamespace(binding, env, appName);
-    }
-  }
-
   const id = parseId(bindingName, env, appName);
   if (debug || process.env.VITLE_LOG_LEVEL === 'debug') {
     console.log(config);
     console.log('bindingName', bindingName);
     console.log('id', id);
-    KV_DEBUG = true;
   }
 
-  if (!getNamespace(id, env)) {
-    createNamespace(bindingName, env, appName);
-  }
+  await setBindings(bindingName, appName, env, debug);
   await setGitconfig(id, env);
 
   await setSecrets(env);

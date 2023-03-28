@@ -1,11 +1,8 @@
 compatibility_date = "2023-02-28"
-# main = "./dist/worker.js"
 main = "./app/worker/index.ts"
 name = "demo-cfw-ssr"
 node_compat = true
 workers_dev = true
-# [build]
-# command = "pnpm build:w"
 [dev]
 port = 3000
 [[env.dev.kv_namespaces]]
@@ -29,6 +26,14 @@ NEXTAUTH_URL = "http://localhost:3000/api/next-auth"
 binding = "DEMO_CFW_SSR"
 id = "5c6a1909d0844b4296607e021240e9f1"
 preview_id = "5c6a1909d0844b4296607e021240e9f1"
+[[env.prod.kv_namespaces]]
+binding = "DEMO_CFW_SSR_SESSIONS"
+id = "a78b8c81d4cf4e96aed9000605bbbd52"
+preview_id = "a78b8c81d4cf4e96aed9000605bbbd52"
+[[env.prod.kv_namespaces]]
+binding = "DEMO_CFW_SSR_USERS"
+id = "fb3cc5e9826141639c7285e4dc6dd6ce"
+preview_id = "fb3cc5e9826141639c7285e4dc6dd6ce"
 [env.prod.vars]
 ENVIRONMENT = "prod"
 LOG_LEVEL = "error"

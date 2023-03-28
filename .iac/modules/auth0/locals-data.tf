@@ -5,6 +5,7 @@ locals {
   base_urls = [
     "http://localhost:3000",
     "https://${local.application_name}-dev.shortpoet.workers.dev",
+    "https://${local.application_name}-prod.shortpoet.workers.dev",
     "https://${local.application_name}.shortpoet.workers.dev",
   ]
 
