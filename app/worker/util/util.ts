@@ -1,6 +1,15 @@
 import { Env, LogLevel, LOG_LOVELS } from '../types';
 
-export { logger, logLevel, isAssetURL, redirectToHttps, isAPI, isJsonURL };
+export {
+  logger,
+  logLevel,
+  isAssetURL,
+  redirectToHttps,
+  isAPI,
+  isJsonURL,
+  isGenerated,
+  isSSR,
+};
 
 const logLevel = (level: LogLevel, env: Env): boolean => {
   const envLevel = env.LOG_LEVEL;
@@ -34,3 +43,8 @@ const isAssetURL = (url: URL) => url.pathname.startsWith('/assets/');
 const isAPI = (url: URL) => url.pathname.startsWith('/api/');
 
 const isJsonURL = (url: URL) => url.pathname.endsWith('.json');
+
+const isSSR = (url: URL) => url.pathname.startsWith('/');
+
+const isGenerated = (url: URL) => url.pathname.startsWith('/_next/');
+// const isSSR = (url: URL) => ssrPaths.some((path) => url.pathname.startsWith(path));
