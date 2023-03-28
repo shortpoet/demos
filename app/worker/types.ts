@@ -9,6 +9,7 @@ interface Env {
   // APP
   LOG_LEVEL: LogLevel;
   ENVIRONMENT: 'dev' | 'prod';
+  SSR_BASE_PATHS: string;
 
   // CORS
   ALLOWED_ORIGINS:

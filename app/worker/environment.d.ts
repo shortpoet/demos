@@ -8,6 +8,7 @@ declare global {
       ENVIRONMENT: 'dev' | 'prod';
       __SECRET__: string;
       NEXTAUTH_URL: string;
+      SSR_BASE_PATHS: string;
     }
   }
 }

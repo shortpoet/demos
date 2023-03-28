@@ -20,7 +20,7 @@ function command(cmd): Promise<string> {
   });
 }
 
-function getToml(): string {
+function getToml(): Record<string, any> {
   try {
     return toml.parse(
       fs.readFileSync(path.join(__dirname, '../../wrangler.toml'), 'utf8'),
@@ -30,7 +30,7 @@ function getToml(): string {
   }
 }
 
-const writeToml = (data: string) => {
+const writeToml = (data: any) => {
   try {
     fs.writeFileSync(
       path.join(__dirname, '../../wrangler.bak.toml'),

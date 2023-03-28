@@ -1,4 +1,5 @@
 import path, { dirname } from 'node:path';
+import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import getGitInfo from './get-git-info';
 
@@ -22,10 +23,6 @@ import {
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-
-console.log('wrangle.ts');
-console.log(__filename);
-console.log(__dirname);
 
 let KV_DEBUG = false;
 
@@ -110,32 +107,36 @@ async function setSecrets(env) {
   );
 }
 
-async function setVars(id, env, envVars) {
-  console.log(env);
-  console.log(id);
-  console.log(envVars);
-  // const ssrDirs = path.readdirSync(ssrDir).map((dir) => path.join(ssrDir, dir));
+async function setVars(env, envVars) {
+  const ssrDir = path.join(__dirname, '../src/pages');
+  const ssrDirs = fs
+    .readdirSync(ssrDir)
+    .map((dir) => path.join(ssrDir, dir).split('/').pop())
+    .join(',');
 
   const config = getToml();
 
-  const domain = await command(`pass Cloud/auth0/shortpoet/domain`);
-  const clientId = await command(
-    `pass Cloud/auth0/${envVars.parsed.VITE_APP_NAME}/client_id`,
-  );
-
-  console.log(config['env'][`${env}`]['vars']);
+  const domain = (await command(`pass Cloud/auth0/shortpoet/domain`)).trim();
   // const newVars = Object.entries(envVars.parsed).reduce((acc, [key, value]) => {
   //   acc[key] = value;
   //   return acc;
   // }, {});
   const newVars = {
     ...config['env'][`${env}`]['vars'],
-    ...envVars.parsed,
-    VITE_AUTH0_CLIENT_ID: clientId,
-    VITE_AUTH0_DOMAIN: domain,
+    AUTH0_DOMAIN: domain,
+    NEXTAUTH_URL: envVars.parsed['NEXTAUTH_URL'],
+    SSR_BASE_PATHS: ssrDirs,
   };
-  console.log(newVars);
-  // writeToml(config);
+  writeToml({
+    ...config,
+    env: {
+      ...config['env'],
+      [`${env}`]: {
+        ...config['env'][`${env}`],
+        vars: newVars,
+      },
+    },
+  });
 }
 
 async function assertBinding(bindingName, env, appName) {
@@ -172,6 +173,7 @@ async function main(env, debug) {
     '_',
   );
   const id = parseId(bindingName, env, appName);
+
   if (debug || process.env.VITLE_LOG_LEVEL === 'debug') {
     console.log(config);
     console.log('bindingName', bindingName);
@@ -180,9 +182,8 @@ async function main(env, debug) {
 
   await setBindings(bindingName, appName, env, debug);
   await setGitconfig(id, env);
-
   await setSecrets(env);
-  // await setVars(id, env, config);
+  await setVars(env, config);
 }
 
 (async () => {

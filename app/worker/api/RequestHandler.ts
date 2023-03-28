@@ -225,11 +225,11 @@ class RequestHandler {
   async initData(env) {
     let headerslength = 0;
     let headerString = '';
-    for (let [key, value] of Object.entries(this.req.headers)) {
+    this.req.headers.forEach((value, key) => {
       // console.log(`${key}: ${value}`);
       headerString += `\n${key}: ${value}\n`;
       headerslength++;
-    }
+    });
     if (!isAssetURL(new URL(this.url))) {
       console.log(`worker.initData -> ${this.url}`);
       console.log(`method -> ${this.req.method}`);
