@@ -6,28 +6,46 @@ declare const __STATIC_CONTENT_MANIFEST: AssetManifestType;
 declare const ENVIRONMENT: string;
 
 interface Env {
-  DEMO_CFW_SSR: KVNamespace;
-  DEMO_CFW_SSR_SESSIONS: KVNamespace;
-  DEMO_CFW_SSR_USERS: KVNamespace;
-  __STATIC_CONTENT: KVNamespace;
-  __STATIC_CONTENT_MANIFEST: AssetManifestType;
+  // APP
+  LOG_LEVEL: LogLevel;
   ENVIRONMENT: 'dev' | 'prod';
-  __SECRET__: string;
-  ADMIN_USERS: string;
-  AUTH0_DOMAIN: string;
-  AUTH0_CLIENT_ID: string;
-  AUTH0_REDIRECT_URI: string;
-  AUTH0_URI: string;
+
+  // CORS
   ALLOWED_ORIGINS:
     | 'https://cloudflare-workers-vue-dev.shortpoet.workers.dev'
     | 'https://cloudflare-workers-vue.shortpoet.workers.dev'
     | 'https://ssr-dev.shortpoet.com'
     | 'https://ssr.shortpoet.com';
-  LOG_LEVEL: LogLevel;
   CACHE_TTL: number;
 
+  // CLOUDFLARE
+  DEMO_CFW_SSR: KVNamespace;
+  DEMO_CFW_SSR_SESSIONS: KVNamespace;
+  DEMO_CFW_SSR_USERS: KVNamespace;
+  __STATIC_CONTENT: KVNamespace;
+  __STATIC_CONTENT_MANIFEST: AssetManifestType;
   // MY_DURABLE_OBJECT: DurableObjectNamespace
   // MY_BUCKET: R2Bucket
+  // MY_QUEUE: R2Queue
+  // MY_CACHE: R2Cache
+  // MY_DATABASE: R2Database // D1
+
+  // AUTH
+  // AUTH COMMON
+  ADMIN_USERS: string;
+  __SECRET__: string;
+
+  // NEXT AUTH
+  JWT_SECRET: string;
+  NEXTAUTH_URL: string;
+  // NEXTAUTH_SECRET: string;
+  // NEXTAUTH_DATABASE_URL: string;
+
+  // AUTH0
+  AUTH0_DOMAIN: string;
+  AUTH0_CLIENT_ID: string;
+  AUTH0_REDIRECT_URI: string;
+  AUTH0_URI: string;
 }
 
 declare type LogLevel = 'debug' | 'info' | 'warn' | 'error' | 'fatal';

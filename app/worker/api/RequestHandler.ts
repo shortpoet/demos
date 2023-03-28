@@ -3,28 +3,60 @@ import { cloneRequest, cloneResponse, isAssetURL, logLevel } from '../util';
 import { BodyContext, User } from '../../types';
 import { createJsonResponse } from '../util';
 import { isValidJwt } from './auth/jwt';
+import type {
+  Request as WorkerRequest,
+  // Fetcher,
+} from '@cloudflare/workers-types';
 
 export { RequestHandler, defineInit };
 
 const FILE_LOG_LEVEL = 'error';
 
-function defineInit(request: Request): RequestInit {
+// class MyFetcher extends Fetcher {
+//   async fetch(
+//     input: RequestInfo,
+//     init?: RequestInit<RequestInitCfProperties>,
+//   ): Promise<Response> {
+//     const response = await fetch(input, init);
+//     return response;
+//   }
+// }
+
+function defineInit(request: WorkerRequest): RequestInit {
+  const headers = new Headers();
+  request.headers.forEach((value, key) => {
+    headers.set(key, value);
+  });
+
+  const body =
+    request.method !== 'HEAD' && request.method !== 'GET'
+      ? JSON.stringify(request.body)
+      : undefined;
+  const redirect: RequestRedirect = 'follow';
+  const controller = new AbortController();
+  const signal: AbortSignal = controller.signal;
+  signal.onabort = () => {
+    console.log('Operation aborted');
+  };
+
   return {
     method: request.method,
-    headers: request.headers,
-    body: request.body,
+    headers,
+    body,
     cf: request.cf,
-    redirect: request.redirect,
-    fetcher: request.fetcher,
+    redirect,
+    // fetcher: new MyFetcher(),
     integrity: request.integrity,
-    signal: request.signal,
+    signal,
   };
 }
 
-class RequestHandler<CfHostMetadata = unknown> extends Request<CfHostMetadata> {
+class RequestHandler {
   // class RequestHandler<CfHostMetadata = unknown> extends Request<CfHostMetadata> {
-  declare req: Request;
-  declare url: string;
+  private _res?: Response;
+  declare req: WorkerRequest;
+  declare reqOriginal: WorkerRequest;
+  declare url: URL;
   declare isAuthenticated: boolean;
   private declare token: string;
   declare query?: Record<string, string>;
@@ -33,11 +65,10 @@ class RequestHandler<CfHostMetadata = unknown> extends Request<CfHostMetadata> {
   declare data?: any;
   declare dump?: any;
 
-  constructor(req: Request, env: Env, init?: RequestInit) {
+  constructor(req: WorkerRequest, env: Env, init?: RequestInit) {
     if (logLevel(FILE_LOG_LEVEL, env)) {
       console.log(`worker.RequestHandler: ${req.url}`);
     }
-    super(req, (init = defineInit(req)));
 
     // const [stream1, stream2] = cloneRequest(req);
     // super(req, {
@@ -47,7 +78,10 @@ class RequestHandler<CfHostMetadata = unknown> extends Request<CfHostMetadata> {
     // console.log(
     //   `worker.RequestHandler.stream: ${JSON.stringify(stream2, null, 2)}`,
     // );
-    this.req = req;
+    this.url = new URL(req.url);
+    this.req = new Request(this.url, defineInit(req));
+    this.reqOriginal = req;
+
     // this.url = req.url;
     this.query = this._parseQuery(new URL(this.url));
     this.params = this._parseParams(new URL(this.url));
@@ -64,6 +98,12 @@ class RequestHandler<CfHostMetadata = unknown> extends Request<CfHostMetadata> {
     //   this.user = this._parseBodyData(this._parseBody(clone.body)).user;
     //   this.data = this._parseBodyData(this._parseBody(clone.body)).data;
     // }
+  }
+  get res(): Response {
+    if (!this._res) {
+      throw new Error('Response not set');
+    }
+    return this._res;
   }
   private _parseQuery(url: URL): Record<string, string> {
     const query: Record<string, string> = {};
@@ -152,7 +192,7 @@ class RequestHandler<CfHostMetadata = unknown> extends Request<CfHostMetadata> {
     } = { withAuth: false, headers: {} },
   ): Promise<Response> {
     let res;
-
+    this._res = res;
     if (options.withAuth) {
       const { valid, payload, status } = await isValidJwt(this, env, ctx);
       let statusText = 'OK';

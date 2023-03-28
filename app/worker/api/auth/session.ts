@@ -5,6 +5,7 @@ import {
   generateTypedUUID,
   generateUUID,
   logLevel,
+  getCookie,
 } from '../../util';
 import { RequestHandler } from '../RequestHandler';
 import { Session, User } from '../../../types';
@@ -77,18 +78,13 @@ async function getSessionFromCookie(
   user?: User,
 ): Promise<Session | undefined> {
   const cookieName = 'demo-cfw-ssr-session-token';
-  const sessionCookie = decodeURIComponent(handler.req.headers.get('Cookie'));
+  const cookies = decodeURIComponent(handler.req.headers.get('Cookie'));
   // if (logLevel(FILE_LOG_LEVEL, env)) {
   //   console.log('worker.getSessionFromCookie.sessionCookie', sessionCookie);
   // }
   let res;
-  if (sessionCookie) {
-    const sessionToken = sessionCookie
-      .split(`; `)
-      .find((row) => {
-        return row.startsWith(cookieName) && row.split('=')[1];
-      })
-      ?.split('=')[1];
+  if (cookies) {
+    const sessionToken = getCookie(cookies, cookieName);
 
     if (logLevel(FILE_LOG_LEVEL, env)) {
       console.log(

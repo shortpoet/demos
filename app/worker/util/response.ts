@@ -2,8 +2,34 @@ import { Env } from '../types';
 import { handleOptions, logLevel } from '.';
 import { RequestHandler } from '../api';
 
-export { createJsonResponse, cloneResponse, cacheResponse, cloneRequest };
+export {
+  createJsonResponse,
+  cloneResponse,
+  cacheResponse,
+  cloneRequest,
+  getCookie,
+  parseCookie,
+};
 const FILE_LOG_LEVEL = 'error';
+
+// const sessionToken = cookies
+//   .split(`; `)
+//   .find((row) => {
+//     return row.startsWith(cookieName) && row.split('=')[1];
+//   })
+//   ?.split('=')[1];
+
+function parseCookie(cookie: string): { [key: string]: string } {
+  return cookie
+    .split(';')
+    .map((c) => c.trim().split('='))
+    .reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {});
+}
+
+function getCookie(cookies: string, name: string): string {
+  const parsed = parseCookie(cookies);
+  return parsed[name];
+}
 
 function cloneResponse(response: Response): Response[] {
   const { body } = response;
@@ -67,6 +93,7 @@ async function cacheResponse(
 
   // Construct the cache key from the cache URL
   const cacheKey = new Request(cacheUrl.toString(), req);
+  // @ts-expect-error
   const cache = caches.default;
   cacheKey.headers.set('Cache-Control', `s-max-age=${options.cacheTTL}`);
 

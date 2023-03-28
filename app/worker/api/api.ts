@@ -4,11 +4,11 @@ import { createJsonResponse, handleCors, handleOptions } from '../util';
 import { RequestHandler } from '.';
 import { handleHealth } from './health';
 import { handleSession } from './auth';
-import { handleNextAuth } from './next/_handler';
+// import { handleNextAuth } from './next/handler';
 
 export { handleAPI };
 
-const FILE_LOG_LEVEL = 'debug';
+const FILE_LOG_LEVEL = 'error';
 
 async function handleAPI(
   handler: RequestHandler,
@@ -21,7 +21,7 @@ async function handleAPI(
   const url: URL = new URL(handler.req.url);
   let res;
   try {
-    log(`-> ${handler.req.method}://.${url.pathname}`);
+    log(`-> ${handler.req.method}://.${url.pathname}\n`);
     switch (true) {
       case handler.req.method === 'OPTIONS':
         res = handleOptions(handler, env);
@@ -33,9 +33,9 @@ async function handleAPI(
       case url.pathname.startsWith('/api/auth/session'):
         res = await handleSession(handler, env, ctx);
         break;
-      case url.pathname.startsWith('/api/next-auth'):
-        res = await handleNextAuth(handler, env, ctx);
-        break;
+      // case url.pathname.startsWith('/api/next-auth'):
+      //   res = await handleNextAuth(handler, env, ctx);
+      //   break;
 
       default:
         res = createJsonResponse({ error: 'Not Found' }, handler, env, 404);

@@ -1,8 +1,11 @@
 compatibility_date = "2023-02-28"
+# main = "./dist/worker.js"
 main = "./app/worker/index.ts"
 name = "demo-cfw-ssr"
 node_compat = true
 workers_dev = true
+# [build]
+# command = "pnpm build:w"
 [dev]
 port = 3000
 [[env.dev.kv_namespaces]]
