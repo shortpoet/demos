@@ -9,7 +9,7 @@
     <Link href="/api-data">Api Data</Link>
     <Link href="/auth">Auth</Link>
     <Link href="/auth0">Auth0</Link>
-    <!-- <Link href="/next-auth">Next Auth</Link> -->
+    <Link href="/next-auth">Next Auth</Link>
   </div>
 </template>
 

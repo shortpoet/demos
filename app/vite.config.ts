@@ -28,6 +28,7 @@ export default ({ mode }: { mode: string }) => {
       // 'process.env.NEXTAUTH_URL': JSON.stringify(process.env.NEXTAUTH_URL)
       // __SECRET__: env.__SECRET__,
       'process.env.__SECRET__': JSON.stringify(process.env.__SECRET__),
+      'process.env.NEXTAUTH_URL': JSON.stringify(process.env.NEXTAUTH_URL),
       __VUE_OPTIONS_API__: true,
       __VUE_PROD_DEVTOOLS__: false,
     },

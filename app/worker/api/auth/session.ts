@@ -83,6 +83,15 @@ async function getSessionFromCookie(
   //   console.log('worker.getSessionFromCookie.sessionCookie', sessionCookie);
   // }
   let res;
+  // override next-auth session for now
+
+  if (handler.url.pathname.startsWith('/next-auth')) {
+    console.log(
+      'worker.session.getSessionFromCookie.nextAuth -> skipping session for',
+      handler.url.pathname,
+    );
+    return res;
+  }
   if (cookies) {
     const sessionToken = getCookie(cookies, cookieName);
 

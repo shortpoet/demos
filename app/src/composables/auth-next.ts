@@ -1,12 +1,15 @@
-import { Auth0Instance, NextAuthInstance, User } from '../../types';
+import { NextAuthInstance, User } from '../../types';
 import { InjectionKey, ref, provide, inject } from 'vue';
 import { CookieSetOptions } from 'universal-cookie';
+import { useFetch } from './fetch';
+import { escapeNestedKeys } from 'app/util';
 
 export {
   COOKIES_SESSION_TOKEN,
   COOKIES_USER_TOKEN,
   SESSION_TOKEN_EXPIRY,
   cookieOptions,
+  useNextAuth,
 };
 
 const AuthSymbol: InjectionKey<NextAuthInstance> = Symbol();
@@ -17,7 +20,6 @@ const AuthSymbol: InjectionKey<NextAuthInstance> = Symbol();
 const user = ref<User | undefined>();
 const token = ref<string>();
 const authLoading = ref(true);
-const popupOpen = ref(false);
 const error = ref<any>();
 const isLoggedIn = ref(false);
 const audience = `https://ssr.shortpoet.com`;
@@ -45,12 +47,12 @@ export const provideAuth = () => {
   const auth = {
     user,
     authLoading,
-    popupOpen,
     isLoggedIn,
     authError: error,
 
+    login,
+    onLoad,
     // createAuthClient,
-    // onLoad,
     // handleRedirectCallback,
     // isAuthenticated,
     // loginWithPopup,
@@ -68,24 +70,56 @@ export const isClient = typeof window !== 'undefined';
 const defaultWindow: (Window & typeof globalThis) | undefined =
   /* #__PURE__ */ isClient ? window : undefined;
 
-const awaitWindowPromise = async (
-  window: Window | undefined,
-): Promise<Window> => {
-  if (!window) {
-    return new Promise((resolve) => {
-      const interval = setInterval(() => {
-        if (window) {
-          clearInterval(interval);
-          resolve(window);
-        }
-      }, 100);
-    });
-  }
-  return window;
-};
-
-const useAuthPlugin = () => {
+const useNextAuth = () => {
   const auth = inject(AuthSymbol);
   if (!auth) throw new Error('setPageContext() not called in parent');
-  return auth as Auth0Instance;
+  return auth as NextAuthInstance;
+};
+
+const onLoad = async () => {
+  // const url = new URL(`${process.env.NEXTAUTH_URL}/session`);
+  // const { data, error, dataLoading } = await useFetch(url.href);
+  // if (error.value) {
+  //   // if (import.meta.env.VITE_LOG_LEVEL === 'debug')
+  //   console.error(`error: ${error.value}`);
+  // }
+
+  // if (dataLoading.value) {
+  //   // if (import.meta.env.VITE_LOG_LEVEL === 'debug')
+  //   console.log(`dataLoading: ${dataLoading.value}`);
+  // }
+  // if (data.value) {
+  //   console.log(`data: ${JSON.stringify(data.value, null, 2)}`);
+  // }
+  authLoading.value = false;
+  return null;
+};
+
+const login = async (options?: any) => {
+  let res;
+  const url = new URL(`${process.env.NEXTAUTH_URL}/signin`);
+  const { data, error, dataLoading } = await useFetch(url.href);
+  if (error.value) {
+    // if (import.meta.env.VITE_LOG_LEVEL === 'debug')
+    console.error(`error: ${error.value}`);
+  }
+
+  if (dataLoading.value) {
+    // if (import.meta.env.VITE_LOG_LEVEL === 'debug')
+    console.log(`dataLoading: ${dataLoading.value}`);
+    res = { result: 'Loading', status: 'Loading' };
+  }
+  if (data.value) {
+    console.log(`data: ${JSON.stringify(data.value, null, 2)}`);
+    // if (import.meta.env.VITE_LOG_LEVEL === 'debug') {
+    //   let logObj = escapeNestedKeys({ ...data.value }, [
+    //     'token',
+    //     'body',
+    //     'Authorization',
+    //     'accessToken',
+    //     'sessionToken',
+    //   ]);
+    //   console.log(`data: ${JSON.stringify(logObj, null, 2)}`);
+    // }
+  }
 };

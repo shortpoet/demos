@@ -2,10 +2,10 @@
   <div class="layout">
     <MainNav />
     <Suspense>
-      <template v-if="loading">
+      <template v-if="authLoading">
         <div flex flex-col class="items-center justify-center p-5">
-          <h1 class="block whitespace-pre-line bg-orange-300 p-5 rounded-xl text-center text-4xl font-bold">
-            {{ `Auth\nSession\nLoading ...` }}
+          <h1 class="block whitespace-pre-line bg-yellow-200 p-5 rounded-xl text-center text-4xl font-bold">
+            {{ `Next Auth\nSession\nLoading ...` }}
           </h1>
           <slot name="fallback" />
         </div>
@@ -30,11 +30,12 @@ import AuthLayout from '~/layouts/UserLayout.vue';
 import AdminLayout from '~/layouts/AdminLayout.vue';
 import { usePageContext } from '~/composables/pageContext';
 import MainNav from '~/components/MainNav.vue';
+import { useNextAuth } from '~/composables/auth-next';
 
-const loading = ref(true);
+let authLoading = ref(true);
 const pageContext = usePageContext();
 
-console.log('suspenseLayout.pageContext: isAdmin -> ', pageContext.pageProps?.isAdmin);
+console.log('NextAuthLayout.pageContext: isAdmin -> ', pageContext.pageProps?.isAdmin);
 
 let Layout = pageContext.pageProps?.isAdmin ? AdminLayout : AuthLayout;
 const pageComponent = computed(() => {
@@ -43,7 +44,10 @@ const pageComponent = computed(() => {
 
 
 onMounted(async () => {
-  loading.value = false;
+  const auth = useNextAuth();
+  const { onLoad } = auth;
+  await onLoad();
+  authLoading.value = auth.authLoading.value;
 })
 
 </script>

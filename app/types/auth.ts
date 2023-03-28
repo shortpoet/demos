@@ -166,13 +166,15 @@ interface NextAuthInstance extends Partial<Auth0Client> {
   user: Ref<User | undefined>;
   authLoading: Ref<boolean>;
   authError: Ref<any>;
-  popupOpen: Ref<boolean>;
+  // popupOpen: Ref<boolean>;
+
+  login(options?: any): Promise<void>;
+  onLoad: () => Promise<User | null | undefined>;
   // createAuthClient: (
   //   onRedirectCallback: (appState: any) => void,
   //   redirect_uri?: string,
   //   options?: ClientOptions,
   // ) => Promise<void>;
-  // onLoad: () => Promise<User | null | undefined>;
   // // onLoad: Promise<void>;
   // isAuthenticated: () => Promise<boolean>;
   // loginWithPopup(o?: PopupLoginOptions): Promise<void>;

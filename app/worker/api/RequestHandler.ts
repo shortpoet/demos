@@ -174,6 +174,9 @@ class RequestHandler {
     }
     return this._res;
   }
+  set res(res: ResponsePlus) {
+    this._res = res;
+  }
   createQueryURL(query: Record<string, string>): URL {
     const url = new URL(this.url);
     Object.entries(query).forEach(([key, value]) => {

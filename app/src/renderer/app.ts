@@ -8,6 +8,7 @@ import '@unocss/reset/tailwind.css';
 import 'uno.css';
 import '~/styles/main.css';
 import { provideAuth } from '~/composables/auth-plugin';
+import { provideAuth as provideNextAuth } from '~/composables/auth-next';
 
 export { createApp };
 
@@ -29,6 +30,7 @@ function createApp(pageContext: PageContext) {
     created() {
       rootComponent = this;
       provideAuth();
+      provideNextAuth();
     },
     render() {
       return h(

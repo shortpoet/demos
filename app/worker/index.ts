@@ -52,13 +52,14 @@ export default {
     }
   },
 };
-declare module globalThis {
-  let process: { env: Env };
-}
-export interface Env {
-  JWT_SECRET: string;
-  NEXTAUTH_URL: string;
-}
+// declare module globalThis {
+//   let process: { env: Env };
+// }
+// export interface Env {
+//   NEXTAUTH_SECRET: string;
+//   NEXTAUTH_URL: string;
+// }
+
 async function handleFetchEvent(
   handler: RequestHandler,
   env: Env,

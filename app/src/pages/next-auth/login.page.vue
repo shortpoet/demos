@@ -1,5 +1,6 @@
 <template>
   <div class="page-container" flex-col items-center flex>
+    <h1>Next Auth</h1>
     <Link :href="`/auth`" :title="'back'">
     <i class="i-carbon-page-first" inline-block /><span>back</span>
     </Link>

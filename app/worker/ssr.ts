@@ -8,7 +8,11 @@ export { handleSsr };
 
 const FILE_LOG_LEVEL = 'error';
 
-async function handleSsr(handler: RequestHandler, env: Env, ctx) {
+async function handleSsr(
+  handler: RequestHandler,
+  env: Env,
+  ctx?: ExecutionContext,
+) {
   const log = logger(FILE_LOG_LEVEL, env);
   const userAgent = handler.req.headers.get('User-Agent') || '';
   const session = await getSessionFromCookie(handler, env);

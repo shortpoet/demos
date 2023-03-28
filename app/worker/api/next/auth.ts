@@ -31,7 +31,7 @@ const AuthHandler = (env: Env): AuthConfig => {
       }) as Provider,
     ],
     trustHost: true,
-    secret: env.JWT_SECRET,
+    secret: env.NEXTAUTH_SECRET,
   };
 };
 

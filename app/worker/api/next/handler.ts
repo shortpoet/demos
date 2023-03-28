@@ -5,6 +5,7 @@ import {
   generateTypedUUID,
   generateUUID,
   getCookie,
+  logger,
   logLevel,
   parseCookie,
 } from '../../util';
@@ -14,8 +15,9 @@ import { getUser, sessionUser } from '../auth/user';
 import { getToken } from '@auth/core/jwt';
 import { Auth } from '@auth/core';
 import AuthHandler from './auth';
+import { handleSsr } from 'ssr';
 
-const FILE_LOG_LEVEL = 'error';
+const FILE_LOG_LEVEL = 'debug';
 
 export { handleNextAuth, exposeSession };
 
@@ -53,40 +55,61 @@ const transformGetRequest = (handler: RequestHandler, env: Env) => {
 };
 
 const handleRequest = async (handler: RequestHandler, env: Env) => {
+  const log = logger(FILE_LOG_LEVEL, env);
+  log('worker.api.auth.next.handleRequest');
   const url = new URL(handler.req.url);
   const action = url.pathname.split('/').slice(2);
+  log(`action: ${action}`);
 
-  const token = await getToken({
-    req: handler.req,
-    secret: env.JWT_SECRET,
-  });
-  const sessionToken = (handler.user.token = token
-    ? JSON.stringify(token)
-    : undefined);
-
-  const needsLogin = ['verify-email' /*, 'otp' */].includes(action[1]);
-
-  if (action[0] === 'callback') {
-    if (handler.req.method === 'GET') {
-      transformGetRequest(handler.req as any, env);
-    }
-    const body: BodyInit = sessionToken ?? undefined;
-    const init = defineInitR(handler.req, {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body,
+  try {
+    const token = await getToken({
+      req: handler.req,
+      secret: env.NEXTAUTH_SECRET,
     });
+    console.log('token', token);
+    const sessionToken = handler.user
+      ? (handler.user.token = token ? JSON.stringify(token) : undefined)
+      : undefined;
 
-    if (needsLogin && !sessionToken)
-      return Response.redirect('/next-auth/login', 307);
-    if (!needsLogin && sessionToken)
-      return new Response('Already logged-in', { status: 403 });
+    const needsLogin = ['verify-email' /*, 'otp' */, 'signin'].includes(
+      action[1],
+    );
+
+    log(`needsLogin: ${needsLogin}`);
+
+    if (action[0] === 'callback') {
+      if (handler.req.method === 'GET') {
+        transformGetRequest(handler.req as any, env);
+      }
+      const body: BodyInit = sessionToken ?? undefined;
+      const init = defineInitR(handler.req, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body,
+      });
+
+      if (needsLogin && !sessionToken)
+        return Response.redirect('/api/next-auth/logisignin', 307);
+      if (!needsLogin && sessionToken)
+        return new Response('Already logged-in', { status: 403 });
+    }
+
+    const nextAuthUrl = handler.createQueryURL({ nextauth: action.join('/') });
+    log(`nextAuthUrl: ${nextAuthUrl}`);
+    handler.res = new Response();
+    const res = await handler.nextAuth(
+      new Request(nextAuthUrl, handler.req),
+      handler.res,
+    );
+    log(`res: ${res}`);
+    log(JSON.stringify(res, null, 2));
+    handler.req = res.req;
+    return res;
+    return handleSsr(handler, env);
+  } catch (error) {
+    console.log('error', error);
   }
-
-  const nextAuthUrl = handler.createQueryURL({ nextauth: action.join('/') });
-
-  handler.nextAuth(new Request(nextAuthUrl, handler.req), handler.res);
 };
 
 // import cookieParser from 'cookie-parser';
@@ -132,6 +155,10 @@ async function handleNextAuth(
 ) {
   const url = new URL(handler.req.url);
   const method = handler.req.method;
+  const log = logger(FILE_LOG_LEVEL, env);
+  log(
+    `worker.api.auth.next.handleNextAuth -> ${handler.req.method}://.${url.pathname}\n`,
+  );
   let res;
 
   const authHandler = (req, res) => Auth(req, AuthHandler(env));
@@ -142,21 +169,32 @@ async function handleNextAuth(
   // req.query.nextauth = nextauth;
 
   // NextAuthHandler(req, res);
+  log(`\nXXXXXXXXXXXXXXXXXXXXXXXXX\n\tTest pathname\n`);
+  log(`${new RegExp(/test/).test('testing')}`);
+  log(
+    `${new RegExp(/^\/api\/next-auth\/(csrf|session|signin)$/i).test(
+      url.pathname,
+    )}`,
+  );
 
   try {
     switch (true) {
-      case method === 'GET' && /^\/auth\/(csrf|session)$/.test(url.pathname):
+      case method === 'GET' &&
+        /^\/api\/next-auth\/(csrf|session|signin)$/i.test(url.pathname):
         res = await handleRequest(handler, env);
         break;
       case method === 'POST' &&
-        /^\/auth\/callback\/(register|login)$/i.test(url.pathname):
+        /^\/api\/next-auth\/callback\/(register|login|signin)$/i.test(
+          url.pathname,
+        ):
         res = await handleRequest(handler, env);
         break;
       case method === 'GET' &&
-        /^\/auth\/callback\/(verify-email|otp)$/i.test(url.pathname):
+        /^\/api\/next-auth\/callback\/(verify-email|otp)$/i.test(url.pathname):
         res = await handleRequest(handler, env);
         break;
-      case method === 'POST' && /^\/auth\/signout$/.test(url.pathname):
+      case method === 'POST' &&
+        /^\/api\/next-auth\/signout$/i.test(url.pathname):
         res = await handleRequest(handler, env);
         break;
       // case method === 'GET' && url.pathname.startsWith('/api/next-auth/signin'):

@@ -36,13 +36,13 @@ export const requestInit: RequestConfig = {
 
 const useFetch = async <T extends unknown>(
   path: string,
-  options: RequestConfig | null,
+  options?: RequestConfig | null,
   // valueRef: Ref<T> = <Ref<T>>ref(),
   // loadingRef: Ref<boolean> = ref(false),
   // errorRef: Ref<any> = ref(null),
 ) => {
   const urlBase = `${import.meta.env.VITE_APP_URL}`;
-  const url = `${urlBase}/${path}`;
+  const url = path.startsWith('http') ? path : `${urlBase}/${path}`;
 
   const dataLoading = ref(true);
   const error = ref(null);
@@ -51,7 +51,7 @@ const useFetch = async <T extends unknown>(
     options = {};
   }
   console.info(`fetch.fetching data from: -> ${url}`);
-
+  options = { ...requestInit, ...options };
   const token = ref(options.token || options.user?.token);
   const user = ref(options.user);
   // possible leak of private data

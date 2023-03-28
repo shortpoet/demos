@@ -81,7 +81,14 @@ async function setSecrets(env) {
     '__SECRET__',
     `Cloud/auth0/${process.env.VITE_APP_NAME}/${env}/__SECRET__`,
     env,
-    16,
+    32,
+  );
+
+  setSecretFile(
+    'NEXTAUTH_SECRET',
+    `Cloud/auth0/${process.env.VITE_APP_NAME}/${env}/NEXTAUTH_SECRET`,
+    env,
+    32,
   );
 
   setSecretFile(

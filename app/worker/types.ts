@@ -35,17 +35,15 @@ interface Env {
   ADMIN_USERS: string;
   __SECRET__: string;
 
-  // NEXT AUTH
-  JWT_SECRET: string;
-  NEXTAUTH_URL: string;
-  // NEXTAUTH_SECRET: string;
-  // NEXTAUTH_DATABASE_URL: string;
-
   // AUTH0
   AUTH0_DOMAIN: string;
   AUTH0_CLIENT_ID: string;
   AUTH0_REDIRECT_URI: string;
-  AUTH0_URI: string;
+
+  // NEXT AUTH
+  NEXTAUTH_URL: string;
+  NEXTAUTH_SECRET: string;
+  // NEXTAUTH_DATABASE_URL: string;
 }
 
 declare type LogLevel = 'debug' | 'info' | 'warn' | 'error' | 'fatal';

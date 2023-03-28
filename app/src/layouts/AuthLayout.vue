@@ -41,7 +41,7 @@ import MainNav from '~/components/MainNav.vue';
 // const loginSlot = slots.login;
 const loading = ref(true);
 const pageContext = usePageContext();
-console.log('suspenseLayout.pageContext: isAdmin -> ', pageContext.pageProps?.isAdmin);
+console.log('AuthLayout.pageContext: isAdmin -> ', pageContext.pageProps?.isAdmin);
 let Layout = pageContext.pageProps?.isAdmin ? AdminLayout : AuthLayout;
 const pageComponent = computed(() => {
   return Layout;
@@ -49,12 +49,12 @@ const pageComponent = computed(() => {
 
 
 onMounted(async () => {
-  // console.log('suspenseLayout.onMounted.before');
+  // console.log('AuthLayout.onMounted.before');
   // await setTimeout(() => {
-  //   console.log('suspenseLayout.onMounted.timeout');
+  //   console.log('AuthLayout.onMounted.timeout');
   //   loading.value = false;
   // }, 1000);
-  // console.log('suspenseLayout.onMounted.after: loading ->', loading.value);
+  // console.log('AuthLayout.onMounted.after: loading ->', loading.value);
 
   const authP = useAuthPlugin();
   await authP?.createAuthClient(DEFAULT_REDIRECT_CALLBACK);

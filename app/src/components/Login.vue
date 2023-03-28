@@ -37,7 +37,6 @@
 <script lang="ts">
 import { ref } from 'vue';
 import { cookieOptions, COOKIES_USER_TOKEN, COOKIES_SESSION_TOKEN, DEFAULT_REDIRECT_CALLBACK, useAuthPlugin } from '~/composables/auth-plugin';
-import { GithubUser } from '~/../types';
 
 export default {
   props: {
@@ -54,7 +53,7 @@ export default {
 
     let isLoggedIn = ref(false);
     let authError = ref(null);
-    let user = ref({} as GithubUser);
+    let user = ref();
     let authLoading = ref(true);
 
     const c = ctx;
