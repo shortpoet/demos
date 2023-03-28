@@ -114,6 +114,7 @@ async function setVars(id, env, envVars) {
   console.log(env);
   console.log(id);
   console.log(envVars);
+  // const ssrDirs = path.readdirSync(ssrDir).map((dir) => path.join(ssrDir, dir));
 
   const config = getToml();
 
