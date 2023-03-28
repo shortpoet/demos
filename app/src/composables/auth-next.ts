@@ -3,6 +3,7 @@ import { InjectionKey, ref, provide, inject } from 'vue';
 import { CookieSetOptions } from 'universal-cookie';
 import { useFetch } from './fetch';
 import { escapeNestedKeys } from 'app/util';
+import { navigate } from 'vite-plugin-ssr/client/router';
 
 export {
   COOKIES_SESSION_TOKEN,
@@ -99,6 +100,7 @@ const login = async (options?: any) => {
   let res;
   const url = new URL(`${process.env.NEXTAUTH_URL}/signin`);
   const { data, error, dataLoading } = await useFetch(url.href);
+  navigate(url.pathname);
   if (error.value) {
     // if (import.meta.env.VITE_LOG_LEVEL === 'debug')
     console.error(`error: ${error.value}`);

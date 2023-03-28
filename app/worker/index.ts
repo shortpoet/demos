@@ -5,9 +5,21 @@ import {
   MethodNotAllowedError,
   NotFoundError,
 } from '@cloudflare/kv-asset-handler/dist/types';
-import { isAPI, isAssetURL, logger, logLevel } from './util';
+import {
+  isAPI,
+  isAssetURL,
+  isGenerated,
+  isSSR,
+  logger,
+  logLevel,
+} from './util';
 import { Env } from './types';
-import { defineInit, RequestHandler, WorkerRequest } from './api';
+import {
+  defineInit,
+  handleGenerated,
+  RequestHandler,
+  WorkerRequest,
+} from './api';
 import { handleAPI } from './api';
 import { exposeSession } from './api';
 const FILE_LOG_LEVEL = 'error';
@@ -72,23 +84,22 @@ async function handleFetchEvent(
 
   // endless redirect
   // await exposeSession(handler, env);
-
-  if (isAssetURL(url)) {
-    log('worker.handleFetchEvent.isAssetURL');
-    return await handleStaticAssets(handler.req, env, ctx);
+  switch (true) {
+    case isAssetURL(url):
+      log('worker.handleFetchEvent.isAssetURL');
+      return await handleStaticAssets(handler.req, env, ctx);
+    case isAPI(url):
+      log('worker.handleFetchEvent.isAPI');
+      return await handleAPI(handler, env, ctx, waitUntil);
+    // case isGenerated(url):
+    //   log('worker.handleFetchEvent.isGenerated');
+    //   return await handleGenerated(handler, env);
+    // has to be at end until made more explicit
+    default:
+      log('worker.handleFetchEvent.default');
+      return (
+        (await handleSsr(handler, env, ctx)) ??
+        new Response('Not Found', { status: 404 })
+      );
   }
-  if (isAPI(url)) {
-    const apiRes = handleAPI(handler, env, ctx, waitUntil);
-    // console.log('worker.handleFetchEvent.apiRes');
-    // console.log(JSON.stringify(apiRes, null, 2));
-    return apiRes;
-  }
-
-  const response = await handleSsr(handler, env, ctx);
-  console.log(
-    `worker.handleFetchEvent.response: ${JSON.stringify(response, null, 2)}`,
-  );
-  log(response);
-  if (response !== null) return response;
-  return new Response('Not Found', { status: 404 });
 }

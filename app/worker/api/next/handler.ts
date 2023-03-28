@@ -14,12 +14,12 @@ import { Session, User } from '../../../types';
 import { getUser, sessionUser } from '../auth/user';
 import { getToken } from '@auth/core/jwt';
 import { Auth } from '@auth/core';
-import AuthHandler from './auth';
+import authConfig from './auth';
 import { handleSsr } from 'ssr';
 
 const FILE_LOG_LEVEL = 'debug';
 
-export { handleNextAuth, exposeSession };
+export { handleNextAuth, exposeSession, handleGenerated };
 
 const AuthError = class AuthError extends Error {};
 
@@ -54,7 +54,46 @@ const transformGetRequest = (handler: RequestHandler, env: Env) => {
   const _req = new Request(handler.req.url, init);
 };
 
+const handleGenerated = async (handler: RequestHandler, env: Env) => {
+  const url = new URL(handler.req.url);
+  const log = logger(FILE_LOG_LEVEL, env);
+  log('worker.api.auth.next.handleGenerated');
+  const html = await handler.req.text();
+  const redirect = `${url.protocol}//${url.host}/_redirect_next/signin`;
+  // return await fetch(handler.req);
+  // return handler.req;
+  return new Response(html, {
+    headers: {
+      'content-type': 'text/html;charset=UTF-8',
+      // Location: redirect,
+    },
+    // status: 307,
+  });
+  // return Response.redirect(redirect, 307);
+
+  // const { csrfCookie, callbackCookie } = cookieNames(env);
+  // const cookies = handler.req.headers.get('Cookie') || '';
+  // const csrfToken = (getCookie(cookies, csrfCookie) || '').split('|')[0];
+  // const callbackUrl = getCookie(cookies, callbackCookie);
+  // const body: BodyInit = JSON.stringify({
+  //   ...handler.query,
+  //   redirect: 'true',
+  //   json: 'false',
+  //   csrfToken,
+  //   callbackUrl,
+  // });
+  // const init = {
+  //   headers: {
+  //     ...handler.req.headers,
+  //   },
+  //   method: 'POST',
+  //   body,
+  // };
+};
+
 const handleRequest = async (handler: RequestHandler, env: Env) => {
+  const urlOriginal = new URL(handler.req.url);
+  console.log('urlOriginal', urlOriginal.href);
   const log = logger(FILE_LOG_LEVEL, env);
   log('worker.api.auth.next.handleRequest');
   const url = new URL(handler.req.url);
@@ -97,13 +136,34 @@ const handleRequest = async (handler: RequestHandler, env: Env) => {
 
     const nextAuthUrl = handler.createQueryURL({ nextauth: action.join('/') });
     log(`nextAuthUrl: ${nextAuthUrl}`);
+
     handler.res = new Response();
     const res = await handler.nextAuth(
       new Request(nextAuthUrl, handler.req),
       handler.res,
     );
+
     log(`res: ${res}`);
-    log(`${JSON.stringify(res.clone().text(), null, 2)}`);
+    // log(`${JSON.stringify(await res.clone().text(), null, 2)}`);
+    // return new Response(html, {
+    //   headers: {
+    //     'content-type': 'text/html;charset=UTF-8',
+    //   },
+    // });
+    // const redirect = `${urlOriginal.protocol}//${urlOriginal.host}/_next${urlOriginal.pathname}`;
+    // const html = await res.text();
+    // log(`redirecting to ${redirect}`);
+    // return new Response(html, {
+    //   status: 301,
+    //   headers: {
+    //     'Content-Type': 'text/html',
+    //     Location: `${redirect}`,
+    //   },
+    // });
+    console;
+    const other = await Auth(handler.req, authConfig(env));
+    console.log('other', other);
+    return other;
     return res;
     // const init = new Request(nextAuthUrl, {
     //   method: 'GET',
@@ -163,25 +223,13 @@ async function handleNextAuth(
     `worker.api.auth.next.handleNextAuth -> ${handler.req.method}://.${url.pathname}\n`,
   );
   let res;
-
-  const authHandler = (req, res) => {
+  const authHandler = async (req, res) => {
     console.log(`$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$\n\tauthHandler`);
-    return Auth(req, AuthHandler(env));
+    const authRes = await Auth(req, authConfig(env));
+    console.log('Auth Res', JSON.stringify(authRes, null, 2));
+    return authRes;
   };
   handler.nextAuth = authHandler;
-
-  // const nextauth = req.path.split('/');
-  // nextauth.splice(0, 3);
-  // req.query.nextauth = nextauth;
-
-  // NextAuthHandler(req, res);
-  log(`\nXXXXXXXXXXXXXXXXXXXXXXXXX\n\tTest pathname\n`);
-  log(`${new RegExp(/test/).test('testing')}`);
-  log(
-    `${new RegExp(/^\/api\/next-auth\/(csrf|session|signin)$/i).test(
-      url.pathname,
-    )}`,
-  );
 
   try {
     switch (true) {
