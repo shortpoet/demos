@@ -9,7 +9,7 @@ import {
   logLevel,
   parseCookie,
 } from '../../util';
-import { defineInitR, RequestHandler } from '../RequestHandler';
+import { RequestHandler } from '../RequestHandler';
 import { Session, User } from '../../../types';
 import { getUser, sessionUser } from '../auth/user';
 import { getToken } from '@auth/core/jwt';
@@ -121,7 +121,7 @@ const handleRequest = async (handler: RequestHandler, env: Env) => {
         transformGetRequest(handler.req as any, env);
       }
       const body: BodyInit = sessionToken ?? undefined;
-      const init = defineInitR(handler.req, {
+      const init = new Request(handler.req, {
         headers: {
           'Content-Type': 'application/json',
         },

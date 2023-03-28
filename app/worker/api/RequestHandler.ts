@@ -1,6 +1,6 @@
 import { Env } from '../types';
-import { cloneRequest, cloneResponse, isAssetURL, logLevel } from '../util';
-import { BodyContext, Session, User } from '../../types';
+import { isAssetURL, logLevel, readBody } from '../util';
+import { Session, User } from '../../types';
 import { createJsonResponse } from '../util';
 import { isValidJwt } from './auth/jwt';
 import type {
@@ -8,103 +8,10 @@ import type {
   Fetcher,
   IncomingRequestCfPropertiesCloudflareAccessOrApiShield,
 } from '@cloudflare/workers-types';
-import AuthHandler from './next/auth';
-import { Auth } from '@auth/core';
 
-export { RequestHandler, defineInit, defineInitR, WorkerRequest };
+export { RequestHandler, WorkerRequest };
 
 const FILE_LOG_LEVEL = 'error';
-
-interface DefineInitOptions {
-  method?: string;
-  headers?: HeadersInit;
-  body?: BodyInit;
-  redirect?: RequestRedirect;
-  cf?: Partial<IncomingRequestCfPropertiesCloudflareAccessOrApiShield>;
-  integrity?: string;
-  signal?: AbortSignal;
-  fetcher?: Fetcher;
-}
-class MyFetcher {
-  fetch(input: RequestInfo, init?: RequestInit): Promise<Response> {
-    return fetch(input, init);
-  }
-}
-
-async function defineInit(
-  request: WorkerRequest,
-  options: DefineInitOptions = {},
-): Promise<RequestInit> {
-  const { method = request.method } = options;
-  const headers = new Headers(request.headers);
-  if (options.headers) {
-    for (const [key, value] of Object.entries(options.headers)) {
-      headers.set(key, value);
-    }
-  }
-  // const fetcher = new MyFetcher();
-
-  const body =
-    method !== 'HEAD' && method !== 'GET'
-      ? options.body ?? (await request.text())
-      : undefined;
-
-  const redirect = options.redirect ?? 'follow';
-  const cf = options.cf ?? request.cf;
-  const integrity = options.integrity ?? request.integrity;
-
-  const controller = new AbortController();
-  const signal = options.signal ?? controller.signal;
-  signal.onabort = () => {
-    console.log('Operation aborted');
-  };
-
-  return {
-    method,
-    headers,
-    body,
-    redirect,
-    cf,
-    integrity,
-    signal,
-  };
-}
-function defineInitR(
-  request: Request,
-  options: DefineInitOptions = {},
-): Omit<RequestInit, 'cf'> {
-  const { method = request.method } = options;
-  const headers = new Headers(request.headers);
-  if (options.headers) {
-    for (const [key, value] of Object.entries(options.headers)) {
-      headers.set(key, value);
-    }
-  }
-  // const fetcher = new MyFetcher();
-
-  const body =
-    method !== 'HEAD' && method !== 'GET'
-      ? options.body ?? JSON.stringify(request.body)
-      : undefined;
-
-  const redirect = options.redirect ?? 'follow';
-  const integrity = options.integrity ?? request.integrity;
-
-  const controller = new AbortController();
-  const signal = options.signal ?? controller.signal;
-  signal.onabort = () => {
-    console.log('Operation aborted');
-  };
-
-  return {
-    method,
-    headers,
-    body,
-    redirect,
-    integrity,
-    signal,
-  };
-}
 
 interface ResponsePlus extends Response {
   readonly headers: Headers;
@@ -122,7 +29,6 @@ class RequestHandler {
   // class RequestHandler<CfHostMetadata = unknown> extends Request<CfHostMetadata> {
   private _res?: ResponsePlus;
   declare req: Request;
-  declare reqOriginal: Request;
   declare url: URL;
   declare isAuthenticated: boolean;
   private declare token: string;
@@ -139,34 +45,10 @@ class RequestHandler {
       console.log(`worker.RequestHandler: ${req.url}`);
     }
 
-    // const [stream1, stream2] = cloneRequest(req);
-    // super(req, {
-    //   ...init,
-    //   body: stream1,
-    // });
-    // console.log(
-    //   `worker.RequestHandler.stream: ${JSON.stringify(stream2, null, 2)}`,
-    // );
     this.url = new URL(req.url);
-    this.reqOriginal = req;
     this.req = new Request(req.url, req);
-
-    // this.url = req.url;
     this.query = this._parseQuery(new URL(this.url));
     this.params = this._parseParams(new URL(this.url));
-
-    // if (this.body) {
-    //   console.log('worker.RequestHandler.body', this.body);
-    //   this.user = this._parseBodyData(this._parseBody(this.body)).user;
-    //   this.data = this._parseBodyData(this._parseBody(this.body)).data;
-    // }
-
-    // const clone = this.clone();
-    // if (clone.body) {
-    //   console.log('worker.RequestHandler.clone.body', clone.body);
-    //   this.user = this._parseBodyData(this._parseBody(clone.body)).user;
-    //   this.data = this._parseBodyData(this._parseBody(clone.body)).data;
-    // }
   }
   get res(): ResponsePlus {
     if (!this._res) {
@@ -199,27 +81,18 @@ class RequestHandler {
     return params;
   };
 
-  private _parseBody: (body: any) => any = (body) => {
-    if (body instanceof ReadableStream) {
-      return body;
+  private _parseBody: (request: Request) => any = async (request) => {
+    if (request.body instanceof ReadableStream) {
+      return await request.json();
     }
-    if (typeof body === 'string') {
+    if (typeof request.body === 'string') {
       try {
-        return JSON.parse(body);
+        return JSON.parse(request.body);
       } catch (e) {
-        return body;
+        return request.body;
       }
     }
-    return body;
-  };
-
-  private _parseBodyData: (body: any) => { user?: User; data?: any } = (
-    body,
-  ) => {
-    return {
-      ...(body.user ? { user: body.user } : {}),
-      ...(body.data ? { data: body.data } : {}),
-    };
+    return request.body;
   };
 
   async initData(env) {
@@ -240,24 +113,11 @@ class RequestHandler {
     if (logLevel(FILE_LOG_LEVEL, env)) {
       console.log(`headers ->  \n${headerString}\n`);
     }
-    // this.req = new Request(this.url, await defineInit(this.reqOriginal, env));
-
-    // this results in an error when there is a user object in request
-    // but can't see any of the data
-    if (this.req.method === 'POST') {
-      const t = await this.req.text();
-      // const j: BodyContext = await this.req.clone().json();
-      // console.log('worker.handleRequest.text', t);
-      // if (j) {
-      //   this.user = j.user;
-      //   this.data = j.data;
-      // }
-      const data = JSON.parse(t);
-      // console.log('worker.handleRequest.data', data);
-      this.user = data;
-      this.data = data.data;
-      // console.log('worker.handleRequest.body', this.data);
-      // console.log('worker.handleRequest.user', this.user);
+    if (this.req.body && this.req.method === 'POST') {
+      this.data = await this._parseBody(this.req);
+      if (this.data && this.url && this.url.pathname === '/api/auth/session') {
+        this.user = this.data;
+      }
     }
   }
 
