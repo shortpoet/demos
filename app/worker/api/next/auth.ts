@@ -5,7 +5,7 @@ import Credentials from '@auth/core/providers/credentials';
 import { Provider } from '@auth/core/providers';
 import { Env } from 'types';
 
-const AuthHandler = (env: Env): AuthConfig => {
+const authConfig = (env: Env): AuthConfig => {
   console.log(`create auth handler`);
   return {
     providers: [
@@ -38,4 +38,4 @@ const AuthHandler = (env: Env): AuthConfig => {
 
 // const request = new Request('https://example.com');
 
-export default AuthHandler;
+export default authConfig;
