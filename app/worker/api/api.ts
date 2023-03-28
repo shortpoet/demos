@@ -4,7 +4,7 @@ import { createJsonResponse, handleCors, handleOptions } from '../util';
 import { RequestHandler } from '.';
 import { handleHealth } from './health';
 import { handleSession } from './auth';
-// import { handleNextAuth } from './next/handler';
+import { handleNextAuth } from './next/handler';
 
 export { handleAPI };
 
@@ -33,9 +33,9 @@ async function handleAPI(
       case url.pathname.startsWith('/api/auth/session'):
         res = await handleSession(handler, env, ctx);
         break;
-      // case url.pathname.startsWith('/api/next-auth'):
-      //   res = await handleNextAuth(handler, env, ctx);
-      //   break;
+      case url.pathname.startsWith('/api/next-auth'):
+        res = await handleNextAuth(handler, env, ctx);
+        break;
 
       default:
         res = createJsonResponse({ error: 'Not Found' }, handler, env, 404);

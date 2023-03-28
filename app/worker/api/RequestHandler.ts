@@ -1,54 +1,107 @@
 import { Env } from '../types';
 import { cloneRequest, cloneResponse, isAssetURL, logLevel } from '../util';
-import { BodyContext, User } from '../../types';
+import { BodyContext, Session, User } from '../../types';
 import { createJsonResponse } from '../util';
 import { isValidJwt } from './auth/jwt';
 import type {
   Request as WorkerRequest,
   Fetcher,
+  IncomingRequestCfPropertiesCloudflareAccessOrApiShield,
 } from '@cloudflare/workers-types';
 import AuthHandler from './next/auth';
 import { Auth } from '@auth/core';
 
-export { RequestHandler, defineInit };
+export { RequestHandler, defineInit, defineInitR, WorkerRequest };
 
 const FILE_LOG_LEVEL = 'error';
 
-// class MyFetcher implements Fetcher {
-//   async fetch(
-//     input: Request,
-//     init?: RequestInit,
-//   ): Promise<Response> {
-//     const response = await fetch(input, init);
-//     return response;
-//   }
-// }
+interface DefineInitOptions {
+  method?: string;
+  headers?: HeadersInit;
+  body?: BodyInit;
+  redirect?: RequestRedirect;
+  cf?: Partial<IncomingRequestCfPropertiesCloudflareAccessOrApiShield>;
+  integrity?: string;
+  signal?: AbortSignal;
+  fetcher?: Fetcher;
+}
+class MyFetcher {
+  fetch(input: RequestInfo, init?: RequestInit): Promise<Response> {
+    return fetch(input, init);
+  }
+}
 
-function defineInit(request: WorkerRequest): Partial<RequestInit> {
-  const headers = new Headers();
-  request.headers.forEach((value, key) => {
-    headers.set(key, value);
-  });
+function defineInit(
+  request: WorkerRequest,
+  options: DefineInitOptions = {},
+): RequestInit {
+  const { method = request.method } = options;
+  const headers = new Headers(request.headers);
+  if (options.headers) {
+    for (const [key, value] of Object.entries(options.headers)) {
+      headers.set(key, value);
+    }
+  }
+  // const fetcher = new MyFetcher();
 
   const body =
-    request.method !== 'HEAD' && request.method !== 'GET'
-      ? JSON.stringify(request.body)
+    method !== 'HEAD' && method !== 'GET'
+      ? options.body ?? JSON.stringify(request.body)
       : undefined;
-  const redirect: RequestRedirect = 'follow';
+
+  const redirect = options.redirect ?? 'follow';
+  const cf = options.cf ?? request.cf;
+  const integrity = options.integrity ?? request.integrity;
+
   const controller = new AbortController();
-  const signal: AbortSignal = controller.signal;
+  const signal = options.signal ?? controller.signal;
   signal.onabort = () => {
     console.log('Operation aborted');
   };
 
   return {
-    method: request.method,
+    method,
     headers,
     body,
-    cf: request.cf,
     redirect,
-    // fetcher: new MyFetcher(),
-    integrity: request.integrity,
+    cf,
+    integrity,
+    signal,
+  };
+}
+function defineInitR(
+  request: Request,
+  options: DefineInitOptions = {},
+): Omit<RequestInit, 'cf'> {
+  const { method = request.method } = options;
+  const headers = new Headers(request.headers);
+  if (options.headers) {
+    for (const [key, value] of Object.entries(options.headers)) {
+      headers.set(key, value);
+    }
+  }
+  // const fetcher = new MyFetcher();
+
+  const body =
+    method !== 'HEAD' && method !== 'GET'
+      ? options.body ?? JSON.stringify(request.body)
+      : undefined;
+
+  const redirect = options.redirect ?? 'follow';
+  const integrity = options.integrity ?? request.integrity;
+
+  const controller = new AbortController();
+  const signal = options.signal ?? controller.signal;
+  signal.onabort = () => {
+    console.log('Operation aborted');
+  };
+
+  return {
+    method,
+    headers,
+    body,
+    redirect,
+    integrity,
     signal,
   };
 }
@@ -76,9 +129,10 @@ class RequestHandler {
   declare query?: Record<string, string>;
   declare params?: Record<string, string>;
   declare user?: User;
+  declare session?: Session;
   declare data?: any;
   declare dump?: any;
-  declare nextAuth?: typeof Auth;
+  declare nextAuth?: any;
 
   constructor(req: WorkerRequest, env: Env, init?: RequestInit) {
     if (logLevel(FILE_LOG_LEVEL, env)) {
@@ -119,6 +173,13 @@ class RequestHandler {
       throw new Error('Response not set');
     }
     return this._res;
+  }
+  createQueryURL(query: Record<string, string>): URL {
+    const url = new URL(this.url);
+    Object.entries(query).forEach(([key, value]) => {
+      url.searchParams.set(key, value);
+    });
+    return url;
   }
   private _parseQuery(url: URL): Record<string, string> {
     const query: Record<string, string> = {};

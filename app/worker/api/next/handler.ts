@@ -8,7 +8,7 @@ import {
   logLevel,
   parseCookie,
 } from '../../util';
-import { RequestHandler } from '../RequestHandler';
+import { defineInitR, RequestHandler } from '../RequestHandler';
 import { Session, User } from '../../../types';
 import { getUser, sessionUser } from '../auth/user';
 import { getToken } from '@auth/core/jwt';
@@ -17,7 +17,7 @@ import AuthHandler from './auth';
 
 const FILE_LOG_LEVEL = 'error';
 
-export { handleNextAuth };
+export { handleNextAuth, exposeSession };
 
 const uri = process.env.NEXTAUTH_URL;
 
@@ -53,32 +53,40 @@ const transformGetRequest = (handler: RequestHandler) => {
 };
 
 const handleRequest = async (handler: RequestHandler, env: Env) => {
-  const action = new URL(handler.req.url).pathname.split('/').slice(2);
+  const url = new URL(handler.req.url);
+  const action = url.pathname.split('/').slice(2);
 
   const token = await getToken({
     req: handler.req,
     secret: env.JWT_SECRET,
   });
-  const sessionToken = token ? JSON.stringify(token) : undefined;
+  const sessionToken = (handler.user.token = token
+    ? JSON.stringify(token)
+    : undefined);
 
   const needsLogin = ['verify-email' /*, 'otp' */].includes(action[1]);
 
   if (action[0] === 'callback') {
-    if (handler.req.method === 'GET') transformGetRequest(handler.req as any);
+    if (handler.req.method === 'GET') {
+      transformGetRequest(handler.req as any);
+    }
+    const body: BodyInit = sessionToken ?? undefined;
+    const init = defineInitR(handler.req, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body,
+    });
+
+    if (needsLogin && !sessionToken)
+      return Response.redirect('/next-auth/login', 307);
+    if (!needsLogin && sessionToken)
+      return new Response('Already logged-in', { status: 403 });
   }
-  const body: BodyInit = sessionToken ?? undefined;
 
-  handler.req.body = handler.req.body.sessionToken = sessionToken
-    ? JSON.stringify(sessionToken)
-    : undefined;
+  const nextAuthUrl = handler.createQueryURL({ nextauth: action.join('/') });
 
-  if (needsLogin && !sessionToken)
-    return Response.redirect('/next-auth/login', 307);
-  if (!needsLogin && sessionToken)
-    return new Response('Already logged-in', { status: 403 });
-
-  handler.req.query.nextauth = action;
-  authHandler(handler.req, handler.res);
+  handler.nextAuth(new Request(nextAuthUrl, handler.req), handler.res);
 };
 
 // import cookieParser from 'cookie-parser';

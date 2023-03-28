@@ -7,12 +7,13 @@ import {
 } from '@cloudflare/kv-asset-handler/dist/types';
 import { isAPI, isAssetURL, logger, logLevel } from './util';
 import { Env } from './types';
-import { defineInit, RequestHandler } from './api';
+import { defineInit, RequestHandler, WorkerRequest } from './api';
 import { handleAPI } from './api';
+import { exposeSession } from './api';
 const FILE_LOG_LEVEL = 'error';
 export default {
   async fetch(
-    request: Request,
+    request: WorkerRequest,
     env: Env,
     ctx: ExecutionContext,
     waitUntil: (promise: Promise<any>) => void,
@@ -61,6 +62,8 @@ async function handleFetchEvent(
   const log = logger(FILE_LOG_LEVEL, env);
   log('worker.handleFetchEvent');
   const url = new URL(handler.url);
+
+  await exposeSession(handler);
 
   if (isAssetURL(url)) {
     log('worker.handleFetchEvent.isAssetURL');
