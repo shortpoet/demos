@@ -1,6 +1,7 @@
 import crypto from 'crypto';
 import path, { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { Env } from 'wrangle';
 import { command, readFile, writeFile } from './util';
 
 export { writeSecret, generateSecret, passGet, passWrite, setSecretFile };
@@ -11,7 +12,7 @@ const __dirname = dirname(__filename);
 async function setSecretFile(
   key: string,
   passKey: string,
-  env: string,
+  env: Env,
   generateLength?: number,
 ) {
   let secret;
@@ -21,9 +22,11 @@ async function setSecretFile(
   } else {
     secret = await passGet(passKey);
   }
-  console.log(`secret ${key}: ${secret}\n`);
+  if (env.debug) {
+    console.log(`secret ${key}: ${secret}\n`);
+  }
   await writeSecret(key, secret, env);
-  const file = path.join(__dirname, `../../.${env}.vars`);
+  const file = path.join(__dirname, `../../.${env.env}.vars`);
   const existing = await readFile(file);
   const lines = existing.split('\n').filter((line) => line.trim() !== '');
   const keyValuePairs = lines.map((line) => {
@@ -39,10 +42,13 @@ async function setSecretFile(
   await writeFile(file, newLines.join('\n'));
 }
 
-async function writeSecret(key: string, value: string, env: string) {
+async function writeSecret(key: string, value: string, _env: Env) {
+  const env = _env.env;
   console.log(`writing ${key} to ${env}\n`);
   const cmd = `echo "${value}" | npx wrangler --env ${env} secret put ${key}`;
-  console.log(`${cmd}\n`);
+  if (_env.debug) {
+    console.log(`${cmd}\n`);
+  }
   const res = await command(cmd);
   console.log(res + '\n');
 }

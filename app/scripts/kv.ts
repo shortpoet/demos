@@ -12,28 +12,26 @@ export {
   deleteNamespace,
   getPreview,
 };
-import { KV_DEBUG as debug } from './wrangle';
+import { Env, KV_DEBUG as debug } from './wrangle';
 import { getToml, writeToml } from './util';
-
-type Env = 'dev' | 'prod';
 
 const getBinding = (env) => {
   return getToml()['env'][`${env}`]['kv_namespaces'][0]['binding'];
 };
 
-function executeWranglerCommand(command: string, env: string) {
+function executeWranglerCommand(command: string, env: 'dev' | 'prod') {
   return execSync(`npx wrangler --env ${env} ${command}`, { encoding: 'utf8' });
 }
 
 const parseId = (binding: string, env: Env, appName: string) =>
-  `${appName}-${env}-${env}-${binding}`;
+  `${appName}-${env.env}-${env.env}-${binding}`;
 
 // const binding = getBinding(env);
 
 // writeToml(getToml());
 
 function getNamespaces(env: Env) {
-  return JSON.parse(executeWranglerCommand('kv:namespace list', env));
+  return JSON.parse(executeWranglerCommand('kv:namespace list', env.env));
 }
 
 function getNamespace(id: string, env: Env) {
@@ -53,10 +51,10 @@ function getPreview(id: string, env: Env) {
 function deleteNamespace(env: Env, namespaceId: string, previewId: string) {
   let deleteCmd = `kv:namespace delete --namespace-id ${namespaceId}`;
   // if (debug) process.exit(0);
-  let deleteRes = executeWranglerCommand(deleteCmd, env);
+  let deleteRes = executeWranglerCommand(deleteCmd, env.env);
   console.log(deleteRes);
   deleteCmd = `kv:namespace delete --namespace-id ${previewId}`;
-  deleteRes = executeWranglerCommand(deleteCmd, env);
+  deleteRes = executeWranglerCommand(deleteCmd, env.env);
   console.log(deleteRes);
 }
 
@@ -65,9 +63,9 @@ function createNamespace(bindingName: string, env: Env, appName: string) {
   const cmd = `kv:namespace create ${bindingName}`;
   const cmdPrev = `kv:namespace create ${bindingName} --preview`;
   // if (debug) process.exit(0);
-  const res = executeWranglerCommand(cmd, env);
+  const res = executeWranglerCommand(cmd, env.env);
   console.log(res);
-  const resPrev = executeWranglerCommand(cmdPrev, env);
+  const resPrev = executeWranglerCommand(cmdPrev, env.env);
   console.log(resPrev);
   if (debug) {
   }
@@ -129,6 +127,6 @@ function writeKV(id: string, env: Env, value: string) {
 
     process.exit(0);
   }
-  const res = executeWranglerCommand(cmd, env);
+  const res = executeWranglerCommand(cmd, env.env);
   console.log(res);
 }

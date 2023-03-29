@@ -26,7 +26,13 @@ const __dirname = dirname(__filename);
 
 let KV_DEBUG = false;
 
-export { KV_DEBUG };
+type Env = {
+  env: 'dev' | 'prod';
+  envFile: string;
+  debug: boolean;
+};
+
+export { KV_DEBUG, Env };
 
 function getArgs() {
   let env = 'dev';
@@ -76,14 +82,14 @@ async function setGitconfig(id, env) {
 async function setSecrets(env) {
   setSecretFile(
     '__SECRET__',
-    `Cloud/auth0/${process.env.VITE_APP_NAME}/${env}/__SECRET__`,
+    `Cloud/auth0/${process.env.VITE_APP_NAME}/${env.env}/__SECRET__`,
     env,
     32,
   );
 
   setSecretFile(
     'NEXTAUTH_SECRET',
-    `Cloud/auth0/${process.env.VITE_APP_NAME}/${env}/NEXTAUTH_SECRET`,
+    `Cloud/auth0/${process.env.VITE_APP_NAME}/${env.env}/NEXTAUTH_SECRET`,
     env,
     32,
   );
@@ -107,7 +113,8 @@ async function setSecrets(env) {
   );
 }
 
-async function setVars(env, envVars) {
+async function setVars(_env: Env, envVars) {
+  const env = _env.env;
   const ssrDir = path.join(__dirname, '../src/pages');
   const ssrDirs = fs
     .readdirSync(ssrDir)
@@ -163,9 +170,9 @@ async function setBindings(bindingName, appName, env, debug) {
   }
 }
 
-async function main(env, envFile, debug) {
+async function main(env, debug) {
   const config = dotenv.config({
-    path: path.join(__dirname, `../${envFile}`),
+    path: path.join(__dirname, `../${env.envFile}`),
   });
   const appName = process.env.VITE_APP_NAME;
   const bindingName = process.env.VITE_APP_NAME.toUpperCase().replace(
@@ -189,6 +196,7 @@ async function main(env, envFile, debug) {
 (async () => {
   //TODO change to mode
   const { env, other, debug } = getArgs();
+
   const envFile =
     env === 'dev'
       ? '.env'
@@ -197,6 +205,13 @@ async function main(env, envFile, debug) {
       : env === '.env.uat'
       ? '.env.uat'
       : '.env.prod';
-  const _env = env === 'prod' ? 'prod' : 'dev';
-  await main(_env, envFile, debug);
+
+  const _env = {
+    debug,
+    env,
+    envFile,
+  };
+
+  _env.env = env === 'prod' ? 'prod' : 'dev';
+  await main(_env, debug);
 })();
