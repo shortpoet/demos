@@ -147,7 +147,6 @@ interface Auth0Instance extends Partial<Auth0Client> {
     options?: ClientOptions,
   ) => Promise<void>;
   onLoad: () => Promise<User | null | undefined>;
-  // onLoad: Promise<void>;
   isAuthenticated: () => Promise<boolean>;
   loginWithPopup(o?: PopupLoginOptions): Promise<void>;
   handleRedirectCallback(url?: string): Promise<RedirectLoginResult>;
@@ -175,7 +174,6 @@ interface NextAuthInstance extends Partial<Auth0Client> {
   //   redirect_uri?: string,
   //   options?: ClientOptions,
   // ) => Promise<void>;
-  // // onLoad: Promise<void>;
   // isAuthenticated: () => Promise<boolean>;
   // loginWithPopup(o?: PopupLoginOptions): Promise<void>;
   // handleRedirectCallback(url?: string): Promise<RedirectLoginResult>;

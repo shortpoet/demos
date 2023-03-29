@@ -264,9 +264,12 @@ const validateSession = async (
   return out;
 };
 
-const setSession = async (
-  user: User,
-): Promise<{ result: string; status: string }> => {
+interface SetSessionResult {
+  session: Session | undefined;
+  status: string;
+}
+
+const setSession = async (user: User): Promise<SetSessionResult> => {
   if (import.meta.env.VITE_LOG_LEVEL === 'debug') {
     let logObj = escapeNestedKeys({ ...user }, [
       'token',
@@ -276,9 +279,10 @@ const setSession = async (
     console.log(`setSession.user: ${JSON.stringify(logObj, null, 2)}`);
   }
   const options = { user };
-  let res = { result: 'Error', status: 'Error' };
 
-  const { data, error, dataLoading } = await useFetch<Session>(
+  let res: SetSessionResult = { session: undefined, status: 'Error' };
+
+  const { data, error, dataLoading } = await useFetch<{ session: Session }>(
     'api/auth/session',
     options,
   );
@@ -291,9 +295,9 @@ const setSession = async (
   if (dataLoading.value) {
     if (import.meta.env.VITE_LOG_LEVEL === 'debug')
       console.log(`dataLoading: ${dataLoading.value}`);
-    res = { result: 'Loading', status: 'Loading' };
+    res = { session: undefined, status: 'Loading' };
   }
-  if (data.value && data.value) {
+  if (data.value && data.value.session) {
     if (import.meta.env.VITE_LOG_LEVEL === 'debug') {
       let logObj = escapeNestedKeys({ ...data.value }, [
         'token',
@@ -305,15 +309,16 @@ const setSession = async (
       console.log('test');
       console.log(`data: ${JSON.stringify(logObj, null, 2)}`);
     }
+    console.log('data.value.sessionToken', data.value);
     const [isValid, token] = await validateSession(
-      data.value.sessionToken,
+      data.value.session.sessionToken,
       SESSION_TOKEN_EXPIRY,
     );
     if (!isValid) {
-      res = { result: 'Invalid', status: 'Error' };
+      res = { session: undefined, status: 'Error' };
     } else {
-      session.value = data.value;
-      res = { result: token, status: 'Success' };
+      session.value = data.value.session;
+      res = { session: session.value, status: 'Success' };
     }
   }
   return res;
@@ -378,6 +383,7 @@ async function loginWithRedirect(
   authLoading.value = true;
   try {
     const res = await authClient.value?.loginWithRedirect(o);
+    // window.location.reload();
     return res;
   } catch (e) {
     console.error(e);
@@ -393,6 +399,7 @@ async function loginWithPopup(o: PopupLoginOptions = {}) {
   authLoading.value = true;
   try {
     const res = await authClient.value?.loginWithPopup(o);
+    // window.location.reload();
     return res;
   } catch (e) {
     console.error(e);

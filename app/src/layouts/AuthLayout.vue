@@ -34,7 +34,9 @@ import UserLayout from '~/layouts/UserLayout.vue';
 import AdminLayout from '~/layouts/AdminLayout.vue';
 import { usePageContext } from '~/composables/pageContext';
 import MainNav from '~/components/MainNav.vue';
-import { COOKIES_SESSION_TOKEN, cookieOptions } from '~/composables/cookies';
+import { COOKIES_SESSION_TOKEN, cookieOptions, COOKIES_USER_TOKEN } from '~/composables/cookies';
+// import { navigate } from 'vite-plugin-ssr/client/router';
+import { escapeNestedKeys } from '../../../app/util';
 
 const loading = ref(true);
 const pageContext = usePageContext();
@@ -64,20 +66,32 @@ onMounted(async () => {
     const cookies = useCookies([COOKIES_SESSION_TOKEN]);
 
     if (seshRes && seshRes.status === 'Success') {
+      // cookie options must be in both set and remove
+      cookies.remove(COOKIES_USER_TOKEN, cookieOptions('remove'))
+      cookies.set(COOKIES_USER_TOKEN, true, cookieOptions('set'))
 
-      cookies.set(COOKIES_SESSION_TOKEN, seshRes.result, {
+      cookies.remove(COOKIES_SESSION_TOKEN, cookieOptions('remove'));
+      cookies.set(COOKIES_SESSION_TOKEN, seshRes.session?.sessionToken, {
         ...cookieOptions('set'),
         maxAge: SESSION_TOKEN_EXPIRY,
       });
 
       if (import.meta.env.VITE_LOG_LEVEL === 'debug') {
+        let logObj = escapeNestedKeys({ ...seshRes }, [
+          'token',
+          'accessToken',
+          'sessionToken',
+        ]);
         console.log('onLoad.setSession: ', COOKIES_SESSION_TOKEN);
-        console.log(JSON.stringify(seshRes, null, 2));
+        console.log(JSON.stringify(logObj, null, 2));
         console.log('onLoad.setSession.cookies: ', cookies.getAll());
         console.log('onLoad.setSession.cookies: ', cookies.get(COOKIES_SESSION_TOKEN));
       }
+      // pageContext.isAdmin = seshRes.session?.user.role === 'admin';
+      console.log('AuthLayout.onLoad.setSession: isAdmin -> ', pageContext.isAdmin);
+      // console.log('navigate: ', pageContext.urlPathname)
+      // navigate(pageContext.urlPathname);
     } else {
-
       if (import.meta.env.VITE_LOG_LEVEL === 'debug') {
         console.error('error setting session: ', seshRes);
       }

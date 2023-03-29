@@ -98,18 +98,15 @@ export default {
 
     onLogin.value = async (event: any) => {
       console.log("login.component.onLogin");
-      // cookie options must be in both set and remove
-      cookies.set(COOKIES_USER_TOKEN, true, cookieOptions('set'))
       await loginWithRedirect();
 
     };
     onLoginPopup.value = async (event: any) => {
-      console.log("login.component.onLoginPopup");
-      cookies.set(COOKIES_USER_TOKEN, true, cookieOptions('set'))
       await loginWithPopup();
     };
     onLogout.value = async (event: any) => {
       console.log("login.component.onLogout");
+      // cookie options must be in both set and remove ???
       // remove cookie MUST have path
       // "Browsers are bitches about that." 😆
       // https://github.com/reactivestack/cookies/issues/16#issuecomment-178881393

@@ -11,6 +11,7 @@ import {
 import { RequestHandler } from '../RequestHandler';
 import { Session, User } from '../../../types';
 import { getUser, sessionUser } from './user';
+import { escapeNestedKeys } from '../../../util';
 
 const FILE_LOG_LEVEL = 'error';
 
@@ -101,7 +102,8 @@ async function getSessionFromCookie(
     const sessionToken = getCookie(cookies, cookieName);
     log(`worker.session.getSessionFromCookie.sessionToken: ${sessionToken}`);
     if (sessionToken) {
-      const session = await env.DEMO_CFW_SSR_SESSIONS.get(sessionToken);
+      const sessionId = sessionToken.split('.')[0];
+      const session = await env.DEMO_CFW_SSR_SESSIONS.get(sessionId);
       log(`worker.session.getSessionFromCookie.session: ${session}`);
 
       if (logLevel(FILE_LOG_LEVEL, env)) {
@@ -119,9 +121,13 @@ async function getSessionFromCookie(
 
       if (session) {
         const sessionJson: Session = JSON.parse(session);
+        let logObj = escapeNestedKeys({ sessionJson }, [
+          'token',
+          'accessToken',
+        ]);
         log(
           `worker.session.getSessionFromCookie.sessionJson:\n${JSON.stringify(
-            sessionJson,
+            logObj,
             null,
             2,
           )}`,

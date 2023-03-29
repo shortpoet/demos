@@ -8,7 +8,9 @@ const COOKIE_EXPIRY = 1000 * 60 * 60 * 24;
 
 const cookieOptions: (mode: 'set' | 'remove') => CookieSetOptions = (mode) => {
   // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie/SameSite
-  console.log('cookieOptions');
+  if (import.meta.env.VITE_LOG_LEVEL === 'debug') {
+    console.log('cookieOptions');
+  }
   const hostname = new URL(import.meta.env.VITE_APP_URL).hostname;
   const isLocalhost =
     hostname === 'localhost' ||
@@ -19,11 +21,12 @@ const cookieOptions: (mode: 'set' | 'remove') => CookieSetOptions = (mode) => {
     expires: new Date(Date.now() + COOKIE_EXPIRY),
     maxAge: 60 * 60 * 24,
     domain: hostname,
-    sameSite: isLocalhost ? ('lax' as const) : ('none' as const),
-    // below only works in https
-    secure: import.meta.env.VITE_APP_URL.startsWith('https'),
-    httpOnly: !import.meta.env.VITE_APP_URL.startsWith('https'),
+    sameSite: 'none' as const,
+    secure: import.meta.env.VITE_APP_URL.startsWith('https') && !isLocalhost,
+    httpOnly: false,
   };
-  console.log(out);
+  if (import.meta.env.VITE_LOG_LEVEL === 'debug') {
+    console.log(out);
+  }
   return out;
 };

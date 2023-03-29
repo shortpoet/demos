@@ -6,7 +6,7 @@ import { Env } from 'types';
 
 export { handleSsr };
 
-const FILE_LOG_LEVEL = 'debug';
+const FILE_LOG_LEVEL = 'error';
 
 async function handleSsr(handler: RequestHandler, env: Env, ctx) {
   const log = logger(FILE_LOG_LEVEL, env);
