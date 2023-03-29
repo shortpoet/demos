@@ -440,6 +440,8 @@ async function loginWithRedirect(
           console.log('loginWithPopup: setSession: ', seshRes);
         }
         session.value = seshRes.session;
+        // TODO figure out why this doesn't work like it does in loginWithPopup
+        window.location.reload();
       }
     }
     authLoading.value = false;
@@ -472,6 +474,7 @@ async function loginWithPopup(o: PopupLoginOptions = {}) {
           console.log('loginWithPopup: setSession: ', seshRes);
         }
         session.value = seshRes.session;
+        window.location.reload();
       }
     }
     authLoading.value = false;
