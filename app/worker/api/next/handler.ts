@@ -19,79 +19,15 @@ import { handleSsr } from 'ssr';
 
 const FILE_LOG_LEVEL = 'debug';
 
-export { handleNextAuth, exposeSession, handleGenerated };
+export {
+  handleNextAuth,
+  exposeSession,
+  //  handleGenerated
+};
 
 const AuthError = class AuthError extends Error {};
 
-const cookieNames = (env: Env) => {
-  const useSecureCookie = (env.NEXTAUTH_URL || '').startsWith('https://');
-  // const sessionCookie =  (useSecureCookie ? '__Secure-' : '') + 'next-auth.session-token'
-  const csrfCookie =
-    (useSecureCookie ? '__Host-' : '') + 'next-auth.csrf-token';
-  const callbackCookie =
-    (useSecureCookie ? '__Secure-' : '') + 'next-auth.callback-url';
-  return { csrfCookie, callbackCookie };
-};
-
-const transformGetRequest = (handler: RequestHandler, env: Env) => {
-  const uri = env.NEXTAUTH_URL;
-  const { csrfCookie } = cookieNames(env);
-  const cookies = handler.req.headers.get('Cookie') || '';
-  const csrfToken = (getCookie(cookies, csrfCookie) || '').split('|')[0];
-  const body: BodyInit = JSON.stringify({
-    ...handler.query,
-    redirect: 'true',
-    json: 'false',
-    csrfToken,
-  });
-  const init = {
-    headers: {
-      ...handler.req.headers,
-    },
-    method: 'POST',
-    body,
-  };
-  const _req = new Request(handler.req.url, init);
-};
-
-const handleGenerated = async (handler: RequestHandler, env: Env) => {
-  const url = new URL(handler.req.url);
-  const log = logger(FILE_LOG_LEVEL, env);
-  log('worker.api.auth.next.handleGenerated');
-  const html = await handler.req.text();
-  const redirect = `${url.protocol}//${url.host}/_redirect_next/signin`;
-  // return await fetch(handler.req);
-  // return handler.req;
-  return new Response(html, {
-    headers: {
-      'content-type': 'text/html;charset=UTF-8',
-      // Location: redirect,
-    },
-    // status: 307,
-  });
-  // return Response.redirect(redirect, 307);
-
-  // const { csrfCookie, callbackCookie } = cookieNames(env);
-  // const cookies = handler.req.headers.get('Cookie') || '';
-  // const csrfToken = (getCookie(cookies, csrfCookie) || '').split('|')[0];
-  // const callbackUrl = getCookie(cookies, callbackCookie);
-  // const body: BodyInit = JSON.stringify({
-  //   ...handler.query,
-  //   redirect: 'true',
-  //   json: 'false',
-  //   csrfToken,
-  //   callbackUrl,
-  // });
-  // const init = {
-  //   headers: {
-  //     ...handler.req.headers,
-  //   },
-  //   method: 'POST',
-  //   body,
-  // };
-};
-
-const handleRequest = async (handler: RequestHandler, env: Env) => {
+async function handleRequest(handler: RequestHandler, env: Env) {
   const urlOriginal = new URL(handler.req.url);
   console.log('urlOriginal', urlOriginal.href);
   const log = logger(FILE_LOG_LEVEL, env);
@@ -174,43 +110,10 @@ const handleRequest = async (handler: RequestHandler, env: Env) => {
   } catch (error) {
     console.log('error', error);
   }
-};
+}
 
 // import cookieParser from 'cookie-parser';
 // import setCookie from 'set-cookie-parser';
-
-const exposeSession = async (handler: RequestHandler, env: Env) => {
-  // Fetch session
-  const options = handler.req.headers.get('Cookie')
-    ? { headers: { cookie: handler.req.headers.get('Cookie') } }
-    : {};
-
-  const sessionRes = await fetch(`${env.NEXTAUTH_URL}/session`, options);
-  const session: Session = await sessionRes.json();
-  // Pass session to next()
-  handler.res.locals.session = session;
-  // Include set-cookie in response
-
-  const setCookies = sessionRes.headers.get('set-cookie');
-  if (setCookies) {
-    handler.res.headers.set('set-cookie', setCookies);
-  }
-  const cookies = handler.req.headers.get('Cookie') || '';
-
-  const { csrfCookie, callbackCookie } = cookieNames(env);
-  const parsed = parseCookie(setCookies);
-  // Pass csrfToken to next()
-  const csrfToken: string =
-    getCookie(cookies, csrfCookie) ||
-    parsed[csrfCookie] ||
-    handler.req.headers.get(csrfCookie);
-
-  handler.res.locals.csrfToken = csrfToken.split('|')[0];
-  // Pass callbackUrl to next()
-  const callbackUrl: string =
-    parsed[callbackCookie] || handler.req.headers.get(callbackCookie);
-  handler.res.locals.callbackUrl = callbackUrl;
-};
 
 async function handleNextAuth(
   handler: RequestHandler,
@@ -252,45 +155,6 @@ async function handleNextAuth(
         /^\/api\/next-auth\/signout$/i.test(url.pathname):
         res = await handleRequest(handler, env);
         break;
-      // case method === 'GET' && url.pathname.startsWith('/api/next-auth/signin'):
-      //   res = await handleSignin(handler, env, ctx);
-      //   break;
-      // case method === 'GET' && url.pathname.startsWith('/api/next-auth/signout'):
-      //   res = await handleSignout(handler, env, ctx);
-      //   break;
-      // case method === 'GET' && url.pathname.startsWith('/api/next-auth/callback'):
-      //   res = await handleCallback(handler, env, ctx);
-      //   break;
-      // case method === 'GET' && url.pathname.startsWith('/api/next-auth/verify-request'):
-      //   res = await handleVerifyRequest(handler, env, ctx);
-      //   break;
-      // case method === 'GET' && url.pathname.startsWith('/api/next-auth/csrf'):
-      //   res = await handleCSRF(handler, env, ctx);
-      //   break;
-      // case method === 'GET' && url.pathname.startsWith('/api/next-auth/providers'):
-      //   res = await handleProviders(handler, env, ctx);
-      //   break;
-      // case method === 'GET' && url.pathname.startsWith('/api/next-auth/client'):
-      //   res = await handleClient(handler, env, ctx);
-      //   break;
-      // case method === 'GET' && url.pathname.startsWith('/api/next-auth/events'):
-      //   res = await handleEvents(handler, env, ctx);
-      //   break;
-      // case method === 'GET' && url.pathname.startsWith('/api/next-auth/configuration'):
-      //   res = await handleConfiguration(handler, env, ctx);
-      //   break;
-      // case method === 'GET' && url.pathname.startsWith('/api/next-auth/jwks'):
-      //   res = await handleJWKS(handler, env, ctx);
-      //   break;
-      // case method === 'GET' && url.pathname.startsWith('/api/next-auth/secret'):
-      //   res = await handleSecret(handler, env, ctx);
-      //   break;
-      // case method === 'GET' && url.pathname.startsWith('/api/next-auth/adapters'):
-      //   res = await handleAdapters(handler, env, ctx);
-      //   break;
-      // case method === 'GET' && url.pathname.startsWith('/api/next-auth/debug'):
-      //   res = await handleDebug(handler, env, ctx);
-      //   break;
       default:
         res = createJsonResponse({ error: 'Not Found' }, handler, env, 404);
         break;
@@ -303,3 +167,107 @@ async function handleNextAuth(
   }
   return res;
 }
+
+function cookieNames(env: Env) {
+  const useSecureCookie = (env.NEXTAUTH_URL || '').startsWith('https://');
+  // const sessionCookie =  (useSecureCookie ? '__Secure-' : '') + 'next-auth.session-token'
+  const csrfCookie =
+    (useSecureCookie ? '__Host-' : '') + 'next-auth.csrf-token';
+  const callbackCookie =
+    (useSecureCookie ? '__Secure-' : '') + 'next-auth.callback-url';
+  return { csrfCookie, callbackCookie };
+}
+
+function transformGetRequest(handler: RequestHandler, env: Env) {
+  const uri = env.NEXTAUTH_URL;
+  const { csrfCookie } = cookieNames(env);
+  const cookies = handler.req.headers.get('Cookie') || '';
+  const csrfToken = (getCookie(cookies, csrfCookie) || '').split('|')[0];
+  const body: BodyInit = JSON.stringify({
+    ...handler.query,
+    redirect: 'true',
+    json: 'false',
+    csrfToken,
+  });
+  const init = {
+    headers: {
+      ...handler.req.headers,
+    },
+    method: 'POST',
+    body,
+  };
+  const _req = new Request(handler.req.url, init);
+}
+
+const exposeSession = async (handler: RequestHandler, env: Env) => {
+  // Fetch session
+  const options = handler.req.headers.get('Cookie')
+    ? { headers: { cookie: handler.req.headers.get('Cookie') } }
+    : {};
+
+  const sessionRes = await fetch(`${env.NEXTAUTH_URL}/session`, options);
+  const session: Session = await sessionRes.json();
+  // Pass session to next()
+  handler.res.locals.session = session;
+  // Include set-cookie in response
+
+  const setCookies = sessionRes.headers.get('set-cookie');
+  if (setCookies) {
+    handler.res.headers.set('set-cookie', setCookies);
+  }
+  const cookies = handler.req.headers.get('Cookie') || '';
+
+  const { csrfCookie, callbackCookie } = cookieNames(env);
+  const parsed = parseCookie(setCookies);
+  // Pass csrfToken to next()
+  const csrfToken: string =
+    getCookie(cookies, csrfCookie) ||
+    parsed[csrfCookie] ||
+    handler.req.headers.get(csrfCookie);
+
+  handler.res.locals.csrfToken = csrfToken.split('|')[0];
+  // Pass callbackUrl to next()
+  const callbackUrl: string =
+    parsed[callbackCookie] || handler.req.headers.get(callbackCookie);
+  handler.res.locals.callbackUrl = callbackUrl;
+};
+
+// case method === 'GET' && url.pathname.startsWith('/api/next-auth/signin'):
+//   res = await handleSignin(handler, env, ctx);
+//   break;
+// case method === 'GET' && url.pathname.startsWith('/api/next-auth/signout'):
+//   res = await handleSignout(handler, env, ctx);
+//   break;
+// case method === 'GET' && url.pathname.startsWith('/api/next-auth/callback'):
+//   res = await handleCallback(handler, env, ctx);
+//   break;
+// case method === 'GET' && url.pathname.startsWith('/api/next-auth/verify-request'):
+//   res = await handleVerifyRequest(handler, env, ctx);
+//   break;
+// case method === 'GET' && url.pathname.startsWith('/api/next-auth/csrf'):
+//   res = await handleCSRF(handler, env, ctx);
+//   break;
+// case method === 'GET' && url.pathname.startsWith('/api/next-auth/providers'):
+//   res = await handleProviders(handler, env, ctx);
+//   break;
+// case method === 'GET' && url.pathname.startsWith('/api/next-auth/client'):
+//   res = await handleClient(handler, env, ctx);
+//   break;
+// case method === 'GET' && url.pathname.startsWith('/api/next-auth/events'):
+//   res = await handleEvents(handler, env, ctx);
+//   break;
+// case method === 'GET' && url.pathname.startsWith('/api/next-auth/configuration'):
+//   res = await handleConfiguration(handler, env, ctx);
+//   break;
+// case method === 'GET' && url.pathname.startsWith('/api/next-auth/jwks'):
+//   res = await handleJWKS(handler, env, ctx);
+//   break;
+// case method === 'GET' && url.pathname.startsWith('/api/next-auth/secret'):
+//   res = await handleSecret(handler, env, ctx);
+//   break;
+// case method === 'GET' && url.pathname.startsWith('/api/next-auth/adapters'):
+//   res = await handleAdapters(handler, env, ctx);
+//   break;
+// case method === 'GET' && url.pathname.startsWith('/api/next-auth/debug'):
+//   res = await handleDebug(handler, env, ctx);
+//   break;

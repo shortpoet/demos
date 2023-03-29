@@ -15,9 +15,12 @@ import {
   readBody,
 } from './util';
 import { Env } from './types';
-import { handleGenerated, RequestHandler, WorkerRequest } from './api';
+import {
+  // handleGenerated,
+  RequestHandler,
+  WorkerRequest,
+} from './api';
 import { handleAPI } from './api';
-import { exposeSession } from './api';
 const FILE_LOG_LEVEL = 'error';
 export default {
   async fetch(
@@ -53,14 +56,6 @@ export default {
     }
   },
 };
-// declare module globalThis {
-//   let process: { env: Env };
-// }
-// export interface Env {
-//   NEXTAUTH_SECRET: string;
-//   NEXTAUTH_URL: string;
-// }
-
 async function handleFetchEvent(
   handler: RequestHandler,
   env: Env,
@@ -92,3 +87,11 @@ async function handleFetchEvent(
       );
   }
 }
+
+// declare module globalThis {
+//   let process: { env: Env };
+// }
+// export interface Env {
+//   NEXTAUTH_SECRET: string;
+//   NEXTAUTH_URL: string;
+// }
