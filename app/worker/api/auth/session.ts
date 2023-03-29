@@ -12,7 +12,7 @@ import { RequestHandler } from '../RequestHandler';
 import { Session, User } from '../../../types';
 import { getUser, sessionUser } from './user';
 
-const FILE_LOG_LEVEL = 'debug';
+const FILE_LOG_LEVEL = 'error';
 
 export { handleSession, getSessionFromCookie };
 
@@ -93,8 +93,7 @@ async function getSessionFromCookie(
   // override next-auth session for now
   if (handler.url.pathname.startsWith('/next-auth')) {
     console.log(
-      'worker.session.getSessionFromCookie.nextAuth -> skipping session for',
-      handler.url.pathname,
+      `\tworker.session.getSessionFromCookie.nextAuth -> skipping session for ${handler.url.pathname}`,
     );
     return res;
   }
@@ -109,8 +108,11 @@ async function getSessionFromCookie(
         const envVars = await env.DEMO_CFW_SSR_SESSIONS.list();
         for (const key in envVars.keys) {
           console.log(
-            'worker.session.envVars.getSessionFromCookie.keys',
-            JSON.stringify(envVars.keys[key].name, null, 2),
+            `worker.session.envVars.getSessionFromCookie.keys:\n${JSON.stringify(
+              envVars.keys[key].name,
+              null,
+              2,
+            )}`,
           );
         }
       }
@@ -118,7 +120,7 @@ async function getSessionFromCookie(
       if (session) {
         const sessionJson: Session = JSON.parse(session);
         log(
-          `worker.session.getSessionFromCookie.sessionJson: ${JSON.stringify(
+          `worker.session.getSessionFromCookie.sessionJson:\n${JSON.stringify(
             sessionJson,
             null,
             2,
@@ -130,17 +132,21 @@ async function getSessionFromCookie(
             new Date(Date.now()).getTime()
         ) {
           console.log(
-            `worker.session.getSessionFromCookie.NOT expired ${new Date(
+            `\tworker.session.getSessionFromCookie.NOT EXPIRED ${new Date(
               sessionJson.expires,
-            ).getTime()} > ${new Date(Date.now()).getTime()}`,
+            ).toLocaleTimeString()} > ${new Date(
+              Date.now(),
+            ).toLocaleTimeString()}\n`,
           );
           res = sessionJson;
           user = sessionJson.user;
         } else {
           console.log(
-            `worker.session.getSessionFromCookie.expired ${new Date(
+            `\tworker.session.getSessionFromCookie.EXPIRED ${new Date(
               sessionJson.expires,
-            ).getTime()} < ${new Date(Date.now()).getTime()}`,
+            ).toLocaleTimeString()} < ${new Date(
+              Date.now(),
+            ).toLocaleTimeString()}\n`,
           );
           await env.DEMO_CFW_SSR_SESSIONS.delete(sessionToken);
         }
@@ -199,9 +205,9 @@ async function handleSession(
   const method = handler.req.method;
   let res;
   await clearExpiredSessions(env);
-  await clearAllKeys(env.DEMO_CFW_SSR, env, ['gitInfo']);
-  await clearAllKeys(env.DEMO_CFW_SSR_SESSIONS, env);
-  await clearAllKeys(env.DEMO_CFW_SSR_USERS, env);
+  // await clearAllKeys(env.DEMO_CFW_SSR, env, ['gitInfo']);
+  // await clearAllKeys(env.DEMO_CFW_SSR_SESSIONS, env);
+  // await clearAllKeys(env.DEMO_CFW_SSR_USERS, env);
   // await clearAllSessions(env);
 
   if (url.pathname.startsWith('/api/auth/session')) {

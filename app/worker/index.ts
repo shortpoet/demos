@@ -36,19 +36,9 @@ export default {
       \n
       `);
       }
-      console.log(JSON.stringify(request, null, 2));
-      // if (request.body) {
-      //   console.log(JSON.stringify(await readBody(request.body), null, 2));
-      // }
       const handler = new RequestHandler(request, env);
       await handler.initData(env);
-
-      // const req = new RequestHandler(request, env, await defineInit(request));
-      // console.log('worker.handleFetchEvent.handler');
-      // console.log(JSON.stringify(handler, null, 2));
-
       const response = await handleFetchEvent(handler, env, ctx, waitUntil);
-
       return response;
     } catch (e) {
       console.error('worker.fetch');

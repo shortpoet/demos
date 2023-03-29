@@ -99,16 +99,15 @@ class RequestHandler {
     let headerslength = 0;
     let headerString = '';
     this.req.headers.forEach((value, key) => {
-      // console.log(`${key}: ${value}`);
       headerString += `\n${key}: ${value}\n`;
       headerslength++;
     });
     if (!isAssetURL(new URL(this.url))) {
-      console.log(`worker.initData -> ${this.url}`);
-      console.log(`method -> ${this.req.method}`);
-      console.log(`body -> ${this.req.body}`);
-      console.log(`bodyUsed -> ${this.req.bodyUsed}`);
-      console.log(`headers length -> ${headerslength} \n`);
+      console.log(`\tworker.initData -> ${this.url}`);
+      console.log(`\tmethod -> ${this.req.method}`);
+      console.log(`\tbody -> ${!!this.req.body}`);
+      console.log(`\tbodyUsed -> ${this.req.bodyUsed}`);
+      console.log(`\theaders length -> ${headerslength} \n`);
     }
     if (logLevel(FILE_LOG_LEVEL, env)) {
       console.log(`headers ->  \n${headerString}\n`);

@@ -8,7 +8,7 @@ import { handleNextAuth } from './next/handler';
 
 export { handleAPI };
 
-const FILE_LOG_LEVEL = 'debug';
+const FILE_LOG_LEVEL = 'error';
 
 async function handleAPI(
   handler: RequestHandler,
@@ -17,11 +17,11 @@ async function handleAPI(
   waitUntil: (promise: Promise<any>) => void,
 ) {
   const log = logger(FILE_LOG_LEVEL, env);
-  log('worker.handleAPI');
+  log(`\tworker.handleAPI`);
   const url: URL = new URL(handler.req.url);
   let res;
   try {
-    log(`-> ${handler.req.method}://.${url.pathname}\n`);
+    log(`\t-> ${handler.req.method}://.${url.pathname}\n`);
     switch (true) {
       case handler.req.method === 'OPTIONS':
         res = handleOptions(handler, env);
@@ -48,6 +48,5 @@ async function handleAPI(
     console.error(error);
   }
   log(`\n\t<- END API HANDLE\n`);
-  log(`${JSON.stringify(res)}`);
   return res;
 }
