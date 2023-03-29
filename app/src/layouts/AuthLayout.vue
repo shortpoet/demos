@@ -68,13 +68,17 @@ onMounted(async () => {
     const cookies = useCookies([COOKIES_SESSION_TOKEN]);
 
     if (seshRes && seshRes.status === 'Success') {
+
       cookies.set(COOKIES_SESSION_TOKEN, seshRes.result, {
         ...cookieOptions,
         maxAge: SESSION_TOKEN_EXPIRY,
       });
 
       if (import.meta.env.VITE_LOG_LEVEL === 'debug') {
+        console.log('onLoad.setSession: ', COOKIES_SESSION_TOKEN);
+        console.log(JSON.stringify(seshRes, null, 2));
         console.log('onLoad.setSession.cookies: ', cookies.getAll());
+        console.log('onLoad.setSession.cookies: ', cookies.get(COOKIES_SESSION_TOKEN));
       }
     } else {
 

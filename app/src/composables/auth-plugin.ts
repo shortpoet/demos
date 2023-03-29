@@ -53,11 +53,11 @@ const cookieOptions: CookieSetOptions = {
   path: '/',
   expires: new Date(Date.now() + 1000 * 60 * 60 * 24),
   maxAge: 60 * 60 * 24,
-  domain: 'localhost',
+  domain: new URL(import.meta.env.VITE_APP_URL).hostname,
   sameSite: 'strict',
   // below only works in https
-  // secure: true,
-  // httpOnly: true,
+  // secure: import.meta.env.VITE_APP_URL.startsWith('https'),
+  // httpOnly: import.meta.env.VITE_APP_URL.startsWith('https'),
 };
 
 const DEFAULT_REDIRECT_CALLBACK = (appState: any = {}) =>
@@ -96,22 +96,6 @@ export const provideAuth = () => {
 export const isClient = typeof window !== 'undefined';
 const defaultWindow: (Window & typeof globalThis) | undefined =
   /* #__PURE__ */ isClient ? window : undefined;
-
-const awaitWindowPromise = async (
-  window: Window | undefined,
-): Promise<Window> => {
-  if (!window) {
-    return new Promise((resolve) => {
-      const interval = setInterval(() => {
-        if (window) {
-          clearInterval(interval);
-          resolve(window);
-        }
-      }, 100);
-    });
-  }
-  return window;
-};
 
 const useAuthPlugin = () => {
   const auth = inject(AuthSymbol);

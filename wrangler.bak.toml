@@ -20,7 +20,7 @@ preview_id = "ef2b919ed69a49c5bf33349b2c943fc7"
 [env.dev.vars]
 AUTH0_DOMAIN = "shortpoet.auth0.com"
 ENVIRONMENT = "dev"
-LOG_LEVEL = "error"
+LOG_LEVEL = "debug"
 NEXTAUTH_URL = "http://localhost:3000/api/next-auth"
 SSR_BASE_PATHS = "about,api-data,auth,auth0,index,next-auth,star-wars"
 VITE_AUTH0_DOMAIN = "shortpoet.auth0.com"

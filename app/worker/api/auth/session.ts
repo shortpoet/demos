@@ -6,6 +6,7 @@ import {
   generateUUID,
   logLevel,
   getCookie,
+  logger,
 } from '../../util';
 import { RequestHandler } from '../RequestHandler';
 import { Session, User } from '../../../types';
@@ -15,59 +16,67 @@ const FILE_LOG_LEVEL = 'debug';
 
 export { handleSession, getSessionFromCookie };
 
-async function clearExpiredSessions(env: Env) {
+async function clearExpiredSessions(
+  env: Env,
+  log = logger(FILE_LOG_LEVEL, env),
+) {
   const envVars = await env.DEMO_CFW_SSR_SESSIONS.list();
   for (const key in envVars.keys) {
-    // if (logLevel(FILE_LOG_LEVEL, env)) {
-    //   console.log(
-    //     'worker.session.clearExpiredSessions.envVars.keys',
-    //     JSON.stringify(envVars.keys[key], null, 2),
-    //   );
-    // }
-
     const session: Session = JSON.parse(
       await env.DEMO_CFW_SSR_SESSIONS.get(envVars.keys[key].name),
     );
-    if (new Date(session.expires).getTime() < new Date(Date.now()).getTime()) {
-      if (logLevel(FILE_LOG_LEVEL, env)) {
-        console.log(
-          'worker.session.clearExpiredSessions.envVars.keys.expiration.delete',
-          JSON.stringify(session, null, 2),
+    if (session) {
+      if (
+        new Date(session.expires).getTime() < new Date(Date.now()).getTime()
+      ) {
+        log(
+          `worker.session.clearExpiredSessions.envVars.keys.expiration.delete: ${JSON.stringify(
+            session,
+            null,
+            2,
+          )}`,
         );
+        await env.DEMO_CFW_SSR_SESSIONS.delete(envVars.keys[key].name);
       }
-      await env.DEMO_CFW_SSR_SESSIONS.delete(envVars.keys[key].name);
     }
   }
 }
 
-async function clearAllKeys(kv: KVNamespace, env: Env, excludes = []) {
+async function clearAllKeys(
+  kv: KVNamespace,
+  env: Env,
+  excludes = [],
+  log = logger(FILE_LOG_LEVEL, env),
+) {
   const envVars = await kv.list();
   for (const key in envVars.keys) {
     if (excludes.includes(envVars.keys[key].name)) {
       continue;
     }
-    if (logLevel(FILE_LOG_LEVEL, env)) {
-      console.log(
-        'worker.session.clearAllKeys.envVars.keys DELETE',
-        JSON.stringify(envVars.keys[key].name, null, 2),
-      );
-    }
+    log(
+      `worker.session.clearAllKeys.envVars.keys.delete: ${JSON.stringify(
+        envVars.keys[key].name,
+        null,
+        2,
+      )}`,
+    );
     await kv.delete(envVars.keys[key].name);
   }
 }
 
-async function clearAllSessions(env: Env) {
+async function clearAllSessions(env: Env, log = logger(FILE_LOG_LEVEL, env)) {
   const envVars = await env.DEMO_CFW_SSR_SESSIONS.list();
   for (const key in envVars.keys) {
     if (!envVars.keys[key].name.startsWith('@session@')) {
       continue;
     }
-    if (logLevel(FILE_LOG_LEVEL, env)) {
-      console.log(
-        'worker.session.clearAllKeys.envVars.keys',
-        JSON.stringify(envVars.keys[key], null, 2),
-      );
-    }
+    log(
+      `worker.session.clearAllSessions.envVars.keys.delete: ${JSON.stringify(
+        envVars.keys[key].name,
+        null,
+        2,
+      )}`,
+    );
     await env.DEMO_CFW_SSR_SESSIONS.delete(envVars.keys[key].name);
   }
 }
@@ -76,15 +85,12 @@ async function getSessionFromCookie(
   handler: RequestHandler,
   env: Env,
   user?: User,
+  log = logger(FILE_LOG_LEVEL, env),
 ): Promise<Session | undefined> {
   const cookieName = 'demo-cfw-ssr-session-token';
   const cookies = decodeURIComponent(handler.req.headers.get('Cookie'));
-  // if (logLevel(FILE_LOG_LEVEL, env)) {
-  //   console.log('worker.getSessionFromCookie.sessionCookie', sessionCookie);
-  // }
   let res;
   // override next-auth session for now
-
   if (handler.url.pathname.startsWith('/next-auth')) {
     console.log(
       'worker.session.getSessionFromCookie.nextAuth -> skipping session for',
@@ -94,19 +100,10 @@ async function getSessionFromCookie(
   }
   if (cookies) {
     const sessionToken = getCookie(cookies, cookieName);
-
-    if (logLevel(FILE_LOG_LEVEL, env)) {
-      console.log(
-        'worker.session.getSessionFromCookie.sessionToken',
-        sessionToken,
-      );
-    }
+    log(`worker.session.getSessionFromCookie.sessionToken: ${sessionToken}`);
     if (sessionToken) {
       const session = await env.DEMO_CFW_SSR_SESSIONS.get(sessionToken);
-
-      if (logLevel(FILE_LOG_LEVEL, env)) {
-        console.log('worker.session.getSessionFromCookie.session', session);
-      }
+      log(`worker.session.getSessionFromCookie.session: ${session}`);
 
       if (logLevel(FILE_LOG_LEVEL, env)) {
         const envVars = await env.DEMO_CFW_SSR_SESSIONS.list();
@@ -120,10 +117,17 @@ async function getSessionFromCookie(
 
       if (session) {
         const sessionJson: Session = JSON.parse(session);
-        // console.log('worker.session.getSessionFromCookie.session', sessionJson);
+        log(
+          `worker.session.getSessionFromCookie.sessionJson: ${JSON.stringify(
+            sessionJson,
+            null,
+            2,
+          )}`,
+        );
         if (
+          sessionJson.expires &&
           new Date(sessionJson.expires).getTime() >
-          new Date(Date.now()).getTime()
+            new Date(Date.now()).getTime()
         ) {
           console.log(
             `worker.session.getSessionFromCookie.NOT expired ${new Date(
@@ -131,12 +135,6 @@ async function getSessionFromCookie(
             ).getTime()} > ${new Date(Date.now()).getTime()}`,
           );
           res = sessionJson;
-          if (logLevel(FILE_LOG_LEVEL, env)) {
-            console.log(
-              'worker.session.getSessionFromCookie.sessionJson',
-              sessionJson,
-            );
-          }
           user = sessionJson.user;
         } else {
           console.log(
@@ -144,7 +142,6 @@ async function getSessionFromCookie(
               sessionJson.expires,
             ).getTime()} < ${new Date(Date.now()).getTime()}`,
           );
-
           await env.DEMO_CFW_SSR_SESSIONS.delete(sessionToken);
         }
       }
@@ -156,6 +153,7 @@ async function getSessionFromCookie(
 async function generateSessionToken(
   env: Env,
   sessionId: string,
+  log = logger(FILE_LOG_LEVEL, env),
 ): Promise<string> {
   // const token = crypto.getRandomenvVarss(new Uint32Array(1))[0].toString(16);
   const encoder = new TextEncoder();
@@ -179,11 +177,11 @@ async function generateSessionToken(
     const sign = await crypto.subtle.sign('HMAC', secretKey, payloadData);
     const signature = new Uint8Array(sign);
     const signatureBase64 = Buffer.from(signature).toString('base64');
-    if (logLevel(FILE_LOG_LEVEL, env)) {
-      console.log('generateSessionToken.sign', sign);
-      console.log('generateSessionToken.signature', signature.values());
-      console.log('generateSessionToken.signatureBase64', signatureBase64);
-    }
+    log(`
+    generateSessionToken.sign ${sign}\n
+    generateSessionToken.signature ${signature.values()}\n
+    generateSessionToken.signatureBase64 ${signatureBase64}\n
+    `);
     out = `${payload}.${signatureBase64}`;
   } catch (error) {
     console.log('generateSessionToken.error', error);
@@ -195,6 +193,7 @@ async function handleSession(
   handler: RequestHandler,
   env: Env,
   ctx: ExecutionContext,
+  log = logger(FILE_LOG_LEVEL, env),
 ) {
   const url = new URL(handler.req.url);
   const method = handler.req.method;
@@ -206,13 +205,9 @@ async function handleSession(
   // await clearAllSessions(env);
 
   if (url.pathname.startsWith('/api/auth/session')) {
-    if (logLevel(FILE_LOG_LEVEL, env)) {
-      console.log('worker.api.auth.session.handleSession');
-    }
-
+    log(`worker.api.auth.session.handleSession ${url.pathname}`);
     try {
       const { valid, payload, status } = await isValidJwt(handler, env, ctx);
-
       if (!valid) {
         res = createJsonResponse(
           {
@@ -227,9 +222,7 @@ async function handleSession(
       let session: Session;
       switch (method) {
         case 'GET':
-          if (logLevel(FILE_LOG_LEVEL, env)) {
-            console.log('worker.api.auth.session.handleSession.get');
-          }
+          log(`worker.api.auth.session.handleSession.GET ${url.pathname}`);
           const sessionTokenParam = url.searchParams.get('sessionToken');
           session = JSON.parse(
             await env.DEMO_CFW_SSR_SESSIONS.get(sessionTokenParam),
@@ -239,33 +232,21 @@ async function handleSession(
           });
           break;
         case 'POST':
-          if (logLevel(FILE_LOG_LEVEL, env)) {
-            console.log('worker.api.auth.session.handleSession.post');
-          }
+          log(`worker.api.auth.session.handleSession.POST ${url.pathname}`);
           session = await getSessionFromCookie(handler, env);
           if (session !== undefined) {
-            // console.log(
-            //   'worker.api.auth.session.handleSession.post.session',
-            //   session,
-            // );
             res = await handler.handleRequest(env, ctx, session, 200, {
               withAuth: true,
             });
           } else {
             const sessionId = generateTypedUUID(16, 'session');
             const sessionToken = await generateSessionToken(env, sessionId);
-            console.log(handler.user);
             const user = await sessionUser(handler.user, env);
-            if (logLevel(FILE_LOG_LEVEL, env)) {
-              console.log(`sessionToken: 
-          XXXXXXXXXXXXXXXXXXXXX
-          ${sessionToken}
-          `);
-              console.log(`sessionId:
-          XXXXXXXXXXXXXXXXXXXXX
-          ${sessionId}
-          `);
-            }
+            log(`
+            XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+            \tsessionToken -> ${sessionToken}\n\
+            \tsessionId -> ${sessionId}
+            `);
             session = {
               id: sessionId,
               user: user,
@@ -314,13 +295,9 @@ async function handleSession(
       );
     }
   }
-  if (logLevel(FILE_LOG_LEVEL, env)) {
-    console.log(
-      'worker.api.auth.session.handleSession.res',
-      JSON.stringify(res, null, 2),
-    );
-  }
-
+  log(
+    `worker.api.auth.session.handleSession.res ${JSON.stringify(res, null, 2)}`,
+  );
   return res;
 }
 

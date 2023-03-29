@@ -15,18 +15,13 @@ import {
   readBody,
 } from './util';
 import { Env } from './types';
-import {
-  defineInit,
-  handleGenerated,
-  RequestHandler,
-  WorkerRequest,
-} from './api';
+import { handleGenerated, RequestHandler, WorkerRequest } from './api';
 import { handleAPI } from './api';
 import { exposeSession } from './api';
 const FILE_LOG_LEVEL = 'error';
 export default {
   async fetch(
-    request: WorkerRequest,
+    request: Request,
     env: Env,
     ctx: ExecutionContext,
     waitUntil: (promise: Promise<any>) => void,
