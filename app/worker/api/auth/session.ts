@@ -268,7 +268,7 @@ async function handleSession(
               JSON.stringify(session),
             );
 
-            res = await handler.handleRequest(env, ctx, { sessionToken }, 204, {
+            res = await handler.handleRequest(env, ctx, { session }, 204, {
               withAuth: true,
             });
           }

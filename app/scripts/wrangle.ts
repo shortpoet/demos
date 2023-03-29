@@ -127,6 +127,8 @@ async function setVars(env, envVars) {
     NEXTAUTH_URL: envVars.parsed['NEXTAUTH_URL'],
     SSR_BASE_PATHS: ssrDirs,
   };
+  // TODO seems to be a bug where NEXTAUTH_URL
+  // prod value is ending up in dev
   writeToml({
     ...config,
     env: {

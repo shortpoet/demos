@@ -28,28 +28,21 @@
 </style>
 
 <script lang="ts" setup>
-// import { useHead } from '@vueuse/head';
-// import { title, meta, link } from '~/types';
 import { computed, onMounted, ref } from 'vue';
-import { useAuthPlugin, DEFAULT_REDIRECT_CALLBACK, setSession, cookieOptions, COOKIES_SESSION_TOKEN, SESSION_TOKEN_EXPIRY } from '~/composables/auth-plugin';
+import { useAuthPlugin, DEFAULT_REDIRECT_CALLBACK, setSession, SESSION_TOKEN_EXPIRY } from '~/composables/auth-plugin';
 import UserLayout from '~/layouts/UserLayout.vue';
 import AdminLayout from '~/layouts/AdminLayout.vue';
 import { usePageContext } from '~/composables/pageContext';
 import MainNav from '~/components/MainNav.vue';
+import { COOKIES_SESSION_TOKEN, cookieOptions } from '~/composables/cookies';
 
-// const slots = useSlots();
-// const loginSlot = slots.login;
 const loading = ref(true);
 const pageContext = usePageContext();
 console.log('AuthLayout.pageContext: isAdmin -> ', pageContext.pageProps?.isAdmin);
-console.log(pageContext.session)
-console.log(pageContext.pageProps)
-console.log(pageContext.isAdmin)
 let Layout = pageContext.pageProps?.isAdmin ? AdminLayout : UserLayout;
 const pageComponent = computed(() => {
   return Layout;
 });
-
 
 onMounted(async () => {
   // console.log('AuthLayout.onMounted.before');
@@ -73,7 +66,7 @@ onMounted(async () => {
     if (seshRes && seshRes.status === 'Success') {
 
       cookies.set(COOKIES_SESSION_TOKEN, seshRes.result, {
-        ...cookieOptions(),
+        ...cookieOptions('set'),
         maxAge: SESSION_TOKEN_EXPIRY,
       });
 
@@ -88,38 +81,9 @@ onMounted(async () => {
       if (import.meta.env.VITE_LOG_LEVEL === 'debug') {
         console.error('error setting session: ', seshRes);
       }
-      cookies.remove(COOKIES_SESSION_TOKEN, cookieOptions());
+      cookies.remove(COOKIES_SESSION_TOKEN, cookieOptions('remove'));
     }
   }
   loading.value = false;
 })
-
-// useHead({
-//   // title,
-//   script: [
-//     {
-//       src: 'https://cdn.auth0.com/js/auth0-spa-js/2.0.4/auth0-spa-js.production.js',
-//       crossorigin: 'anonymous',
-//       async: true,
-//       onload: async () => {
-//         console.log('XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX')
-//         // const { onLoad } = await useAuth(defaultOptions);
-//         // console.log('auth0 loaded');
-//         // await onLoad();
-//         // the self-executing function below fires multiple times
-//         // return onLoad
-//         // const authP = useAuthPlugin();
-//         // await authP?.createAuthClient(DEFAULT_REDIRECT_CALLBACK);
-//         // await authP?.onLoad();
-//       },
-//     },
-//     // {
-//     //   src: 'https://cdn.auth0.com/js/auth0/9.18/auth0.min.js',
-//     //   crossorigin: 'anonymous',
-//     //   async: true,
-//     // },
-//   ],
-//   // meta,
-//   // link,
-// })
 </script>

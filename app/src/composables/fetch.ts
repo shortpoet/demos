@@ -1,5 +1,5 @@
 import { escapeNestedKeys, safeInit } from '~/../util';
-import { Ref, ref, watch } from 'vue';
+import { Ref, ref, UnwrapRef, watch } from 'vue';
 import { User } from '~/../types';
 
 export { useFetch };
@@ -34,19 +34,26 @@ export const requestInit: RequestConfig = {
   // mode: 'cors',
 };
 
-const useFetch = async <T extends unknown>(
+interface UseFetchResult<T> {
+  fetchApi: () => Promise<void>;
+  data: Ref<UnwrapRef<T>>;
+  dataLoading: Ref<boolean>;
+  error: Ref<null>;
+}
+
+const useFetch = async <T = unknown>(
   path: string,
   options?: RequestConfig | null,
   // valueRef: Ref<T> = <Ref<T>>ref(),
   // loadingRef: Ref<boolean> = ref(false),
   // errorRef: Ref<any> = ref(null),
-) => {
+): Promise<UseFetchResult<T>> => {
   const urlBase = `${import.meta.env.VITE_APP_URL}`;
   const url = path.startsWith('http') ? path : `${urlBase}/${path}`;
 
   const dataLoading = ref(true);
   const error = ref(null);
-  const data: Ref<T | any | unknown> = ref();
+  const data = ref(null as unknown as T);
   if (options === null) {
     options = {};
   }

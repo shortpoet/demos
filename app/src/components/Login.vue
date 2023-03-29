@@ -36,7 +36,8 @@
 
 <script lang="ts">
 import { ref } from 'vue';
-import { cookieOptions, COOKIES_USER_TOKEN, COOKIES_SESSION_TOKEN, DEFAULT_REDIRECT_CALLBACK, useAuthPlugin } from '~/composables/auth-plugin';
+import { DEFAULT_REDIRECT_CALLBACK, useAuthPlugin } from '~/composables/auth-plugin';
+import { COOKIES_USER_TOKEN, COOKIES_SESSION_TOKEN, cookieOptions } from '~/composables/cookies';
 
 export default {
   props: {
@@ -98,22 +99,22 @@ export default {
     onLogin.value = async (event: any) => {
       console.log("login.component.onLogin");
       // cookie options must be in both set and remove
-      cookies.set(COOKIES_USER_TOKEN, true, cookieOptions())
+      cookies.set(COOKIES_USER_TOKEN, true, cookieOptions('set'))
       await loginWithRedirect();
 
     };
     onLoginPopup.value = async (event: any) => {
       console.log("login.component.onLoginPopup");
-      cookies.set(COOKIES_USER_TOKEN, true, cookieOptions())
+      cookies.set(COOKIES_USER_TOKEN, true, cookieOptions('set'))
       await loginWithPopup();
     };
     onLogout.value = async (event: any) => {
       console.log("login.component.onLogout");
       // remove cookie MUST have path
-      // https://github.com/reactivestack/cookies/issues/16#issuecomment-178881393
       // "Browsers are bitches about that." 😆
-      cookies.remove(COOKIES_USER_TOKEN, cookieOptions());
-      cookies.remove(COOKIES_SESSION_TOKEN, cookieOptions());
+      // https://github.com/reactivestack/cookies/issues/16#issuecomment-178881393
+      cookies.remove(COOKIES_USER_TOKEN, cookieOptions('remove'));
+      cookies.remove(COOKIES_SESSION_TOKEN, cookieOptions('remove'));
       if (!authError.value) {
       }
       await logout();

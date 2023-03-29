@@ -28,7 +28,7 @@ const sessionUser = async (user: User, env: Env): Promise<User> => {
     console.log('sessionUser.existing.end', JSON.stringify(existing, null, 2));
     return existing;
   } else {
-    user = { id: generateTypedUUID(8, 'user'), role: role, ...user };
+    user = { ...user, id: generateTypedUUID(8, 'user'), role: role };
     await putUser(user, env);
     console.log('sessionUser.newuser.end', JSON.stringify(user, null, 2));
     return user;

@@ -21,7 +21,7 @@ async function setSecretFile(
   } else {
     secret = await passGet(passKey);
   }
-  // console.log(clientId);
+  console.log(`secret ${key}: ${secret}\n`);
   await writeSecret(key, secret, env);
   const file = path.join(__dirname, `../../.${env}.vars`);
   const existing = await readFile(file);
@@ -41,9 +41,9 @@ async function setSecretFile(
 
 async function writeSecret(key: string, value: string, env: string) {
   console.log(`writing ${key} to ${env}\n`);
-  const res = await command(
-    `echo ${value} | npx wrangler --env ${env} secret put ${key}`,
-  );
+  const cmd = `echo "${value}" | npx wrangler --env ${env} secret put ${key}`;
+  console.log(`${cmd}\n`);
+  const res = await command(cmd);
   console.log(res + '\n');
 }
 

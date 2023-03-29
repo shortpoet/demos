@@ -1,11 +1,16 @@
 // import crypto from 'crypto';
-import { ref, Ref, computed, watch, inject, provide } from 'vue';
+import { ref, inject, provide } from 'vue';
 import type { InjectionKey } from 'vue';
 
 import { navigate } from 'vite-plugin-ssr/client/router';
-import { CookieSetOptions } from 'universal-cookie';
 
-import { User, Auth0Instance, ClientOptions, Auth0Client } from '~/../types';
+import {
+  User,
+  Auth0Instance,
+  ClientOptions,
+  Auth0Client,
+  Session,
+} from '~/../types';
 import { useFetch } from './fetch';
 import {
   createAuth0Client,
@@ -18,15 +23,13 @@ import {
 
 import { Buffer } from 'buffer';
 import { escapeNestedKeys } from '~/../util';
+import { COOKIES_USER_TOKEN } from './cookies';
 
 export {
   useAuthPlugin,
   DEFAULT_REDIRECT_CALLBACK,
   defaultOptions,
-  COOKIES_USER_TOKEN,
-  cookieOptions,
   setSession,
-  COOKIES_SESSION_TOKEN,
   SESSION_TOKEN_EXPIRY,
 };
 
@@ -36,6 +39,7 @@ const authClient = ref<Auth0Client | null>(null);
 let redirectCallback: (appState: any) => void;
 // const redirectCallback = ref(DEFAULT_REDIRECT_CALLBACK);
 const user = ref<User | undefined>();
+const session = ref<Session | undefined>();
 const token = ref<string>();
 const authLoading = ref(true);
 const popupOpen = ref(false);
@@ -45,27 +49,7 @@ const audience = `https://ssr.shortpoet.com`;
 const scope = 'openid profile email offline_access';
 const response_type = 'code';
 
-const COOKIES_USER_TOKEN = `${import.meta.env.VITE_APP_NAME}-user-token`;
-const COOKIES_SESSION_TOKEN = `${import.meta.env.VITE_APP_NAME}-session-token`;
 const SESSION_TOKEN_EXPIRY = 60 * 60; // 1 hour
-
-const cookieOptions: () => CookieSetOptions = () => {
-  console.log('cookieOptions');
-  console.log(import.meta.env.VITE_APP_URL);
-  console.log(new URL(import.meta.env.VITE_APP_URL).hostname);
-  const out = {
-    path: '/',
-    expires: new Date(Date.now() + 1000 * 60 * 60 * 24),
-    maxAge: 60 * 60 * 24,
-    domain: new URL(import.meta.env.VITE_APP_URL).hostname,
-    sameSite: 'strict' as const,
-    // below only works in https
-    // secure: import.meta.env.VITE_APP_URL.startsWith('https'),
-    // httpOnly: import.meta.env.VITE_APP_URL.startsWith('https'),
-  };
-  console.log(out);
-  return out;
-};
 
 const DEFAULT_REDIRECT_CALLBACK = (appState: any = {}) =>
   // window.history.replaceState(appState, document.title, window.location.pathname);
@@ -294,9 +278,10 @@ const setSession = async (
   const options = { user };
   let res = { result: 'Error', status: 'Error' };
 
-  const { data, error, dataLoading } = await useFetch<{
-    sessionToken: string;
-  }>('api/auth/session', options);
+  const { data, error, dataLoading } = await useFetch<Session>(
+    'api/auth/session',
+    options,
+  );
 
   if (error.value) {
     if (import.meta.env.VITE_LOG_LEVEL === 'debug')
@@ -308,7 +293,7 @@ const setSession = async (
       console.log(`dataLoading: ${dataLoading.value}`);
     res = { result: 'Loading', status: 'Loading' };
   }
-  if (data.value && data.value.sessionToken) {
+  if (data.value && data.value) {
     if (import.meta.env.VITE_LOG_LEVEL === 'debug') {
       let logObj = escapeNestedKeys({ ...data.value }, [
         'token',
@@ -327,6 +312,7 @@ const setSession = async (
     if (!isValid) {
       res = { result: 'Invalid', status: 'Error' };
     } else {
+      session.value = data.value;
       res = { result: token, status: 'Success' };
     }
   }

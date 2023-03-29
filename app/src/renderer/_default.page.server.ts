@@ -9,16 +9,19 @@ export { passToClient };
 export { onBeforeRender };
 
 async function onBeforeRender(pageContext: PageContext) {
+  console.log('_default.server.onBeforeRender');
+
   const session = pageContext.session;
   const user = pageContext.session?.user;
-  console.log('_default.server.onBeforeRender');
-  console.log(
-    `_default.server.is logged in ${user !== null && user !== undefined}`,
-  );
   const isAdmin = user?.role === 'admin';
   let redirectTo: string | undefined;
   const protectedRoutes = ['/api-data/debug', '/api-data/debug-plugin'];
   const path = pageContext.urlPathname;
+
+  console.log(
+    `_default.server.is logged in ${user !== null && user !== undefined}
+    isAdmin ${isAdmin}`,
+  );
 
   switch (true as boolean) {
     case protectedRoutes.includes(path) && !user:
