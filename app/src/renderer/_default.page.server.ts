@@ -37,6 +37,9 @@ async function onBeforeRender(pageContext: PageContext) {
       redirectTo,
       session,
       isAdmin,
+      pageProps: {
+        isAdmin,
+      },
     },
   };
 }
