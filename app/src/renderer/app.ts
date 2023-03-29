@@ -14,8 +14,8 @@ export { createApp };
 
 function createApp(pageContext: PageContext) {
   // console.log('createApp');
-  const { Page, pageProps, session, csrfToken, callbackUrl } = pageContext;
-  const isAdmin = pageProps?.isAdmin;
+  const { Page, pageProps, session, csrfToken, callbackUrl, isAdmin } =
+    pageContext;
   let rootComponent: Component;
 
   const PageWithWrapper = defineComponent({
@@ -58,7 +58,7 @@ function createApp(pageContext: PageContext) {
       rootComponent.session = pageContext.session;
       rootComponent.csrfToken = pageContext.csrfToken;
       rootComponent.callbackUrl = pageContext.callbackUrl;
-      rootComponent.isAdmin = pageContext.pageProps?.isAdmin;
+      rootComponent.isAdmin = pageContext.isAdmin;
     },
   });
 

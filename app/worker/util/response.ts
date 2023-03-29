@@ -28,6 +28,7 @@ function parseCookie(cookie: string): { [key: string]: string } {
 }
 
 function getCookie(cookies: string, name: string): string {
+  // cookie parsing is messed up so no admin or any role
   const parsed = parseCookie(cookies);
   return parsed[name];
 }

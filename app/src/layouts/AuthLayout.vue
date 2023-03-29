@@ -42,6 +42,9 @@ import MainNav from '~/components/MainNav.vue';
 const loading = ref(true);
 const pageContext = usePageContext();
 console.log('AuthLayout.pageContext: isAdmin -> ', pageContext.pageProps?.isAdmin);
+console.log(pageContext.session)
+console.log(pageContext.pageProps)
+console.log(pageContext.isAdmin)
 let Layout = pageContext.pageProps?.isAdmin ? AdminLayout : UserLayout;
 const pageComponent = computed(() => {
   return Layout;

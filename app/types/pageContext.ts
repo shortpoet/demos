@@ -49,6 +49,7 @@ export type PageContextCustom = {
   httpResponse: HttpResponse;
   _allPageIds: string[];
   session: Session | null;
+  isAdmin: boolean;
   csrfToken: string;
   callbackUrl: string;
 };
