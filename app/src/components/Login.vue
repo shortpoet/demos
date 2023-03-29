@@ -91,7 +91,7 @@ export default {
     const { loginWithRedirect, logout, loginWithPopup } = authP;
 
     const { useCookies } = await import('@vueuse/integrations/useCookies');
-    const cookies = useCookies([COOKIES_USER_TOKEN]);
+    const cookies = useCookies([COOKIES_USER_TOKEN, COOKIES_SESSION_TOKEN]);
 
     console.log(`login.component.authLoading.value ${authLoading.value}`);
 
@@ -109,8 +109,13 @@ export default {
     };
     onLogout.value = async (event: any) => {
       console.log("login.component.onLogout");
+      // remove cookie MUST have path
+      // https://github.com/reactivestack/cookies/issues/16#issuecomment-178881393
+      // "Browsers are bitches about that." 😆
       cookies.remove(COOKIES_USER_TOKEN, cookieOptions());
-      cookies.remove(COOKIES_SESSION_TOKEN, cookieOptions())
+      cookies.remove(COOKIES_SESSION_TOKEN, cookieOptions());
+      if (!authError.value) {
+      }
       await logout();
     };
 

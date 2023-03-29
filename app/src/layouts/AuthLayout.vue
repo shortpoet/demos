@@ -88,7 +88,7 @@ onMounted(async () => {
       if (import.meta.env.VITE_LOG_LEVEL === 'debug') {
         console.error('error setting session: ', seshRes);
       }
-      cookies.remove(COOKIES_SESSION_TOKEN);
+      cookies.remove(COOKIES_SESSION_TOKEN, cookieOptions());
     }
   }
   loading.value = false;
