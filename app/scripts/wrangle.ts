@@ -161,9 +161,7 @@ async function setBindings(bindingName, appName, env, debug) {
   }
 }
 
-async function main(env, debug) {
-  const envFile =
-    env === 'dev' ? '.env' : env === 'preview' ? '.env.preview' : '.env.uat';
+async function main(env, envFile, debug) {
   const config = dotenv.config({
     path: path.join(__dirname, `../${envFile}`),
   });
@@ -187,6 +185,16 @@ async function main(env, debug) {
 }
 
 (async () => {
+  //TODO change to mode
   const { env, other, debug } = getArgs();
-  await main(env, debug);
+  const envFile =
+    env === 'dev'
+      ? '.env'
+      : env === 'preview'
+      ? '.env.preview'
+      : env === '.env.uat'
+      ? '.env.uat'
+      : '.env.prod';
+  const _env = env === 'prod' ? 'prod' : 'dev';
+  await main(_env, envFile, debug);
 })();

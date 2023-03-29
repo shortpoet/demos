@@ -106,6 +106,7 @@ const handleRequest = async (handler: RequestHandler, env: Env) => {
       secret: env.NEXTAUTH_SECRET,
     });
     console.log('token', token);
+
     const sessionToken = handler.user
       ? (handler.user.token = token ? JSON.stringify(token) : undefined)
       : undefined;

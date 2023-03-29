@@ -115,6 +115,7 @@ class RequestHandler {
     }
     if (this.req.body && this.req.method === 'POST') {
       this.data = await this._parseBody(this.req);
+      this.user = this.data;
       if (this.data && this.url && this.url.pathname === '/api/auth/session') {
         this.user = this.data;
       }
@@ -212,7 +213,7 @@ class RequestHandler {
         }
         this.isAuthenticated = valid;
         this.token = payload.token;
-        this.user = this.user;
+        // this.user = this.user;
         res = createJsonResponse(
           content,
           this,

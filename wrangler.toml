@@ -39,8 +39,8 @@ preview_id = "fb3cc5e9826141639c7285e4dc6dd6ce"
 [env.prod.vars]
 AUTH0_DOMAIN = "shortpoet.auth0.com"
 ENVIRONMENT = "prod"
-LOG_LEVEL = "error"
-NEXTAUTH_URL = "https://demo-cfw-ssr-dev.shortpoet.workers.dev/api/next-auth"
+LOG_LEVEL = "debug"
+NEXTAUTH_URL = "https://demo-cfw-ssr-prod.shortpoet.workers.dev/api/next-auth"
 SSR_BASE_PATHS = "about,api-data,auth,auth0,index,next-auth,star-wars"
 VITE_AUTH0_DOMAIN = "shortpoet.auth0.com"
 [site]

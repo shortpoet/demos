@@ -51,11 +51,11 @@ const healthCheckJson = async (handler: RequestHandler, env: Env) => {
   return res;
 };
 
-const parseEnv = async (env: KVNamespace) => {
-  const envVars = await env.list();
+const parseEnv = async (kv: KVNamespace) => {
+  const envVars = await kv.list();
   const out = {};
   for (let [k, v] of Object.entries(envVars.keys)) {
-    let logObj = escapeNestedKeys(JSON.parse(await env.get(v.name)), [
+    let logObj = escapeNestedKeys(JSON.parse(await kv.get(v.name)), [
       'token',
       'accessToken',
     ]);
@@ -88,23 +88,28 @@ const handleHealth = async (
             console.log(sanitizedToken);
           }
         }
+        const excludes = [
+          'token',
+          'accessToken',
+          '__SECRET__',
+          'ADMIN_USERS',
+          'AUTH0_CLIENT_SECRET',
+          'NEXTAUTH_SECRET',
+          'AUTH0_CLIENT_ID',
+        ];
+        let handlerLog = escapeNestedKeys(handler, excludes);
+        let envLog = escapeNestedKeys(env, excludes);
         res = await handler.handleRequest(
           env,
           ctx,
           {
-            handler: {
-              ...handler,
-              user: {
-                ...handler.user,
-                token: !!sanitizedToken,
-              },
-            },
+            handler: handlerLog,
             req: handler.req,
             // TODO this is expensive, only do it if needed; add a flag to the request using params
             env: {
-              ...env,
+              ...envLog,
               // DEMO_CFW_SSR: await parseEnv(env.DEMO_CFW_SSR),
-              // DEMO_CFW_SSR_USERS: await parseEnv(env.DEMO_CFW_SSR_USERS),
+              DEMO_CFW_SSR_USERS: await parseEnv(env.DEMO_CFW_SSR_USERS),
               // DEMO_CFW_SSR_SESSIONS: await parseEnv(env.DEMO_CFW_SSR_SESSIONS),
             },
             ctx,

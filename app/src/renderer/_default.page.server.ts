@@ -15,7 +15,7 @@ async function onBeforeRender(pageContext: PageContext) {
   console.log(
     `_default.server.is logged in ${user !== null && user !== undefined}`,
   );
-
+  const isAdmin = user?.role === 'admin';
   let redirectTo: string | undefined;
   const protectedRoutes = ['/api-data/debug', '/api-data/debug-plugin'];
   const path = pageContext.urlPathname;
@@ -35,6 +35,8 @@ async function onBeforeRender(pageContext: PageContext) {
   return {
     pageContext: {
       redirectTo,
+      session,
+      isAdmin,
     },
   };
 }
@@ -48,6 +50,7 @@ const passToClient = [
   'csrfToken',
   'callbackUrl',
   'redirectTo',
+  'isAdmin',
 ];
 
 async function render(pageContext: PageContextServer) {

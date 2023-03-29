@@ -60,7 +60,9 @@ export default {
           options.method === 'PUT' ||
           options.method === 'DELETE' ||
           options.method === 'PATCH' ||
-          options.method === 'OPTIONS'
+          options.method === 'OPTIONS' ||
+          options.withAuth === true ||
+          options.withAuth === false
       }
     }
   },

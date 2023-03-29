@@ -49,15 +49,22 @@ const COOKIES_USER_TOKEN = `${import.meta.env.VITE_APP_NAME}-user-token`;
 const COOKIES_SESSION_TOKEN = `${import.meta.env.VITE_APP_NAME}-session-token`;
 const SESSION_TOKEN_EXPIRY = 60 * 60; // 1 hour
 
-const cookieOptions: CookieSetOptions = {
-  path: '/',
-  expires: new Date(Date.now() + 1000 * 60 * 60 * 24),
-  maxAge: 60 * 60 * 24,
-  domain: new URL(import.meta.env.VITE_APP_URL).hostname,
-  sameSite: 'strict',
-  // below only works in https
-  // secure: import.meta.env.VITE_APP_URL.startsWith('https'),
-  // httpOnly: import.meta.env.VITE_APP_URL.startsWith('https'),
+const cookieOptions: () => CookieSetOptions = () => {
+  console.log('cookieOptions');
+  console.log(import.meta.env.VITE_APP_URL);
+  console.log(new URL(import.meta.env.VITE_APP_URL).hostname);
+  const out = {
+    path: '/',
+    expires: new Date(Date.now() + 1000 * 60 * 60 * 24),
+    maxAge: 60 * 60 * 24,
+    domain: new URL(import.meta.env.VITE_APP_URL).hostname,
+    sameSite: 'strict' as const,
+    // below only works in https
+    // secure: import.meta.env.VITE_APP_URL.startsWith('https'),
+    // httpOnly: import.meta.env.VITE_APP_URL.startsWith('https'),
+  };
+  console.log(out);
+  return out;
 };
 
 const DEFAULT_REDIRECT_CALLBACK = (appState: any = {}) =>

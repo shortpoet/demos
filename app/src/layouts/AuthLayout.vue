@@ -32,7 +32,7 @@
 // import { title, meta, link } from '~/types';
 import { computed, onMounted, ref } from 'vue';
 import { useAuthPlugin, DEFAULT_REDIRECT_CALLBACK, setSession, cookieOptions, COOKIES_SESSION_TOKEN, SESSION_TOKEN_EXPIRY } from '~/composables/auth-plugin';
-import AuthLayout from '~/layouts/UserLayout.vue';
+import UserLayout from '~/layouts/UserLayout.vue';
 import AdminLayout from '~/layouts/AdminLayout.vue';
 import { usePageContext } from '~/composables/pageContext';
 import MainNav from '~/components/MainNav.vue';
@@ -42,7 +42,7 @@ import MainNav from '~/components/MainNav.vue';
 const loading = ref(true);
 const pageContext = usePageContext();
 console.log('AuthLayout.pageContext: isAdmin -> ', pageContext.pageProps?.isAdmin);
-let Layout = pageContext.pageProps?.isAdmin ? AdminLayout : AuthLayout;
+let Layout = pageContext.pageProps?.isAdmin ? AdminLayout : UserLayout;
 const pageComponent = computed(() => {
   return Layout;
 });
@@ -70,7 +70,7 @@ onMounted(async () => {
     if (seshRes && seshRes.status === 'Success') {
 
       cookies.set(COOKIES_SESSION_TOKEN, seshRes.result, {
-        ...cookieOptions,
+        ...cookieOptions(),
         maxAge: SESSION_TOKEN_EXPIRY,
       });
 

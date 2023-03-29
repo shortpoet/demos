@@ -98,19 +98,19 @@ export default {
     onLogin.value = async (event: any) => {
       console.log("login.component.onLogin");
       // cookie options must be in both set and remove
-      cookies.set(COOKIES_USER_TOKEN, true, cookieOptions)
+      cookies.set(COOKIES_USER_TOKEN, true, cookieOptions())
       await loginWithRedirect();
 
     };
     onLoginPopup.value = async (event: any) => {
       console.log("login.component.onLoginPopup");
-      cookies.set(COOKIES_USER_TOKEN, true, cookieOptions)
+      cookies.set(COOKIES_USER_TOKEN, true, cookieOptions())
       await loginWithPopup();
     };
     onLogout.value = async (event: any) => {
       console.log("login.component.onLogout");
-      cookies.remove(COOKIES_USER_TOKEN, cookieOptions);
-      cookies.remove(COOKIES_SESSION_TOKEN, cookieOptions)
+      cookies.remove(COOKIES_USER_TOKEN, cookieOptions());
+      cookies.remove(COOKIES_SESSION_TOKEN, cookieOptions())
       await logout();
     };
 

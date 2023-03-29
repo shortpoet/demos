@@ -26,6 +26,7 @@ function createApp(pageContext: PageContext) {
       session,
       csrfToken,
       callbackUrl,
+      isAdmin,
     }),
     created() {
       rootComponent = this;
@@ -57,6 +58,7 @@ function createApp(pageContext: PageContext) {
       rootComponent.session = pageContext.session;
       rootComponent.csrfToken = pageContext.csrfToken;
       rootComponent.callbackUrl = pageContext.callbackUrl;
+      rootComponent.isAdmin = pageContext.pageProps?.isAdmin;
     },
   });
 
