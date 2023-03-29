@@ -19,6 +19,7 @@ export {
   Auth0Instance,
   Auth0Client,
   NextAuthInstance,
+  SetSessionResult,
 };
 
 import { Commit } from 'git-last-commit';
@@ -134,6 +135,10 @@ interface ClientOptions extends Auth0ClientOptions {
   leeway?: number;
   onRedirectCallback?(appState: any): void;
 }
+interface SetSessionResult {
+  session: Session | undefined;
+  status: 'Loading' | 'Error' | 'Success' | 'Invalid';
+}
 
 interface Auth0Instance extends Partial<Auth0Client> {
   isLoggedIn: Ref<boolean>;
@@ -147,6 +152,7 @@ interface Auth0Instance extends Partial<Auth0Client> {
     options?: ClientOptions,
   ) => Promise<void>;
   onLoad: () => Promise<User | null | undefined>;
+  setSession: (user: User) => Promise<SetSessionResult>;
   isAuthenticated: () => Promise<boolean>;
   loginWithPopup(o?: PopupLoginOptions): Promise<void>;
   handleRedirectCallback(url?: string): Promise<RedirectLoginResult>;

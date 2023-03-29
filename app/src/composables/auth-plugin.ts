@@ -10,6 +10,7 @@ import {
   ClientOptions,
   Auth0Client,
   Session,
+  SetSessionResult,
 } from '~/../types';
 import { useFetch } from './fetch';
 import {
@@ -23,13 +24,16 @@ import {
 
 import { Buffer } from 'buffer';
 import { escapeNestedKeys } from '~/../util';
-import { COOKIES_USER_TOKEN } from './cookies';
+import {
+  cookieOptions,
+  COOKIES_SESSION_TOKEN,
+  COOKIES_USER_TOKEN,
+} from './cookies';
 
 export {
   useAuthPlugin,
   DEFAULT_REDIRECT_CALLBACK,
   defaultOptions,
-  setSession,
   SESSION_TOKEN_EXPIRY,
 };
 
@@ -71,6 +75,7 @@ export const provideAuth = () => {
 
     createAuthClient,
     onLoad,
+    setSession,
     handleRedirectCallback,
     isAuthenticated,
     loginWithPopup,
@@ -264,11 +269,6 @@ const validateSession = async (
   return out;
 };
 
-interface SetSessionResult {
-  session: Session | undefined;
-  status: string;
-}
-
 const setSession = async (user: User): Promise<SetSessionResult> => {
   if (import.meta.env.VITE_LOG_LEVEL === 'debug') {
     let logObj = escapeNestedKeys({ ...user }, [
@@ -280,24 +280,30 @@ const setSession = async (user: User): Promise<SetSessionResult> => {
   }
   const options = { user };
 
-  let res: SetSessionResult = { session: undefined, status: 'Error' };
-
+  let res: SetSessionResult = {
+    session: undefined,
+    status: 'Loading',
+  };
   const { data, error, dataLoading } = await useFetch<{ session: Session }>(
     'api/auth/session',
     options,
   );
 
+  while (dataLoading.value && !error.value) {
+    await new Promise((r) => setTimeout(r, 100));
+  }
+
   if (error.value) {
     if (import.meta.env.VITE_LOG_LEVEL === 'debug')
       console.error(`error: ${error.value}`);
+    res = {
+      session: undefined,
+      status: 'Error',
+    };
   }
 
-  if (dataLoading.value) {
-    if (import.meta.env.VITE_LOG_LEVEL === 'debug')
-      console.log(`dataLoading: ${dataLoading.value}`);
-    res = { session: undefined, status: 'Loading' };
-  }
   if (data.value && data.value.session) {
+    console.log('data.value.session. HAS', !!data.value.session);
     if (import.meta.env.VITE_LOG_LEVEL === 'debug') {
       let logObj = escapeNestedKeys({ ...data.value }, [
         'token',
@@ -314,10 +320,41 @@ const setSession = async (user: User): Promise<SetSessionResult> => {
       data.value.session.sessionToken,
       SESSION_TOKEN_EXPIRY,
     );
+    const { useCookies } = await import('@vueuse/integrations/useCookies');
+    const cookies = useCookies([COOKIES_SESSION_TOKEN]);
+    // cookie options must be in both set and remove
     if (!isValid) {
-      res = { session: undefined, status: 'Error' };
+      if (import.meta.env.VITE_LOG_LEVEL === 'debug') {
+        console.error(`error token invalid: ${token.substring(0, 10)}`);
+      }
+      cookies.remove(COOKIES_SESSION_TOKEN, cookieOptions('remove'));
+      res = {
+        session: undefined,
+        status: 'Invalid',
+      };
     } else {
       session.value = data.value.session;
+
+      cookies.remove(COOKIES_USER_TOKEN, cookieOptions('remove'));
+      cookies.set(COOKIES_USER_TOKEN, true, cookieOptions('set'));
+
+      cookies.remove(COOKIES_SESSION_TOKEN, cookieOptions('remove'));
+      cookies.set(COOKIES_SESSION_TOKEN, session.value.sessionToken, {
+        ...cookieOptions('set'),
+        maxAge: SESSION_TOKEN_EXPIRY,
+      });
+
+      if (import.meta.env.VITE_LOG_LEVEL === 'debug') {
+        let logObj = escapeNestedKeys({ ...session.value }, [
+          'token',
+          'accessToken',
+          'sessionToken',
+        ]);
+        console.log('setSession: ', COOKIES_SESSION_TOKEN);
+        console.log(JSON.stringify(logObj, null, 2));
+        console.log('setSession.cookies: ', cookies.getAll());
+        console.log('setSession.cookies: ', cookies.get(COOKIES_SESSION_TOKEN));
+      }
       res = { session: session.value, status: 'Success' };
     }
   }
@@ -383,13 +420,28 @@ async function loginWithRedirect(
   authLoading.value = true;
   try {
     const res = await authClient.value?.loginWithRedirect(o);
-    // window.location.reload();
     return res;
   } catch (e) {
     console.error(e);
     error.value = e;
     authLoading.value = false;
   } finally {
+    user.value = (await authClient.value?.getUser()) || ({} as User);
+    isLoggedIn.value = (await authClient.value?.isAuthenticated()) || false;
+    token.value = await authClient.value?.getTokenSilently();
+    if (user.value) {
+      if (import.meta.env.VITE_LOG_LEVEL === 'debug') {
+        console.log('loginWithPopup: user: ', user.value);
+      }
+      user.value.token = token.value || '';
+      const seshRes = await setSession(user.value);
+      if (seshRes.status === 'Success') {
+        if (import.meta.env.VITE_LOG_LEVEL === 'debug') {
+          console.log('loginWithPopup: setSession: ', seshRes);
+        }
+        session.value = seshRes.session;
+      }
+    }
     authLoading.value = false;
   }
 }
@@ -399,7 +451,6 @@ async function loginWithPopup(o: PopupLoginOptions = {}) {
   authLoading.value = true;
   try {
     const res = await authClient.value?.loginWithPopup(o);
-    // window.location.reload();
     return res;
   } catch (e) {
     console.error(e);
@@ -410,10 +461,19 @@ async function loginWithPopup(o: PopupLoginOptions = {}) {
     user.value = (await authClient.value?.getUser()) || ({} as User);
     isLoggedIn.value = (await authClient.value?.isAuthenticated()) || false;
     token.value = await authClient.value?.getTokenSilently();
-    if (user.value) user.value.token = token.value || '';
-    // because no redirect we set this here vs in onLoad
-    // console.log(`isLoggedIn: ${isLoggedIn.value}`);
-    // console.log(`user: ${JSON.stringify(user.value)}`);
+    if (user.value) {
+      if (import.meta.env.VITE_LOG_LEVEL === 'debug') {
+        console.log('loginWithPopup: user: ', user.value);
+      }
+      user.value.token = token.value || '';
+      const seshRes = await setSession(user.value);
+      if (seshRes.status === 'Success') {
+        if (import.meta.env.VITE_LOG_LEVEL === 'debug') {
+          console.log('loginWithPopup: setSession: ', seshRes);
+        }
+        session.value = seshRes.session;
+      }
+    }
     authLoading.value = false;
   }
 }

@@ -29,14 +29,14 @@
 
 <script lang="ts" setup>
 import { computed, onMounted, ref } from 'vue';
-import { useAuthPlugin, DEFAULT_REDIRECT_CALLBACK, setSession, SESSION_TOKEN_EXPIRY } from '~/composables/auth-plugin';
+import { useAuthPlugin, DEFAULT_REDIRECT_CALLBACK } from '~/composables/auth-plugin';
 import UserLayout from '~/layouts/UserLayout.vue';
 import AdminLayout from '~/layouts/AdminLayout.vue';
 import { usePageContext } from '~/composables/pageContext';
 import MainNav from '~/components/MainNav.vue';
-import { COOKIES_SESSION_TOKEN, cookieOptions, COOKIES_USER_TOKEN } from '~/composables/cookies';
+// import { COOKIES_SESSION_TOKEN, cookieOptions, COOKIES_USER_TOKEN } from '~/composables/cookies';
 // import { navigate } from 'vite-plugin-ssr/client/router';
-import { escapeNestedKeys } from '../../../app/util';
+// import { escapeNestedKeys } from '../../../app/util';
 
 const loading = ref(true);
 const pageContext = usePageContext();
@@ -47,57 +47,29 @@ const pageComponent = computed(() => {
 });
 
 onMounted(async () => {
-  // console.log('AuthLayout.onMounted.before');
+  console.log('AuthLayout.onMounted.before');
   // await setTimeout(() => {
   //   console.log('AuthLayout.onMounted.timeout');
   //   loading.value = false;
   // }, 1000);
-  // console.log('AuthLayout.onMounted.after: loading ->', loading.value);
 
   const authP = useAuthPlugin();
   await authP?.createAuthClient(DEFAULT_REDIRECT_CALLBACK);
   const user = await authP?.onLoad();
   if (user) {
-    if (import.meta.env.VITE_LOG_LEVEL === 'debug') {
-      console.log('onLoad.setSession.user: ', user);
-    }
-    const seshRes = await setSession(user);
-    const { useCookies } = await import('@vueuse/integrations/useCookies');
-    const cookies = useCookies([COOKIES_SESSION_TOKEN]);
-
-    if (seshRes && seshRes.status === 'Success') {
-      // cookie options must be in both set and remove
-      cookies.remove(COOKIES_USER_TOKEN, cookieOptions('remove'))
-      cookies.set(COOKIES_USER_TOKEN, true, cookieOptions('set'))
-
-      cookies.remove(COOKIES_SESSION_TOKEN, cookieOptions('remove'));
-      cookies.set(COOKIES_SESSION_TOKEN, seshRes.session?.sessionToken, {
-        ...cookieOptions('set'),
-        maxAge: SESSION_TOKEN_EXPIRY,
-      });
-
-      if (import.meta.env.VITE_LOG_LEVEL === 'debug') {
-        let logObj = escapeNestedKeys({ ...seshRes }, [
-          'token',
-          'accessToken',
-          'sessionToken',
-        ]);
-        console.log('onLoad.setSession: ', COOKIES_SESSION_TOKEN);
-        console.log(JSON.stringify(logObj, null, 2));
-        console.log('onLoad.setSession.cookies: ', cookies.getAll());
-        console.log('onLoad.setSession.cookies: ', cookies.get(COOKIES_SESSION_TOKEN));
-      }
-      // pageContext.isAdmin = seshRes.session?.user.role === 'admin';
-      console.log('AuthLayout.onLoad.setSession: isAdmin -> ', pageContext.isAdmin);
-      // console.log('navigate: ', pageContext.urlPathname)
-      // navigate(pageContext.urlPathname);
+    console.log('AuthLayout.onMounted: user ->', user);
+    const session = await authP?.setSession(user);
+    if (session) {
+      console.log('AuthLayout.onMounted: session ->', session);
+      loading.value = false;
     } else {
-      if (import.meta.env.VITE_LOG_LEVEL === 'debug') {
-        console.error('error setting session: ', seshRes);
-      }
-      cookies.remove(COOKIES_SESSION_TOKEN, cookieOptions('remove'));
+      console.log('AuthLayout.onMounted: session ->', session);
+      loading.value = false;
     }
+  } else {
+    console.log('AuthLayout.onMounted: user ->', user);
+    loading.value = false;
   }
-  loading.value = false;
+  console.log('AuthLayout.onMounted.after: loading ->', loading.value);
 })
 </script>

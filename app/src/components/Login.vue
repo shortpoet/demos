@@ -99,7 +99,7 @@ export default {
     onLogin.value = async (event: any) => {
       console.log("login.component.onLogin");
       await loginWithRedirect();
-
+      window.location.reload();
     };
     onLoginPopup.value = async (event: any) => {
       await loginWithPopup();

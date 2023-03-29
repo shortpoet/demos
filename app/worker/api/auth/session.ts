@@ -247,7 +247,7 @@ async function handleSession(
           log(`worker.api.auth.session.handleSession.POST ${url.pathname}`);
           session = await getSessionFromCookie(handler, env);
           if (session !== undefined) {
-            res = await handler.handleRequest(env, ctx, session, 200, {
+            res = await handler.handleRequest(env, ctx, { session }, 200, {
               withAuth: true,
             });
           } else {
