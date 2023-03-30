@@ -24,6 +24,8 @@ const authConfig = (env: Env): AuthConfig => {
             placeholder: 'supersecret',
           },
         },
+        // @ts-expect-error
+        // TODO fix this
         async authorize({ email, password }, request) {
           let options = {};
           options = {

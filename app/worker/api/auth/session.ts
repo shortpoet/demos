@@ -220,6 +220,8 @@ async function handleSession(
   }
 
   if (url.pathname.startsWith('/api/auth/session')) {
+    // const newCsrfToken = await generateCsrfToken(env);
+    // res.headers.set('Set-Cookie', `csrfToken=${newCsrfToken}; Path=/`);
     log(`worker.api.auth.session.handleSession ${url.pathname}`);
     try {
       const { valid, payload, status } = await isValidJwt(handler, env, ctx);

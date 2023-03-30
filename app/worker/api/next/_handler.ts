@@ -16,6 +16,7 @@ import { getToken } from '@auth/core/jwt';
 import { Auth } from '@auth/core';
 import authConfig from './auth';
 import { handleSsr } from 'ssr';
+import { exposeSession } from './handler';
 
 const FILE_LOG_LEVEL = 'debug';
 
@@ -51,6 +52,7 @@ async function handleNextAuth(
   let res;
 
   try {
+    await exposeSession(handler, env);
     res = await handle(handler.req, env);
   } catch (error) {
     console.error(

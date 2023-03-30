@@ -169,19 +169,9 @@ async function handleNextAuth(
   return res;
 }
 
-function cookieNames(env: Env) {
-  const useSecureCookie = (env.NEXTAUTH_URL || '').startsWith('https://');
-  // const sessionCookie =  (useSecureCookie ? '__Secure-' : '') + 'next-auth.session-token'
-  const csrfCookie =
-    (useSecureCookie ? '__Host-' : '') + 'next-auth.csrf-token';
-  const callbackCookie =
-    (useSecureCookie ? '__Secure-' : '') + 'next-auth.callback-url';
-  return { csrfCookie, callbackCookie };
-}
-
 function transformGetRequest(handler: RequestHandler, env: Env) {
   const uri = env.NEXTAUTH_URL;
-  const { csrfCookie } = cookieNames(env);
+  const { csrfCookie } = cookieNames(true);
   const cookies = handler.req.headers.get('Cookie') || '';
   const csrfToken = (getCookie(cookies, csrfCookie) || '').split('|')[0];
   // const body: BodyInit = JSON.stringify({
@@ -201,45 +191,86 @@ function transformGetRequest(handler: RequestHandler, env: Env) {
   handler.req = _req;
 }
 
+function cookieNames(useSecureCookie: boolean) {
+  // const useSecureCookie = true;
+  // const useSecureCookie = (env.NEXTAUTH_URL || '').startsWith('https://');
+  // const sessionCookie =  (useSecureCookie ? '__Secure-' : '') + 'next-auth.session-token'
+  const csrfCookie =
+    (useSecureCookie ? '__Host-' : '') + 'next-auth.csrf-token';
+  const callbackCookie =
+    (useSecureCookie ? '__Secure-' : '') + 'next-auth.callback-url';
+  return { csrfCookie, callbackCookie };
+}
+
 const exposeSession = async (handler: RequestHandler, env: Env) => {
   console.log(`\n$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$\texposeSession`);
   // Fetch session
-  const options = handler.req.headers.get('Cookie')
-    ? { headers: { cookie: handler.req.headers.get('Cookie') } }
+  const handlerReqCookie = handler.req.headers.get('Cookie');
+  const options = handlerReqCookie
+    ? { headers: { cookie: handlerReqCookie } }
     : {};
 
   console.log('options', options);
 
-  const sessionRes = await fetch(`${env.NEXTAUTH_URL}/session`, options);
-  console.log('sessionRes', sessionRes);
-  const session: Session = await sessionRes.json();
-  handler.res = new Response();
-  handler.res.locals = {};
-  // Pass session to next()
-  handler.res.locals.session = session;
-  // Include set-cookie in response
+  const uri = `${env.NEXTAUTH_URL}/session`;
+  const baseUrl = new URL(handler.req.url).origin;
+  // const gUri = `${baseUrl}/api/next-auth/session`;
+  const gUri = baseUrl.includes('localhost')
+    ? 'http://192.168.1.70:3000/api/next-auth/session'
+    : // ? 'http://[::1]:3000/api/next-auth/session'
+      `${baseUrl}/api/next-auth/session`;
+  const useSecureCookie = gUri.startsWith('https://');
+  console.log(`\nURI\n\n${uri}\n\n`);
+  console.log(`\nG_URI\n\n${gUri}\n\n`);
+  try {
+    const sessionRes = await fetch(`${gUri}`, options);
+    console.log('sessionRes', sessionRes);
+    const session: Session = await sessionRes.json();
+    handler.res = new Response();
+    handler.res.locals = {};
+    // Pass session to next()
+    handler.res.locals.session = session;
+    // Include set-cookie in response
 
-  const setCookies = sessionRes.headers.get('set-cookie');
-  if (setCookies) {
-    handler.res.headers.set('set-cookie', setCookies);
+    const setCookies = sessionRes.headers.get('set-cookie');
+    if (setCookies) {
+      console.log(`\nHAS_SET_COOKIES\n\n${setCookies}\n\n}`);
+      handler.res.headers.set('set-cookie', setCookies);
+    }
+    const cookies = handler.req.headers.get('Cookie') || '';
+    const parsedReq = parseCookie(cookies);
+    console.log(
+      `\nPARSED_REQ_COOKIE_\n\n${JSON.stringify(parsedReq, null, 2)}\n\n`,
+    );
+
+    const { csrfCookie, callbackCookie } = cookieNames(useSecureCookie);
+    console.log(`\nCSRF_COOKIE_NAME\n\n${csrfCookie}\n\n`);
+    console.log(`\nCALLBACK_COOKIE_NAME\n\n${callbackCookie}\n\n`);
+    const parsedSet = parseCookie(setCookies);
+    console.log(
+      `\nPARSED_SET_COOKIE_\n\n${JSON.stringify(parsedSet, null, 2)}\n\n`,
+    );
+    // Pass csrfToken to next()
+    const csrfToken: string =
+      getCookie(cookies, csrfCookie) ||
+      parsedSet[csrfCookie] ||
+      handler.req.headers.get(csrfCookie);
+
+    console.log(`\nCSRF_TOKEN\n\n${csrfToken}\n\n`);
+
+    handler.res.locals.csrfToken = csrfToken.split('|')[0];
+    // Pass callbackUrl to next()
+    const callbackUrl: string =
+      parsedSet[callbackCookie] || handler.req.headers.get(callbackCookie);
+
+    console.log(`\nCALLBACK_URL\n\n${callbackUrl}\n\n`);
+
+    handler.res.locals.callbackUrl = callbackUrl;
+    console.log('handler.res.locals', handler.res.locals);
+    console.log(JSON.stringify(session, null, 2));
+  } catch (error) {
+    console.error(error);
   }
-  const cookies = handler.req.headers.get('Cookie') || '';
-
-  const { csrfCookie, callbackCookie } = cookieNames(env);
-  const parsed = parseCookie(setCookies);
-  // Pass csrfToken to next()
-  const csrfToken: string =
-    getCookie(cookies, csrfCookie) ||
-    parsed[csrfCookie] ||
-    handler.req.headers.get(csrfCookie);
-
-  handler.res.locals.csrfToken = csrfToken.split('|')[0];
-  // Pass callbackUrl to next()
-  const callbackUrl: string =
-    parsed[callbackCookie] || handler.req.headers.get(callbackCookie);
-  handler.res.locals.callbackUrl = callbackUrl;
-  console.log('handler.res.locals', handler.res.locals);
-  console.log(JSON.stringify(session, null, 2));
 };
 
 // case method === 'GET' && url.pathname.startsWith('/api/next-auth/signin'):
