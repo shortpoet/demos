@@ -21,8 +21,6 @@ import {
   WorkerRequest,
 } from './api';
 import { handleAPI } from './api';
-import { handle } from 'api/next/_handler';
-import { getToken } from '@auth/core/jwt';
 const FILE_LOG_LEVEL = 'error';
 export default {
   async fetch(
@@ -32,37 +30,18 @@ export default {
     waitUntil: (promise: Promise<any>) => void,
   ): Promise<Response> {
     const url = new URL(request.url);
+    const log = logger(FILE_LOG_LEVEL, env);
     try {
       // BUG: sending env back as response body. includes all static manifest etc.
       if (!isAssetURL(url)) {
         console.log(`
-      \nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n
-      ${new Date().toLocaleTimeString()}
-      worker.fetch -> ${request.url}
-      content.type: ${request.headers.get('Content-Type')}
-      \n
-      `);
-        //   const token = await getToken({
-        //     req: request,
-        //     secret: env.NEXTAUTH_SECRET,
-        //   });
-
-        //   console.log(`
-        // \nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n
-        // TOKEN\n
-        // \t ${token}\n
-        // ENC\n`);
+          \nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+          ${new Date().toLocaleTimeString()}
+          worker.fetch -> ${request.method} -> ${
+          request.url
+        } -> content-type: ${request.headers.get('Content-Type')}\n
+        `);
       }
-
-      // if (url.pathname.startsWith('/api/next-auth')) {
-      //   const res = await handle(request, env);
-      //   console.log('res', {
-      //     ...res,
-      //     body: res.body ? { truncated: true } : res.body,
-      //   });
-      //   return res;
-      // }
-
       const handler = new RequestHandler(request, env);
       await handler.initData(env);
       const response = await handleFetchEvent(handler, env, ctx, waitUntil);

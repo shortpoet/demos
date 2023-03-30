@@ -34,9 +34,6 @@ import UserLayout from '~/layouts/UserLayout.vue';
 import AdminLayout from '~/layouts/AdminLayout.vue';
 import { usePageContext } from '~/composables/pageContext';
 import MainNav from '~/components/MainNav.vue';
-// import { COOKIES_SESSION_TOKEN, cookieOptions, COOKIES_USER_TOKEN } from '~/composables/cookies';
-// import { navigate } from 'vite-plugin-ssr/client/router';
-// import { escapeNestedKeys } from '../../../app/util';
 
 const loading = ref(true);
 const pageContext = usePageContext();

@@ -1,6 +1,6 @@
 /** source/controllers/posts.ts */
 import { Env } from '../../types';
-import { logLevel, msToTime } from '../../util';
+import { logger, logLevel, msToTime } from '../../util';
 import { RequestHandler } from '..';
 import { createJsonResponse, generateUUID } from '../../util';
 // @ts-expect-error
@@ -14,11 +14,8 @@ const FILE_LOG_LEVEL = 'error';
 export { handleHealth };
 
 const healthCheckJson = async (handler: RequestHandler, env: Env) => {
-  if (logLevel(FILE_LOG_LEVEL, env)) {
-    console.log('worker.getHealth');
-    // console.log('worker.getHealth.env');
-    // console.log(await env.DEMO_CFW_SSR);
-  }
+  const log = logger(FILE_LOG_LEVEL, env);
+  log('worker.healthCheckJson');
   let gitInfo;
   try {
     gitInfo =
@@ -44,10 +41,7 @@ const healthCheckJson = async (handler: RequestHandler, env: Env) => {
     timestamp: new Date(Date.now()),
     gitInfo: gitInfo,
   };
-  if (logLevel(FILE_LOG_LEVEL, env)) {
-    console.log('worker.getHealth.healthCheckJson.res');
-    console.log(res);
-  }
+  log(`worker.getHealth.healthCheckJson.res: ${JSON.stringify(res)}`);
   return res;
 };
 
@@ -73,16 +67,15 @@ const handleHealth = async (
   const url = new URL(handler.req.url);
   const method = handler.req.method;
   let res;
+  const log = logger(FILE_LOG_LEVEL, env);
+  log('worker.handleHealth');
+  // TODO add commits with emojis endpoint
 
-  // TODO turn this into switch
-  // add commits with emojis endpoint
-
-  if (url.pathname.startsWith('/api/health/debug')) {
-    if (logLevel(FILE_LOG_LEVEL, env)) {
-      console.log('worker.health.handleHealth.debug');
-    }
-    if (method === 'GET' || method === 'POST') {
-      try {
+  try {
+    switch (true) {
+      case url.pathname.startsWith('/api/health/debug') &&
+        (method === 'GET' || method === 'POST'):
+        log('worker.health.handleHealth.debug');
         let sanitizedToken = null;
         if (handler.user && handler.user.token) {
           sanitizedToken = handler.user.token.substring(0, 7);
@@ -91,17 +84,7 @@ const handleHealth = async (
             console.log(sanitizedToken);
           }
         }
-        const excludes = [
-          'token',
-          // 'accessToken',
-          // '__SECRET__',
-          'ADMIN_USERS',
-          // 'AUTH0_CLIENT_SECRET',
-          // 'NEXTAUTH_SECRET',
-          // 'AUTH0_CLIENT_ID',
-          'SECRET',
-          'CLIENT_ID',
-        ];
+        const excludes = ['token', 'ADMIN_USERS', 'secret', 'client_id'];
         let handlerLog = escapeNestedKeys(handler, excludes);
         let envLog = escapeNestedKeys(env, excludes);
         res = await handler.handleRequest(
@@ -124,25 +107,10 @@ const handleHealth = async (
           200,
           { withAuth: true },
         );
-      } catch (error) {
-        console.error('worker.health.handleHealth.debug.error');
-        console.error(error);
-        res = createJsonResponse(
-          { error: 'worker.health.handleHealth.debug.error' },
-          handler,
-          env,
-          404,
-        );
-      }
-    }
-  }
-
-  if (url.pathname.startsWith('/api/health/check')) {
-    if (method === 'GET' || method === 'POST') {
-      if (logLevel(FILE_LOG_LEVEL, env)) {
-        console.log('worker.health.handleHealth.check');
-      }
-      try {
+        break;
+      case url.pathname.startsWith('/api/health') &&
+        (method === 'GET' || method === 'POST'):
+        log('worker.health.handleHealth');
         res = await handler.handleRequest(
           env,
           ctx,
@@ -150,37 +118,24 @@ const handleHealth = async (
           200,
           { withAuth: false },
         );
-      } catch (error) {
-        console.error('worker.health.handleHealth.check.error');
-        console.error(error);
+      default:
+        log('worker.health.handleHealth.default');
         res = createJsonResponse(
-          { error: 'worker.health.handleHealth.check.error' },
+          { error: 'worker.health.handleHealth.debug.error' },
           handler,
           env,
           404,
         );
-      }
-
-      // try {
-      //   const healthCheck = await healthCheckJson(handler, env);
-      //   if (logLevel(FILE_LOG_LEVEL, env)) {
-      //     console.log(
-      //       'worker.health.handleHealth.check.healthCheck',
-      //       healthCheck,
-      //     );
-      //   }
-      //   res = createJsonResponse(<HealthCheck>healthCheck, handler, env, 200);
-      // } catch (error) {
-      //   console.error('worker.health.handleHealth.check.error');
-      //   console.error(error);
-      //   res = createJsonResponse({ error: 'Not Found' }, handler, env, 404);
-      // }
+        break;
     }
+  } catch (error) {
+    console.error('worker.health.handleHealth.error');
+    console.error(error);
   }
-
-  if (logLevel(FILE_LOG_LEVEL, env)) {
-    console.log('worker.health.handleHealth.res', JSON.stringify(res, null, 2));
-    console.log({ req: handler.req, env, ctx, rawManifest });
-  }
+  log(`
+    worker.health.handleHealth.res\n
+    ${JSON.stringify(res, null, 2)}\n
+    ${{ req: handler.req, env, ctx, rawManifest }}'n
+  `);
   return res;
 };

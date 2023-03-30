@@ -1,10 +1,10 @@
 import { Env } from '../types';
-import { logger, logLevel } from '../util';
+import { logger } from '../util';
 import { createJsonResponse, handleCors, handleOptions } from '../util';
 import { RequestHandler } from '.';
 import { handleHealth } from './health';
 import { handleSession } from './auth';
-import { handleNextAuth } from './next/_handler';
+import { handleNextAuth } from './next/handler';
 
 export { handleAPI };
 

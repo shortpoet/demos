@@ -3,11 +3,7 @@ import { isAssetURL, logLevel, readBody } from '../util';
 import { Session, User } from '../../types';
 import { createJsonResponse } from '../util';
 import { isValidJwt } from './auth/jwt';
-import type {
-  Request as WorkerRequest,
-  Fetcher,
-  IncomingRequestCfPropertiesCloudflareAccessOrApiShield,
-} from '@cloudflare/workers-types';
+import type { Request as WorkerRequest } from '@cloudflare/workers-types';
 
 export { RequestHandler, WorkerRequest };
 
@@ -26,7 +22,6 @@ interface ResponsePlus extends Response {
 }
 
 class RequestHandler {
-  // class RequestHandler<CfHostMetadata = unknown> extends Request<CfHostMetadata> {
   private _res?: ResponsePlus;
   declare req: Request;
   declare url: URL;
@@ -86,17 +81,10 @@ class RequestHandler {
     let res;
     switch (true) {
       case ct && ct.includes('application/json'):
-        console.log(`\n\t__1__\n`);
         res = await request.json();
         break;
       case ct && ct.includes('application/x-www-form-urlencoded'):
-        console.log(`\n\t__2__\n`);
         res = await request.formData();
-        console.log(
-          `\n\tworker._parseBody -> ${
-            this.url
-          } -> POST -> res -> from-urlecnoded -> ${JSON.stringify(res)}\n`,
-        );
         // const obj: Record<string, string> = {};
         // res.forEach((value, key) => {
         //   obj[key] = value;
@@ -105,18 +93,14 @@ class RequestHandler {
         // return obj;
         break;
       case ct && ct.includes('multipart/form-data'):
-        console.log(`\n\t__3__\n`);
         res = await request.formData();
         break;
       case request.body instanceof ReadableStream:
-        console.log(`\n\t__4__\n`);
         res = await request.json();
         break;
       case typeof request.body === 'string':
-        console.log(`\n\t__5__\n`);
         res = request.body;
       default:
-        console.log(`\n\t__6__\n`);
         break;
     }
     return res;
