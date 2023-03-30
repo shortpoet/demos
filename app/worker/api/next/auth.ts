@@ -34,13 +34,18 @@ const authConfig = (env: Env): AuthConfig => {
             body: JSON.stringify({ email, password }),
           };
           options = {};
-          // return {
-          //   id: '1',
-          //   email: email,
-          // };
-          const response = await fetch(request, options);
-          if (!response.ok) return null;
-          return (await response.json()) ?? null;
+          return {
+            id: '1',
+            email: email,
+          };
+          try {
+            const response = await fetch(request, options);
+            if (!response.ok) return null;
+            return (await response.json()) ?? null;
+          } catch (error) {
+            console.error(error);
+            return null;
+          }
         },
       }) as Provider,
     ],

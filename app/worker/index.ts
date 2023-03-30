@@ -42,18 +42,17 @@ export default {
       content.type: ${request.headers.get('Content-Type')}
       \n
       `);
-      }
+        const token = await getToken({
+          req: request,
+          secret: env.NEXTAUTH_SECRET,
+        });
 
-      const token = await getToken({
-        req: request,
-        secret: env.NEXTAUTH_SECRET,
-      });
-
-      console.log(`
+        console.log(`
       \nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n
       TOKEN\n
       \t ${token}\n
       ENC\n`);
+      }
 
       if (url.pathname.startsWith('/api/next-auth')) {
         const res = await handle(request, env);
