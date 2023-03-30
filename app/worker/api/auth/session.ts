@@ -14,7 +14,7 @@ import { getUser, sessionUser } from './user';
 import { escapeNestedKeys } from '../../../util';
 
 const FILE_LOG_LEVEL = 'error';
-const CLEAR_ALL_KV = true;
+const CLEAR_ALL_KV = false;
 
 export { handleSession, getSessionFromCookie };
 

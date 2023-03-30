@@ -29,7 +29,9 @@ function escapeNestedKeys(obj: any, targets: string[]) {
   const escapedObj: Record<any, any> = {};
   for (const [key, value] of Object.entries(obj)) {
     if (
-      targets.includes(key) &&
+      targets.some((target) =>
+        key.toLowerCase().includes(target.toLowerCase()),
+      ) &&
       typeof value === 'string' &&
       value.length > 8
     ) {

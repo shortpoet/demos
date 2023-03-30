@@ -130,7 +130,8 @@ class RequestHandler {
       headerslength++;
     });
     if (!isAssetURL(new URL(this.url))) {
-      console.log(`\tworker.initData -> ${this.url}`);
+      const ct = this.req.headers.get('Content-Type');
+      console.log(`\tworker.initData -> ${this.url} -> content type -> ${ct}`);
       console.log(`\tmethod -> ${this.req.method}`);
       console.log(`\tbody -> ${!!this.req.body}`);
       console.log(`\tbodyUsed -> ${this.req.bodyUsed}`);
@@ -139,22 +140,10 @@ class RequestHandler {
     if (logLevel(FILE_LOG_LEVEL, env)) {
       console.log(`headers ->  \n${headerString}\n`);
     }
-    const ct = this.req.headers.get('Content-Type');
-    console.log(
-      `\n\tworker.initData -> ${this.url} -> POST -> content type -> ${ct}\n`,
-    );
+    // leave next-auth body alone
     if (this.req.url.includes('api/next-auth')) {
       return;
     }
-    // const proxy = new Proxy(this.req, {
-    //   get: (target, prop) => {
-    //     // if (prop === 'body') {
-    //     //   return readBody(target.body);
-    //     // }
-    //     return target[prop];
-    //   },
-    // });
-    // this.req = proxy;
     if (this.req.body && this.req.method === 'POST') {
       this.data = await this._parseBody(this.req);
       this.user = this.data;

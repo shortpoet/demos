@@ -93,12 +93,14 @@ const handleHealth = async (
         }
         const excludes = [
           'token',
-          'accessToken',
-          '__SECRET__',
+          // 'accessToken',
+          // '__SECRET__',
           'ADMIN_USERS',
-          'AUTH0_CLIENT_SECRET',
-          'NEXTAUTH_SECRET',
-          'AUTH0_CLIENT_ID',
+          // 'AUTH0_CLIENT_SECRET',
+          // 'NEXTAUTH_SECRET',
+          // 'AUTH0_CLIENT_ID',
+          'SECRET',
+          'CLIENT_ID',
         ];
         let handlerLog = escapeNestedKeys(handler, excludes);
         let envLog = escapeNestedKeys(env, excludes);

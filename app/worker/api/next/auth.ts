@@ -9,7 +9,10 @@ const authConfig = (env: Env): AuthConfig => {
   console.log(`create auth handler`);
   return {
     providers: [
-      GitHub({ clientId: '', clientSecret: '' }),
+      GitHub({
+        clientId: env.GITHUB_CLIENT_ID,
+        clientSecret: env.GITHUB_CLIENT_SECRET,
+      }),
       Credentials({
         name: 'Credentials',
         credentials: {

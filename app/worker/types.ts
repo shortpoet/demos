@@ -45,6 +45,10 @@ interface Env {
   NEXTAUTH_URL: string;
   NEXTAUTH_SECRET: string;
   // NEXTAUTH_DATABASE_URL: string;
+
+  // GITHUB
+  GITHUB_CLIENT_ID: string;
+  GITHUB_CLIENT_SECRET: string;
 }
 
 declare type LogLevel = 'debug' | 'info' | 'warn' | 'error' | 'fatal';

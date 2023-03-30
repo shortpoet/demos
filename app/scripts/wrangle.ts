@@ -111,6 +111,16 @@ async function setSecrets(env) {
     `Cloud/auth0/${process.env.VITE_APP_NAME}/admin_users`,
     env,
   );
+  setSecretFile(
+    'GITHUB_CLIENT_ID',
+    `Github/oauth/cloudflare-workers-vue/client_id`,
+    env,
+  );
+  setSecretFile(
+    'GITHUB_CLIENT_SECRET',
+    `Github/oauth/cloudflare-workers-vue/client_secret`,
+    env,
+  );
 }
 
 async function setVars(_env: Env, envVars) {
