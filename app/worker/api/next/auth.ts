@@ -25,7 +25,20 @@ const authConfig = (env: Env): AuthConfig => {
           },
         },
         async authorize({ email, password }, request) {
-          const response = await fetch(request);
+          let options = {};
+          options = {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ email, password }),
+          };
+          options = {};
+          // return {
+          //   id: '1',
+          //   email: email,
+          // };
+          const response = await fetch(request, options);
           if (!response.ok) return null;
           return (await response.json()) ?? null;
         },

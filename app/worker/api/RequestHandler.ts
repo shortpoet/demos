@@ -86,9 +86,11 @@ class RequestHandler {
     let res;
     switch (true) {
       case ct && ct.includes('application/json'):
+        console.log(`\n\t__1__\n`);
         res = await request.json();
         break;
       case ct && ct.includes('application/x-www-form-urlencoded'):
+        console.log(`\n\t__2__\n`);
         res = await request.formData();
         console.log(
           `\n\tworker._parseBody -> ${
@@ -103,14 +105,18 @@ class RequestHandler {
         // return obj;
         break;
       case ct && ct.includes('multipart/form-data'):
+        console.log(`\n\t__3__\n`);
         res = await request.formData();
         break;
       case request.body instanceof ReadableStream:
+        console.log(`\n\t__4__\n`);
         res = await request.json();
         break;
       case typeof request.body === 'string':
+        console.log(`\n\t__5__\n`);
         res = request.body;
       default:
+        console.log(`\n\t__6__\n`);
         break;
     }
     return res;
@@ -137,6 +143,9 @@ class RequestHandler {
     console.log(
       `\n\tworker.initData -> ${this.url} -> POST -> content type -> ${ct}\n`,
     );
+    if (this.req.url.includes('api/next-auth')) {
+      return;
+    }
     // const proxy = new Proxy(this.req, {
     //   get: (target, prop) => {
     //     // if (prop === 'body') {
@@ -147,7 +156,7 @@ class RequestHandler {
     // });
     // this.req = proxy;
     if (this.req.body && this.req.method === 'POST') {
-      this.data = await this._parseBody(this.req.clone());
+      this.data = await this._parseBody(this.req);
       this.user = this.data;
       if (this.data && this.url && this.url.pathname === '/api/auth/session') {
         this.user = this.data;

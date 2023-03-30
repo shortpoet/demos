@@ -4,7 +4,7 @@ import { createJsonResponse, handleCors, handleOptions } from '../util';
 import { RequestHandler } from '.';
 import { handleHealth } from './health';
 import { handleSession } from './auth';
-import { handleNextAuth } from './next/handler';
+import { handleNextAuth } from './next/_handler';
 
 export { handleAPI };
 

@@ -192,7 +192,7 @@ packages:
     dependencies:
       '@panva/hkdf': 1.0.4
       cookie: 0.5.0
-      jose: 4.13.1
+      jose: 4.11.1
       oauth4webapi: 2.2.0
       preact: 10.11.3
       preact-render-to-string: 5.2.3(preact@10.11.3)
@@ -3306,8 +3306,8 @@ packages:
     hasBin: true
     dev: true
 
-  /jose@4.13.1:
-    resolution: {integrity: sha512-MSJQC5vXco5Br38mzaQKiq9mwt7lwj2eXpgpRyQYNHYt2lq1PjkWa7DLXX0WVcQLE9HhMh3jPiufS7fhJf+CLQ==}
+  /jose@4.11.1:
+    resolution: {integrity: sha512-YRv4Tk/Wlug8qicwqFNFVEZSdbROCHRAC6qu/i0dyNKr5JQdoa2pIGoS04lLO/jXQX7Z9omoNewYIVIxqZBd9Q==}
     dev: false
 
   /jquery@3.6.4:

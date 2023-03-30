@@ -27,6 +27,12 @@ export {
 
 const AuthError = class AuthError extends Error {};
 
+async function _handle(handler: RequestHandler, env: Env) {
+  const nextauth = handler.url.pathname.split('/').splice(0, 3).join('/');
+  const url = handler.createQueryURL({ nextauth });
+  return await Auth(new Request(url, handler.req), authConfig(env));
+}
+
 async function handleRequest(handler: RequestHandler, env: Env) {
   const urlOriginal = new URL(handler.req.url);
   console.log('urlOriginal', urlOriginal.href);
@@ -67,27 +73,30 @@ async function handleRequest(handler: RequestHandler, env: Env) {
       //   body,
       // });
 
-      if (needsLogin && !sessionToken)
-        return Response.redirect('/api/next-auth/logisignin', 307);
-      if (!needsLogin && sessionToken)
-        return new Response('Already logged-in', { status: 403 });
+      // if (needsLogin && !sessionToken)
+      //   return Response.redirect('/api/next-auth/signin', 307);
+      // if (!needsLogin && sessionToken)
+      //   return new Response('Already logged-in', { status: 403 });
     }
 
     const nextAuthUrl = handler.createQueryURL({ nextauth: action.join('/') });
     log(`nextAuthUrl: ${nextAuthUrl}`);
 
     // DIES HERE
-    handler.res = new Response();
-    const res = await handler.nextAuth(
-      new Request(nextAuthUrl, handler.req),
-      handler.res,
-    );
-    log(`res: ${res}`);
+    // handler.res = new Response();
+    // const res = await handler.nextAuth(
+    //   new Request(nextAuthUrl, handler.req),
+    //   handler.res,
+    // );
+    // log(`res: ${res}`);
 
-    // const other = await Auth(handler.req, authConfig(env));
-    // console.log('other', other);
-    // return other;
-    return res;
+    const c = new Request(nextAuthUrl, handler.req);
+    console.log('c.BODY_USED', c.bodyUsed);
+
+    const other = await Auth(c, authConfig(env));
+    console.log('other', other);
+    return other;
+    // return res;
   } catch (error) {
     console.log('error', error);
   }
@@ -108,34 +117,45 @@ async function handleNextAuth(
     `worker.api.auth.next.handleNextAuth -> ${handler.req.method}://.${url.pathname}\n`,
   );
   let res;
-  const authHandler = async (req, res) => {
-    console.log(`\n$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$\tauthHandler`);
-    const authRes = await Auth(req, authConfig(env));
-    console.log('Auth Res', JSON.stringify(authRes, null, 2));
-    return authRes;
-  };
-  handler.nextAuth = authHandler;
+  await exposeSession(handler, env);
+  // const authHandler = async (req, res) => {
+  //   console.log(`\n$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$\tauthHandler`);
+  //   const authRes = await Auth(req.clone(), authConfig(env));
+  //   console.log('Auth Res', JSON.stringify(authRes, null, 2));
+  //   return authRes;
+  // };
+  // handler.nextAuth = authHandler;
 
   try {
     switch (true) {
-      case method === 'GET' &&
-        /^\/api\/next-auth\/(csrf|session|signin)$/i.test(url.pathname):
-        res = await handleRequest(handler, env);
+      case method === 'GET' && /^\/api\/next-auth\/.*$/i.test(url.pathname):
+        res = await _handle(handler, env);
         break;
-      case method === 'POST' &&
-        /^\/api\/next-auth\/callback\/(register|login|signin|credentials)$/i.test(
-          url.pathname,
-        ):
-        res = await handleRequest(handler, env);
+      case method === 'POST' && /^\/api\/next-auth\/.*$/i.test(url.pathname):
+        res = await _handle(handler, env);
         break;
-      case method === 'GET' &&
-        /^\/api\/next-auth\/callback\/(verify-email|otp)$/i.test(url.pathname):
-        res = await handleRequest(handler, env);
-        break;
-      case method === 'POST' &&
-        /^\/api\/next-auth\/signout$/i.test(url.pathname):
-        res = await handleRequest(handler, env);
-        break;
+      // case method === 'GET' &&
+      //   /^\/api\/next-auth\/(csrf|session|signin)$/i.test(url.pathname):
+      //   res = await handleRequest(handler, env);
+      //   break;
+      // case method === 'POST' &&
+      //   /^\/api\/next-auth\/signin\/(github)$/i.test(url.pathname):
+      //   res = await handleRequest(handler, env);
+      //   break;
+      // case method === 'POST' &&
+      //   /^\/api\/next-auth\/callback\/(register|login|signin|credentials)$/i.test(
+      //     url.pathname,
+      //   ):
+      //   res = await handleRequest(handler, env);
+      //   break;
+      // case method === 'GET' &&
+      //   /^\/api\/next-auth\/callback\/(verify-email|otp)$/i.test(url.pathname):
+      //   res = await handleRequest(handler, env);
+      //   break;
+      // case method === 'POST' &&
+      //   /^\/api\/next-auth\/signout$/i.test(url.pathname):
+      //   res = await handleRequest(handler, env);
+      //   break;
       default:
         res = createJsonResponse({ error: 'Not Found' }, handler, env, 404);
         break;
@@ -182,13 +202,19 @@ function transformGetRequest(handler: RequestHandler, env: Env) {
 }
 
 const exposeSession = async (handler: RequestHandler, env: Env) => {
+  console.log(`\n$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$\texposeSession`);
   // Fetch session
   const options = handler.req.headers.get('Cookie')
     ? { headers: { cookie: handler.req.headers.get('Cookie') } }
     : {};
 
+  console.log('options', options);
+
   const sessionRes = await fetch(`${env.NEXTAUTH_URL}/session`, options);
+  console.log('sessionRes', sessionRes);
   const session: Session = await sessionRes.json();
+  handler.res = new Response();
+  handler.res.locals = {};
   // Pass session to next()
   handler.res.locals.session = session;
   // Include set-cookie in response
@@ -212,6 +238,8 @@ const exposeSession = async (handler: RequestHandler, env: Env) => {
   const callbackUrl: string =
     parsed[callbackCookie] || handler.req.headers.get(callbackCookie);
   handler.res.locals.callbackUrl = callbackUrl;
+  console.log('handler.res.locals', handler.res.locals);
+  console.log(JSON.stringify(session, null, 2));
 };
 
 // case method === 'GET' && url.pathname.startsWith('/api/next-auth/signin'):
