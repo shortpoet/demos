@@ -53,6 +53,7 @@ async function handleNextAuth(
 
   try {
     await exposeSession(handler, env);
+    // res.headers.set('Access-Control-Allow-Origin', '*');
     res = await handle(handler.req, env);
   } catch (error) {
     console.error(

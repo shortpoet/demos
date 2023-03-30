@@ -74,6 +74,9 @@ const handleHealth = async (
   const method = handler.req.method;
   let res;
 
+  // TODO turn this into switch
+  // add commits with emojis endpoint
+
   if (url.pathname.startsWith('/api/health/debug')) {
     if (logLevel(FILE_LOG_LEVEL, env)) {
       console.log('worker.health.handleHealth.debug');
@@ -109,6 +112,7 @@ const handleHealth = async (
             env: {
               ...envLog,
               // DEMO_CFW_SSR: await parseEnv(env.DEMO_CFW_SSR),
+              // @ts-expect-error
               DEMO_CFW_SSR_USERS: await parseEnv(env.DEMO_CFW_SSR_USERS),
               // DEMO_CFW_SSR_SESSIONS: await parseEnv(env.DEMO_CFW_SSR_SESSIONS),
             },

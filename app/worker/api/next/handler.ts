@@ -222,10 +222,26 @@ const exposeSession = async (handler: RequestHandler, env: Env) => {
   const useSecureCookie = gUri.startsWith('https://');
   console.log(`\nURI\n\n${uri}\n\n`);
   console.log(`\nG_URI\n\n${gUri}\n\n`);
+
   try {
-    const sessionRes = await fetch(`${gUri}`, options);
-    console.log('sessionRes', sessionRes);
-    const session: Session = await sessionRes.json();
+    // fetch within worker unsupported in CF
+    // https://community.cloudflare.com/t/get-error-code-1042-when-fetching-within-worker/288031
+    // const sessionRes = await fetch(`${gUri}`, options);
+    const sessionRes = await Auth(new Request(gUri, options), authConfig(env));
+    console.log('sessionRes', JSON.stringify(sessionRes, null, 2));
+    let session;
+    try {
+      session = await sessionRes.clone().json();
+    } catch (error: any) {
+      console.log('error', error);
+      if (error instanceof SyntaxError) {
+        console.log('SyntaxError');
+        console.log(JSON.stringify(sessionRes, null, 2));
+        const text = await sessionRes.text();
+        console.log('text', text);
+        session = text;
+      }
+    }
     handler.res = new Response();
     handler.res.locals = {};
     // Pass session to next()
