@@ -31,7 +31,7 @@ async function handleRequest(handler: RequestHandler, env: Env) {
   const urlOriginal = new URL(handler.req.url);
   console.log('urlOriginal', urlOriginal.href);
   const log = logger(FILE_LOG_LEVEL, env);
-  log('worker.api.auth.next.handleRequest');
+  log(`\n^^^^^^^^^^^^^^^^^^^^^\tworker.api.auth.next.handleRequest`);
   const url = new URL(handler.req.url);
   const action = url.pathname.split('/').slice(2);
   log(`action: ${action}`);
@@ -53,17 +53,19 @@ async function handleRequest(handler: RequestHandler, env: Env) {
 
     log(`needsLogin: ${needsLogin}`);
 
+    // api/next-auth/callback/credentials
     if (action[0] === 'callback') {
       if (handler.req.method === 'GET') {
+        console.log('GET -> transformGetRequest');
         transformGetRequest(handler.req as any, env);
       }
-      const body: BodyInit = sessionToken ?? undefined;
-      const init = new Request(handler.req, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body,
-      });
+      // const body: BodyInit = sessionToken ?? undefined;
+      // const init = new Request(handler.req, {
+      //   headers: {
+      //     'Content-Type': 'application/json',
+      //   },
+      //   body,
+      // });
 
       if (needsLogin && !sessionToken)
         return Response.redirect('/api/next-auth/logisignin', 307);
@@ -74,6 +76,7 @@ async function handleRequest(handler: RequestHandler, env: Env) {
     const nextAuthUrl = handler.createQueryURL({ nextauth: action.join('/') });
     log(`nextAuthUrl: ${nextAuthUrl}`);
 
+    // DIES HERE
     handler.res = new Response();
     const res = await handler.nextAuth(
       new Request(nextAuthUrl, handler.req),
@@ -81,32 +84,10 @@ async function handleRequest(handler: RequestHandler, env: Env) {
     );
 
     log(`res: ${res}`);
-    // log(`${JSON.stringify(await res.clone().text(), null, 2)}`);
-    // return new Response(html, {
-    //   headers: {
-    //     'content-type': 'text/html;charset=UTF-8',
-    //   },
-    // });
-    // const redirect = `${urlOriginal.protocol}//${urlOriginal.host}/_next${urlOriginal.pathname}`;
-    // const html = await res.text();
-    // log(`redirecting to ${redirect}`);
-    // return new Response(html, {
-    //   status: 301,
-    //   headers: {
-    //     'Content-Type': 'text/html',
-    //     Location: `${redirect}`,
-    //   },
-    // });
-    console;
-    const other = await Auth(handler.req, authConfig(env));
-    console.log('other', other);
-    return other;
+    // const other = await Auth(handler.req, authConfig(env));
+    // console.log('other', other);
+    // return other;
     return res;
-    // const init = new Request(nextAuthUrl, {
-    //   method: 'GET',
-    // });
-    // handler.req = init;
-    // return handleSsr(handler, env);
   } catch (error) {
     console.log('error', error);
   }
@@ -128,7 +109,7 @@ async function handleNextAuth(
   );
   let res;
   const authHandler = async (req, res) => {
-    console.log(`$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$\n\tauthHandler`);
+    console.log(`\n$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$\tauthHandler`);
     const authRes = await Auth(req, authConfig(env));
     console.log('Auth Res', JSON.stringify(authRes, null, 2));
     return authRes;
@@ -142,7 +123,7 @@ async function handleNextAuth(
         res = await handleRequest(handler, env);
         break;
       case method === 'POST' &&
-        /^\/api\/next-auth\/callback\/(register|login|signin)$/i.test(
+        /^\/api\/next-auth\/callback\/(register|login|signin|credentials)$/i.test(
           url.pathname,
         ):
         res = await handleRequest(handler, env);
@@ -183,20 +164,21 @@ function transformGetRequest(handler: RequestHandler, env: Env) {
   const { csrfCookie } = cookieNames(env);
   const cookies = handler.req.headers.get('Cookie') || '';
   const csrfToken = (getCookie(cookies, csrfCookie) || '').split('|')[0];
-  const body: BodyInit = JSON.stringify({
-    ...handler.query,
-    redirect: 'true',
-    json: 'false',
-    csrfToken,
-  });
+  // const body: BodyInit = JSON.stringify({
+  //   ...handler.query,
+  //   redirect: 'true',
+  //   json: 'false',
+  //   csrfToken,
+  // });
   const init = {
+    ...handler.req,
     headers: {
       ...handler.req.headers,
     },
     method: 'POST',
-    body,
   };
   const _req = new Request(handler.req.url, init);
+  handler.req = _req;
 }
 
 const exposeSession = async (handler: RequestHandler, env: Env) => {
