@@ -173,8 +173,9 @@ interface NextAuthInstance extends Partial<Auth0Client> {
   authError: Ref<any>;
   // popupOpen: Ref<boolean>;
 
-  login(options?: any): Promise<void>;
   onLoad: () => Promise<User | null | undefined>;
+  login(options?: any): Promise<void>;
+  logout(options?: LogoutOptions): Promise<void>;
   // createAuthClient: (
   //   onRedirectCallback: (appState: any) => void,
   //   redirect_uri?: string,
@@ -183,7 +184,6 @@ interface NextAuthInstance extends Partial<Auth0Client> {
   // isAuthenticated: () => Promise<boolean>;
   // loginWithPopup(o?: PopupLoginOptions): Promise<void>;
   // handleRedirectCallback(url?: string): Promise<RedirectLoginResult>;
-  // logout(options?: LogoutOptions): Promise<void>;
   // loginWithRedirect(o?: RedirectLoginOptions): Promise<void>;
   // getTokenSilently(options?: GetTokenSilentlyOptions): Promise<string>;
   // getTokenSilently(

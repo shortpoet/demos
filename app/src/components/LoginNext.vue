@@ -76,7 +76,7 @@ export default {
     }
     console.log("login.typeof window !== 'undefined' -> can now load things that would break SSR");
     const auth = useNextAuth();
-    const { login, user, authLoading, authError, isLoggedIn } = auth;
+    const { login, logout, user, authLoading, authError, isLoggedIn } = auth;
 
 
     try {
@@ -108,7 +108,7 @@ export default {
       console.log("login.component.onLogout");
       // cookies.remove(COOKIES_USER_TOKEN, cookieOptions);
       // cookies.remove(COOKIES_SESSION_TOKEN, cookieOptions)
-      // await logout();
+      await logout();
     };
 
     if (import.meta.env.VITE_LOG_LEVEL === 'debug') {

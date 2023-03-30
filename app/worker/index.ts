@@ -42,26 +42,26 @@ export default {
       content.type: ${request.headers.get('Content-Type')}
       \n
       `);
-        const token = await getToken({
-          req: request,
-          secret: env.NEXTAUTH_SECRET,
-        });
+        //   const token = await getToken({
+        //     req: request,
+        //     secret: env.NEXTAUTH_SECRET,
+        //   });
 
-        console.log(`
-      \nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n
-      TOKEN\n
-      \t ${token}\n
-      ENC\n`);
+        //   console.log(`
+        // \nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n
+        // TOKEN\n
+        // \t ${token}\n
+        // ENC\n`);
       }
 
-      if (url.pathname.startsWith('/api/next-auth')) {
-        const res = await handle(request, env);
-        console.log('res', {
-          ...res,
-          body: res.body ? { truncated: true } : res.body,
-        });
-        return res;
-      }
+      // if (url.pathname.startsWith('/api/next-auth')) {
+      //   const res = await handle(request, env);
+      //   console.log('res', {
+      //     ...res,
+      //     body: res.body ? { truncated: true } : res.body,
+      //   });
+      //   return res;
+      // }
 
       const handler = new RequestHandler(request, env);
       await handler.initData(env);

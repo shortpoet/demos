@@ -53,6 +53,7 @@ export const provideAuth = () => {
 
     login,
     onLoad,
+    logout,
     // createAuthClient,
     // handleRedirectCallback,
     // isAuthenticated,
@@ -123,5 +124,23 @@ const login = async (options?: any) => {
     //   ]);
     //   console.log(`data: ${JSON.stringify(logObj, null, 2)}`);
     // }
+  }
+};
+
+const logout = async () => {
+  let res;
+  const url = new URL(`${process.env.NEXTAUTH_URL}/signout`);
+  const { data, error, dataLoading } = await useFetch(url.href);
+  navigate(url.pathname);
+  if (error.value) {
+    console.error(`error: ${error.value}`);
+  }
+
+  if (dataLoading.value) {
+    console.log(`dataLoading: ${dataLoading.value}`);
+    res = { result: 'Loading', status: 'Loading' };
+  }
+  if (data.value) {
+    console.log(`data: ${JSON.stringify(data.value, null, 2)}`);
   }
 };
