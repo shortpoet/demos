@@ -1,4 +1,4 @@
-import { NextAuthInstance, User } from '../../types';
+import { NextAuthInstance, SetSessionResult, User } from '../../types';
 import { InjectionKey, ref, provide, inject } from 'vue';
 import { CookieSetOptions } from 'universal-cookie';
 import { useFetch } from './fetch';
@@ -19,6 +19,7 @@ const AuthSymbol: InjectionKey<NextAuthInstance> = Symbol();
 // let redirectCallback: (appState: any) => void;
 // const redirectCallback = ref(DEFAULT_REDIRECT_CALLBACK);
 const user = ref<User | undefined>();
+const session = ref<any>();
 const token = ref<string>();
 const authLoading = ref(true);
 const error = ref<any>();
@@ -54,6 +55,7 @@ export const provideAuth = () => {
     login,
     onLoad,
     logout,
+    setSession,
     // createAuthClient,
     // handleRedirectCallback,
     // isAuthenticated,
@@ -78,20 +80,32 @@ const useNextAuth = () => {
   return auth as NextAuthInstance;
 };
 
-const onLoad = async () => {
-  // const url = new URL(`${process.env.NEXTAUTH_URL}/session`);
-  // const { data, error, dataLoading } = await useFetch(url.href);
-  // if (error.value) {
-  //   // if (import.meta.env.VITE_LOG_LEVEL === 'debug')
-  //   console.error(`error: ${error.value}`);
-  // }
+const setSession = async (): Promise<SetSessionResult> => {
+  const url = new URL(`${process.env.NEXTAUTH_URL}/session`);
+  const { data, error, dataLoading } = await useFetch<any>(url.href);
+  let res: SetSessionResult = { session: undefined, status: 'Loading' };
+  if (error.value) {
+    // if (import.meta.env.VITE_LOG_LEVEL === 'debug')
+    console.error(`error: ${error.value}`);
+    res = { session: undefined, status: 'Error' };
+  }
+  if (dataLoading.value) {
+    // if (import.meta.env.VITE_LOG_LEVEL === 'debug')
+    console.log(`dataLoading: ${dataLoading.value}`);
+  }
+  if (data.value) {
+    console.log(`data: ${JSON.stringify(data.value, null, 2)}`);
+    res = { session: data.value, status: 'Success' };
+  }
+  return res;
+};
 
-  // if (dataLoading.value) {
-  //   // if (import.meta.env.VITE_LOG_LEVEL === 'debug')
-  //   console.log(`dataLoading: ${dataLoading.value}`);
-  // }
-  // if (data.value) {
-  //   console.log(`data: ${JSON.stringify(data.value, null, 2)}`);
+const onLoad = async () => {
+  // this conflicts with getSession on server side and causes a mini redirect loop/series of unnecessary fetches
+  // const _session = await setSession();
+  // if (_session.status === 'Success') {
+  //   console.log(`_session: ${JSON.stringify(_session, null, 2)}`);
+  //   session.value = _session.session;
   // }
   authLoading.value = false;
   return null;

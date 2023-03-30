@@ -230,6 +230,7 @@ const exposeSession = async (handler: RequestHandler, env: Env) => {
     handler.res.locals = {};
     // Pass session to next()
     handler.res.locals.session = session;
+    handler.session = session;
     // Include set-cookie in response
 
     const setCookies = sessionRes.headers.get('set-cookie');

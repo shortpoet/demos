@@ -176,6 +176,7 @@ interface NextAuthInstance extends Partial<Auth0Client> {
   onLoad: () => Promise<User | null | undefined>;
   login(options?: any): Promise<void>;
   logout(options?: LogoutOptions): Promise<void>;
+  setSession: (user: User) => Promise<SetSessionResult>;
   // createAuthClient: (
   //   onRedirectCallback: (appState: any) => void,
   //   redirect_uri?: string,

@@ -1,4 +1,9 @@
-import { getSessionFromCookie, RequestHandler, _atob } from 'api';
+import {
+  exposeSession,
+  getSessionFromCookie,
+  RequestHandler,
+  _atob,
+} from 'api';
 import { logLevel, logger } from './util';
 import { renderPage } from 'vite-plugin-ssr';
 import { PageContext } from '../types';
@@ -15,7 +20,15 @@ async function handleSsr(
 ) {
   const log = logger(FILE_LOG_LEVEL, env);
   const userAgent = handler.req.headers.get('User-Agent') || '';
-  const session = await getSessionFromCookie(handler, env);
+  let session = null;
+  const url = new URL(handler.req.url);
+  if (url.pathname.startsWith('/next-auth/')) {
+    console.log(`\nXXXXXXXXXXXX\tHANDLE NEXT AUTH SSR\n`);
+    await exposeSession(handler, env);
+    session = handler.session;
+  } else {
+    session = await getSessionFromCookie(handler, env);
+  }
 
   log(`
     worker.handleSsr

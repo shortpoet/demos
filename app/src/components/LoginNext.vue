@@ -22,13 +22,9 @@
     </div>
     <ul>
       <li>User Info</li>
-      <div v-if="!user" i-carbon-bot />
+      <div v-if="!session?.expires" i-carbon-bot />
       <div v-else>
-        <li>
-          <img :src="user.picture" class="w-8 h-8 rounded-full" />
-        </li>
-        <li>{{ user.name }}</li>
-        <li>{{ user.nickname }}</li>
+        {{ session }}
       </div>
     </ul>
   </div>
@@ -42,6 +38,7 @@ import {
   // COOKIES_SESSION_TOKEN, 
   useNextAuth
 } from '~/composables/auth-next';
+import { usePageContext } from '~/composables/pageContext';
 
 export default {
   props: {
@@ -78,6 +75,8 @@ export default {
     const auth = useNextAuth();
     const { login, logout, user, authLoading, authError, isLoggedIn } = auth;
 
+    const pageContext = usePageContext();
+    const session = pageContext.session;
 
     try {
       // at some point this might throw the refresh_token not found error
@@ -121,6 +120,7 @@ export default {
     //   ({ user, authLoading, authError } = authP);
     // });
     return {
+      session,
       onLogin,
       onLogout,
       onLoginPopup,
