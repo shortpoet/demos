@@ -14,6 +14,7 @@ import { getUser, sessionUser } from './user';
 import { escapeNestedKeys } from '../../../util';
 
 const FILE_LOG_LEVEL = 'error';
+const CLEAR_ALL_KV = true;
 
 export { handleSession, getSessionFromCookie };
 
@@ -211,10 +212,12 @@ async function handleSession(
   const method = handler.req.method;
   let res;
   await clearExpiredSessions(env);
-  // await clearAllKeys(env.DEMO_CFW_SSR, env, ['gitInfo']);
-  // await clearAllKeys(env.DEMO_CFW_SSR_SESSIONS, env);
-  // await clearAllKeys(env.DEMO_CFW_SSR_USERS, env);
-  // await clearAllSessions(env);
+  if (CLEAR_ALL_KV) {
+    await clearAllKeys(env.DEMO_CFW_SSR, env, ['gitInfo']);
+    await clearAllKeys(env.DEMO_CFW_SSR_SESSIONS, env);
+    await clearAllKeys(env.DEMO_CFW_SSR_USERS, env);
+    // await clearAllSessions(env);
+  }
 
   if (url.pathname.startsWith('/api/auth/session')) {
     log(`worker.api.auth.session.handleSession ${url.pathname}`);

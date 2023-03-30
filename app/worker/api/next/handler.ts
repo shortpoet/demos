@@ -82,8 +82,8 @@ async function handleRequest(handler: RequestHandler, env: Env) {
       new Request(nextAuthUrl, handler.req),
       handler.res,
     );
-
     log(`res: ${res}`);
+
     // const other = await Auth(handler.req, authConfig(env));
     // console.log('other', other);
     // return other;

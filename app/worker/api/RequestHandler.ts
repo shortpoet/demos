@@ -82,17 +82,38 @@ class RequestHandler {
   };
 
   private _parseBody: (request: Request) => any = async (request) => {
-    if (request.body instanceof ReadableStream) {
-      return await request.json();
+    const ct = request.headers.get('Content-Type');
+    let res;
+    switch (true) {
+      case ct && ct.includes('application/json'):
+        res = await request.json();
+        break;
+      case ct && ct.includes('application/x-www-form-urlencoded'):
+        res = await request.formData();
+        console.log(
+          `\n\tworker._parseBody -> ${
+            this.url
+          } -> POST -> res -> from-urlecnoded -> ${JSON.stringify(res)}\n`,
+        );
+        // const obj: Record<string, string> = {};
+        // res.forEach((value, key) => {
+        //   obj[key] = value;
+        // });
+        // console.log(`\n\tworker._parseBody -> ${this.url} -> POST -> obj -> ${obj}\n`);
+        // return obj;
+        break;
+      case ct && ct.includes('multipart/form-data'):
+        res = await request.formData();
+        break;
+      case request.body instanceof ReadableStream:
+        res = await request.json();
+        break;
+      case typeof request.body === 'string':
+        res = request.body;
+      default:
+        break;
     }
-    if (typeof request.body === 'string') {
-      try {
-        return JSON.parse(request.body);
-      } catch (e) {
-        return request.body;
-      }
-    }
-    return request.body;
+    return res;
   };
 
   async initData(env) {
@@ -112,8 +133,21 @@ class RequestHandler {
     if (logLevel(FILE_LOG_LEVEL, env)) {
       console.log(`headers ->  \n${headerString}\n`);
     }
+    const ct = this.req.headers.get('Content-Type');
+    console.log(
+      `\n\tworker.initData -> ${this.url} -> POST -> content type -> ${ct}\n`,
+    );
+    // const proxy = new Proxy(this.req, {
+    //   get: (target, prop) => {
+    //     // if (prop === 'body') {
+    //     //   return readBody(target.body);
+    //     // }
+    //     return target[prop];
+    //   },
+    // });
+    // this.req = proxy;
     if (this.req.body && this.req.method === 'POST') {
-      this.data = await this._parseBody(this.req);
+      this.data = await this._parseBody(this.req.clone());
       this.user = this.data;
       if (this.data && this.url && this.url.pathname === '/api/auth/session') {
         this.user = this.data;

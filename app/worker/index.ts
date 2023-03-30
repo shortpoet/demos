@@ -36,6 +36,7 @@ export default {
       \nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n
       ${new Date().toLocaleTimeString()}
       worker.fetch -> ${request.url}
+      content.type: ${request.headers.get('Content-Type')}
       \n
       `);
       }

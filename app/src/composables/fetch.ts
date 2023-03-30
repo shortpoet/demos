@@ -127,7 +127,8 @@ const useFetch = async <T = unknown>(
       if (import.meta.env.VITE_LOG_LEVEL === 'debug') {
         // console.log('res', JSON.stringify(response, null, 2));
         // ct === 'application/json' && console.log('json', await response.json());
-        ct === 'application/json' &&
+        (ct === 'application/json' ||
+          ct === 'application/x-www-form-urlencoded') &&
           console.log('json clone', await response.clone().json());
         // ct === 'text/plain' && console.log('text', await response.text());
         ct === 'text/plain' &&
@@ -138,7 +139,7 @@ const useFetch = async <T = unknown>(
         // console.log('text clone', msg.substring(0, 50));
         // console.log('json clone', jClone);
       }
-      ct === 'application/json'
+      ct === 'application/json' || ct === 'application/x-www-form-urlencoded'
         ? (out = await response.json())
         : (out = { text: await response.text() });
 

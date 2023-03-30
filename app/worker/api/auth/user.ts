@@ -38,7 +38,12 @@ const sessionUser = async (user: User, env: Env): Promise<User> => {
     );
     return existing;
   } else {
-    user = { ...user, id: generateTypedUUID(8, 'user'), role: role };
+    user = {
+      ...user,
+      token: user.token.substring(0, 7),
+      id: generateTypedUUID(8, 'user'),
+      role: role,
+    };
     await putUser(user, env);
     console.log(
       'sessionUser.end',
