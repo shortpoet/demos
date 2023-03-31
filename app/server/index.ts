@@ -1,46 +1,53 @@
-// Note that this file isn't processed by Vite, see https://github.com/brillout/vite-plugin-ssr/issues/562
+import http from "http";
+import { Api } from "../worker/api";
 
-import express from "express";
-import compression from "compression";
-import { renderPage } from "vite-plugin-ssr";
-import { root } from "./root.js";
-const isProduction = process.env.NODE_ENV === "production";
+const HOST: string = process.env.HOST || "localhost";
+const PORT: number = parseInt(process.env.PORT || "3333");
 
-startServer();
+const api = Api;
+const server = http.createServer(async (req, res) => {
+  if (req.url) {
+    const resp = await api
+      .handle(
+        // ******************** 🙋‍♂️ ADAPTER STUFF : START ***********************
+        // create a Request (requires node 18+) object from node's IncomingMessage,
+        // which can be accepted by itty - router
+        new Request(new URL(req.url, "http://" + req.headers.host), {
+          // should also map headers, body....
+          method: req.method,
+        })
+        // *********************** ADAPTER STUFF : END ***********************
+      )
+      .catch((err) => new Response(err.message, { status: 500 }));
 
-async function startServer() {
-  const app = express();
-
-  app.use(compression());
-
-  if (isProduction) {
-    const sirv = (await import("sirv")).default;
-    app.use(sirv(`${root}/dist/client`));
-  } else {
-    const vite = await import("vite");
-    const viteDevMiddleware = (
-      await vite.createServer({
-        root,
-        server: { middlewareMode: true },
-      })
-    ).middlewares;
-    app.use(viteDevMiddleware);
+    // ******************** 🙋‍♂️ ADAPTER STUFF : START ***********************
+    // map the Response to node's expected ServerResponse
+    if (!resp) {
+      res.statusCode = 404;
+      res.end("Not Found");
+      return;
+    }
+    res.writeHead(
+      resp.status,
+      resp.statusText,
+      Array.from(resp.headers.entries())
+    );
+    res.end((await resp.text()) + "\n");
+    // *********************** ADAPTER STUFF : END ***********************
   }
+});
 
-  app.get("*", async (req, res, next) => {
-    const pageContextInit = {
-      urlOriginal: req.originalUrl,
-    };
-    const pageContext = await renderPage(pageContextInit);
-    const { httpResponse } = pageContext;
-    if (!httpResponse) return next();
-    const { body, statusCode, contentType, earlyHints } = httpResponse;
-    if (res.writeEarlyHints)
-      res.writeEarlyHints({ link: earlyHints.map((e) => e.earlyHintLink) });
-    res.status(statusCode).type(contentType).send(body);
-  });
+server.on("error", (e: NodeJS.ErrnoException) => {
+  if (e.code === "EADDRINUSE") {
+    console.log("Address in use, retrying...");
+    setTimeout(() => {
+      server.close();
+      server.listen(PORT, HOST);
+    }, 1000);
+  }
+  console.error(e);
+});
 
-  const port = process.env.PORT || 3333;
-  app.listen(port);
-  console.log(`Server running at http://localhost:${port}`);
-}
+server.listen(PORT, HOST, () => {
+  console.log(`Server running at http://${HOST}:${PORT}/`);
+});

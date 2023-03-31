@@ -6,6 +6,14 @@
     "resolveJsonModule": true,
     "moduleResolution": "node",
     "preserveConstEnums": true,
+    "strict": true,
+    "esModuleInterop": true,
+    "jsx": "preserve",
+    "skipLibCheck": true,
+    "noUnusedLocals": true,
+    "strictNullChecks": true,
+    "allowJs": true,
+    "forceConsistentCasingInFileNames": true,
     "lib": [
       "esnext"
     ],

@@ -4,13 +4,17 @@ declare const DEMO_CFW_SSR: KVNamespace;
 declare const __STATIC_CONTENT: KVNamespace;
 declare const __STATIC_CONTENT_MANIFEST: AssetManifestType;
 declare const ENVIRONMENT: string;
+declare type LogLevel = "debug" | "info" | "warn" | "error" | "fatal";
 
 interface Env {
+  // APP
+  ENVIRONMENT: "dev" | "prod";
+  LOG_LEVEL: LogLevel;
+
+  // CLOUDFLARE
   DEMO_CFW_SSR: KVNamespace;
   __STATIC_CONTENT: KVNamespace;
   __STATIC_CONTENT_MANIFEST: AssetManifestType;
-  ENVIRONMENT: "dev" | "prod";
-  LOG_LEVEL: string;
 
   // MY_DURABLE_OBJECT: DurableObjectNamespace
   // MY_BUCKET: R2Bucket

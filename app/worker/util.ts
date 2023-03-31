@@ -1,8 +1,10 @@
 import { mapRequestToAsset, Options } from "@cloudflare/kv-asset-handler";
 
-export { setCacheOptions, isAssetURL };
+export { setCacheOptions, isAssetURL, isAPiURL };
 
 const isAssetURL = (url: URL) => url.pathname.startsWith("/assets/");
+
+const isAPiURL = (url: URL) => url.pathname.startsWith("/api/");
 
 function setCacheOptions(request: Request, DEBUG: boolean) {
   let options: Partial<Options> = {};
