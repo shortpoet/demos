@@ -44,6 +44,7 @@
     "@brillout/test-e2e": "^0.4.17",
     "@cloudflare/kv-asset-handler": "^0.3.0",
     "@cloudflare/workers-types": "^4.20230307.0",
+    "@iconify-json/carbon": "^1.1.16",
     "@types/node": "^18.15.1",
     "@vitest/coverage-c8": "^0.29.2",
     "@vue/test-utils": "^2.3.1",
