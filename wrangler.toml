@@ -1,20 +1,13 @@
-main="./app/worker/index.ts"
+compatibility_date = "2023-02-28"
+main = "./app/worker/index.ts"
 name = "demo-cfw-ssr"
-compatibility_date = "2022-05-03"
-workers_dev = true
 node_compat = true
-
-[site]
-bucket = "./app/build/client"
-
+workers_dev = true
 [dev]
 port = 3000
-
-[vars]
+[env.dev.vars]
 ENVIRONMENT = "dev"
 LOG_LEVEL = "debug"
-
-kv_namespaces = [
-  # DEMO_CFW_SSR_preview
-  { binding = "DEMO_CFW_SSR", id = "", preview_id = "" }
-]
+SSR_BASE_PATHS = "about,index,star-wars"
+[site]
+bucket = "./app/build/client"

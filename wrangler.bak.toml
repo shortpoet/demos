@@ -1,0 +1,14 @@
+main="./app/worker/index.ts"
+name = "demo-cfw-ssr"
+compatibility_date = "2023-02-28"
+workers_dev = true
+node_compat = true
+
+[site]
+bucket = "./app/build/client"
+
+[dev]
+port = 3000
+[env.dev.vars]
+ENVIRONMENT = "dev"
+LOG_LEVEL = "debug"
