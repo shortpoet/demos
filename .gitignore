@@ -1,4 +1,7 @@
 !**/*.env*
+.dev.vars
+.prod.vars
+**/*.mf
 
 # Local .terraform directories
 **/.terraform/*
