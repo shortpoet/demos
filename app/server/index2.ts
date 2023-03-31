@@ -1,4 +1,4 @@
-import http from "http";
+import * as http2 from "http2";
 import { Api } from "../worker/api";
 
 const HOST: string = process.env.HOST || "localhost";
@@ -6,7 +6,7 @@ const PORT: number = parseInt(process.env.PORT || "3333");
 
 const api = Api;
 
-const mapHttpHeaders = (headers: http.IncomingHttpHeaders): HeadersInit => {
+const mapHttpHeaders = (headers: http2.IncomingHttpHeaders): HeadersInit => {
   const mappedHeaders: HeadersInit = {};
   for (const key in headers) {
     if (headers.hasOwnProperty(key)) {
@@ -21,7 +21,22 @@ const mapHttpHeaders = (headers: http.IncomingHttpHeaders): HeadersInit => {
   return mappedHeaders;
 };
 
-const server = http.createServer(async (req, res) => {
+const mapOutgoingHttpHeaders = (headers): http2.OutgoingHttpHeaders => {
+  const mappedHeaders: http2.OutgoingHttpHeaders = {};
+  for (const key in headers) {
+    if (headers.hasOwnProperty(key)) {
+      const value = headers[key];
+      if (typeof value === "string") {
+        mappedHeaders[key] = value;
+      } else if (Array.isArray(value)) {
+        mappedHeaders[key] = value.join(",");
+      }
+    }
+  }
+  return mappedHeaders;
+};
+
+const server = http2.createServer(async (req, res) => {
   if (req.url) {
     const resp = await api
       .handle(
@@ -48,9 +63,12 @@ const server = http.createServer(async (req, res) => {
     res.writeHead(
       resp.status,
       resp.statusText,
-      Array.from(resp.headers.entries())
+      mapOutgoingHttpHeaders(resp.headers)
     );
-    res.end((await resp.text()) + "\n");
+    const out = await resp.text();
+    console.log("DONE DONE");
+    console.log(out);
+    res.end(out + "\n");
     // *********************** ADAPTER STUFF : END ***********************
   }
 });

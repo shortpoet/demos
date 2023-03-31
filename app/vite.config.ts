@@ -1,8 +1,10 @@
 import vue from "@vitejs/plugin-vue";
 import ssr from "vite-plugin-ssr/plugin";
+import Unocss from "unocss/vite";
+
 import { defineConfig, loadEnv, UserConfig } from "vite";
-import path from "node:path";
 import { InlineConfig } from "vitest";
+import { fileURLToPath } from "node:url";
 
 interface VitestConfigExport extends UserConfig {
   test: InlineConfig;
@@ -17,9 +19,8 @@ const vitestConfig: InlineConfig = {
 
 export default ({ mode }: { mode: string }) => {
   process.env = { ...process.env, ...loadEnv(mode, process.cwd()) };
-
   return defineConfig({
-    plugins: [vue(), ssr()],
+    plugins: [vue(), ssr(), Unocss()],
 
     server: {
       port: parseInt(process.env.VITE_PORT || "3333"),
@@ -35,7 +36,7 @@ export default ({ mode }: { mode: string }) => {
 
     resolve: {
       alias: {
-        "~/": `${path.resolve(__dirname, "src")}/`,
+        "~": fileURLToPath(new URL(".", import.meta.url)),
       },
     },
 

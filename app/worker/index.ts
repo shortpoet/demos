@@ -5,9 +5,10 @@ import {
   MethodNotAllowedError,
   NotFoundError,
 } from "@cloudflare/kv-asset-handler/dist/types";
-import { isAPiURL, isAssetURL } from "./util";
+
 import { Env } from "./types";
 import { Api } from "./api";
+import { isAPiURL, isAssetURL } from "./util";
 
 const api = Api;
 

@@ -5,7 +5,7 @@
       Interactive while loading:
       <Counter />
       <div v-if="loaded === false">
-        <p>Loading...</p>
+        <p>Loading... (slowed down for FX 🤠)</p>
       </div>
       <div v-else>
         <ol>
@@ -29,7 +29,7 @@
   
 <script lang="ts">
 import { Ref, ref } from 'vue';
-import Counter from '~/components/Counter.vue'
+import Counter from '~/src/components/Counter.vue'
 
 type Movie = {
   id: string

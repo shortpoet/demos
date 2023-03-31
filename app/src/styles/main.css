@@ -1,0 +1,46 @@
+/* @import './markdown.css'; */
+/* @import './page-shell.css'; */
+
+html,
+body,
+#app {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: sans-serif;
+}
+
+html.dark {
+  background: #121212;
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+a {
+  text-decoration: none;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: inline-flex !important;
+}
+
+pre {
+  white-space: pre-wrap;       /* css-3 */
+  white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
+  white-space: -pre-wrap;      /* Opera 4-6 */
+  white-space: -o-pre-wrap;    /* Opera 7 */
+  word-wrap: break-word;       /* Internet Explorer 5.5+ */
+  }
+
+code {
+  font-family: monospace;
+  background-color: #eaeaea;
+  padding: 3px 5px;
+  border-radius: 4px;
+}
