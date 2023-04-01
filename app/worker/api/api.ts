@@ -17,14 +17,22 @@ Api.use((req) => {
   return Promise.resolve(undefined);
 });
 
-Api.use((req) => {
-  if (req.method === "OPTIONS") {
-    console.log(`Api.use OPTIONS -> ${req.method} ${req.url}`);
-    return Promise.resolve(handleCors(req));
-  } else {
-    return Promise.resolve(undefined);
-  }
-});
+// Api.use((req) => {
+//   if (req.method === "OPTIONS") {
+//     console.log(`Api.use OPTIONS -> ${req.method} ${req.url}`);
+//     return Promise.resolve(
+//       handleCors(req)
+//       // handleCors(req, 200, "Ok", {
+//       //   "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+//       //   "Access-Control-Allow-Headers": "Content-Type, Authorization",
+//       //   "Access-Control-Max-Age": "86400",
+//       //   "Access-Control-Allow-Origin": "*",
+//       // })
+//     );
+//   } else {
+//     return Promise.resolve(undefined);
+//   }
+// });
 
 Api.use((req: Request): Promise<Response | undefined> => {
   const path = new URL(req.url).pathname;
