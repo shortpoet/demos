@@ -38,13 +38,15 @@ const authConfig = (env: Env): AuthConfig => {
             },
             body: JSON.stringify({ email, password }),
           };
-          options = {};
-          return {
-            id: '1',
-            email: email,
-          };
+          console.log('credentials.authorize.request', request, options);
+          // options = {};
+          // return {
+          //   id: '1',
+          //   email: email,
+          // };
           try {
             const response = await fetch(request, options);
+            console.log('credentials.authorize.response', response);
             if (!response.ok) return null;
             return (await response.json()) ?? null;
           } catch (error) {
