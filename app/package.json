@@ -2,7 +2,7 @@
   "scripts": {
     "========= Util": "",
     "git": "ts-node --esm scripts/wrangle.ts",
-    "serve": "cross-env PORT=3333 tsx watch ./server/index.ts",
+    "serve": "cross-env PORT=3333 tsx watch ./server/index.v2.ts",
     "build": "vite build",
     "========= Dev": "",
     "dev": "concurrently \"pnpm serve\" \"vite\"",

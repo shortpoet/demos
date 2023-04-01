@@ -73,6 +73,7 @@ export const useCors = (options: CorsOptions = {}) => {
   }
 
   const preflight = (req: Request) => {
+    console.log("preflight", "PREEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE");
     const useMethods = [...new Set(["OPTIONS", ...methods])];
     const origin = req.headers.get("Origin") || "";
 
