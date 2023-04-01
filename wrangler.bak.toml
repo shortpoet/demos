@@ -1,14 +1,13 @@
-main="./app/worker/index.ts"
-name = "demo-cfw-ssr"
 compatibility_date = "2023-02-28"
-workers_dev = true
+main = "./app/worker/index.ts"
+name = "demo-cfw-ssr"
 node_compat = true
-
-[site]
-bucket = "./app/build/client"
-
+workers_dev = true
 [dev]
 port = 3000
 [env.dev.vars]
 ENVIRONMENT = "dev"
 LOG_LEVEL = "debug"
+SSR_BASE_PATHS = "about,index,star-wars"
+[site]
+bucket = "./app/build/client"

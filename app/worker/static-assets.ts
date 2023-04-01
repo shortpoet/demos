@@ -1,29 +1,27 @@
 import { getAssetFromKV } from "@cloudflare/kv-asset-handler";
 export { handleStaticAssets };
-
+// @ts-expect-error
 import rawManifest from "__STATIC_CONTENT_MANIFEST";
+import { Env } from "./types";
 import { setCacheOptions } from "./util";
-const KV_ASSET_NAMESPACE = "CLOUDFLARE_WORKERS_VUE";
 
-async function handleStaticAssets(request, env, ctx) {
+async function handleStaticAssets(
+  request: Request,
+  env: Env,
+  ctx: ExecutionContext
+) {
   const DEBUG = env.LOG_LEVEL === "debug";
-  if (env.LOG_LEVEL === "debug") {
-    console.log("worker.handleStaticAssets");
-  }
   let options = setCacheOptions(request, DEBUG);
 
   const getAssetFromKVArgs = {
     request,
-    waitUntil(promise) {
+    waitUntil(promise: Promise<any>) {
       return ctx.waitUntil(promise);
     },
   };
 
   try {
     try {
-      if (env.LOG_LEVEL === "debug") {
-        console.log("worker.handleStaticAssets.getAssetFromKV");
-      }
       options = {
         ...options,
         ASSET_NAMESPACE:
@@ -42,11 +40,11 @@ async function handleStaticAssets(request, env, ctx) {
       response.headers.set("Feature-Policy", "none");
 
       return response;
-    } catch (error) {
+    } catch (error: any) {
       console.log("error", error);
       return new Response(error.message || error.toString(), { status: 500 });
     }
-  } catch (e) {
+  } catch (e: any) {
     // if an error is thrown try to serve the asset at 404.html
     if (!DEBUG) {
       try {
@@ -59,7 +57,7 @@ async function handleStaticAssets(request, env, ctx) {
           ...notFoundResponse,
           status: 404,
         });
-      } catch (e) {
+      } catch (e: any) {
         console.log("error", e);
       }
     }
