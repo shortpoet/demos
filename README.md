@@ -40,3 +40,20 @@ npx wrangler kv:namespace create "$namespace" --preview
 ```
 
 - no need for node-fetch these days it's implemented in their engine (find references)
+
+## SSL
+
+```bash
+openssl genrsa -out server.key 2048
+openssl req -new -newkey rsa:2048 -days 3650 -nodes -x509 \
+  -subj "/C=US/ST=CA/L=San Francisco/O=My Organization/OU=My Unit/CN=mydomain.com" \
+  -keyout server.key -out server.crt
+
+openssl req -x509 -newkey rsa:4096 -sha256 -days 3650 -nodes \
+-keyout server.key -out server.crt -subj "/CN=example.com" \
+-addext "subjectAltName=DNS:shortpoet.com,DNS:www.shortpoet.net,IP:192.168.1.70"
+
+# create in keychain for safari
+openssl pkcs12 -in Certificates.p12 -out server.crt.pem -clcerts -nokeys
+openssl pkcs12 -in Certificates.p12 -out server.key.pem -nocerts -nodes
+```

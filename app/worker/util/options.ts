@@ -59,7 +59,7 @@ function handleCors(
   };
 
   const corsHeaders = {
-    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Origin": "http://localhost:3000",
     // "Access-Control-Allow-Origin": checkOrigin(request),
     "Access-Control-Allow-Methods": `${allowedMethodsAll}`,
     "Access-Control-Allow-Headers": `${allowedHeaders}`,

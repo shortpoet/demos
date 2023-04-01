@@ -45,11 +45,22 @@ const server = http.createServer(async (req, res) => {
       res.end("Not Found");
       return;
     }
-    res.writeHead(
-      resp.status,
-      resp.statusText,
-      Array.from(resp.headers.entries())
-    );
+    console.log(resp.headers);
+    console.log(resp.headers.entries());
+    console.log(Array.from(resp.headers.entries()));
+
+    const outGoingHeaders: http.OutgoingHttpHeaders =
+      req.method === "GET"
+        ? (Array.from(
+            resp.headers.entries()
+            // ) as any;
+          ).concat([["Access-Control-Allow-Origin", "*"]]) as any)
+        : (Array.from(resp.headers.entries()) as any);
+
+    console.log(outGoingHeaders);
+    console.log(resp.status, resp.statusText);
+    // res.setHeader("Access-Control-Allow-Origin", "*");
+    res.writeHead(resp.status, resp.statusText, outGoingHeaders);
     res.end((await resp.text()) + "\n");
     // *********************** ADAPTER STUFF : END ***********************
   }
