@@ -1,46 +1,43 @@
 import { Router } from "./router";
 import data from "./data.json";
-import { handleCors } from "../util";
+import { useCors } from "../util";
 
 const Api = Router();
+
+const { preflight, corsify } = useCors({
+  origins: ["*"],
+
+  // allowedHeaders: ["Content-Type", "Authorization"],
+  // exposedHeaders: ["Content-Type", "Authorization"],
+
+  // allowedHeaders: ["Content-Type", "Authorization", "X-Ping"],
+  // exposedHeaders: ["Content-Type", "Authorization", "X-Ping"],
+});
 
 Api.use((req) => {
   console.log(`
   \nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
   ${new Date().toLocaleTimeString()}
-  worker.fetch -> ${req.method} -> ${
-    req.url
-  } -> content-type: ${req.headers.get("Content-Type")}\n
+  Api.use -> ${req.method} -> ${req.url} -> content-type: ${req.headers.get(
+    "Content-Type"
+  )}\n
 `);
-
-  console.log(`Api.use -> ${req.method} ${req.url}`);
   return Promise.resolve(undefined);
 });
 
-// Api.use((req) => {
-//   if (req.method === "OPTIONS") {
-//     console.log(`Api.use OPTIONS -> ${req.method} ${req.url}`);
-//     return Promise.resolve(
-//       handleCors(req)
-//       // handleCors(req, 200, "Ok", {
-//       //   "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-//       //   "Access-Control-Allow-Headers": "Content-Type, Authorization",
-//       //   "Access-Control-Max-Age": "86400",
-//       //   "Access-Control-Allow-Origin": "*",
-//       // })
-//     );
-//   } else {
-//     return Promise.resolve(undefined);
-//   }
-// });
+Api.use((req) => {
+  return Promise.resolve(preflight(req));
+});
 
 Api.use((req: Request): Promise<Response | undefined> => {
   const path = new URL(req.url).pathname;
   if (path === "/api/hello") {
     return Promise.resolve(
-      new Response(JSON.stringify({ hello: "world" }), {
-        headers: { "content-type": "application/json" },
-      })
+      corsify(
+        new Response(JSON.stringify({ hello: "world" }), {
+          headers: { "content-type": "application/json" },
+        })
+      )
     );
   }
   return Promise.resolve(undefined);

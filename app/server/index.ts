@@ -1,5 +1,7 @@
 import http from "http";
 import { Api } from "../worker/api";
+import { useCors } from "../worker/util";
+const { corsify } = useCors({ origins: ["*"] });
 
 const HOST: string = process.env.HOST || "localhost";
 const PORT: number = parseInt(process.env.PORT || "3333");
@@ -25,44 +27,38 @@ const server = http.createServer(async (req, res) => {
   if (req.url) {
     const resp = await api
       .handle(
-        // ******************** 🙋‍♂️ ADAPTER STUFF : START ***********************
-        // create a Request (requires node 18+) object from node's IncomingMessage,
-        // which can be accepted by itty - router
-
         new Request(new URL(req.url, "http://" + req.headers.host), {
-          // should also map headers, body....
           method: req.method,
           headers: mapHttpHeaders(req.headers),
+          // body: req.read(),
         })
-        // *********************** ADAPTER STUFF : END ***********************
       )
       .catch((err) => new Response(err.message, { status: 500 }));
 
-    // ******************** 🙋‍♂️ ADAPTER STUFF : START ***********************
-    // map the Response to node's expected ServerResponse
     if (!resp) {
       res.statusCode = 404;
       res.end("Not Found");
       return;
     }
-    console.log(resp.headers);
-    console.log(resp.headers.entries());
-    console.log(Array.from(resp.headers.entries()));
+    const incomingHeaders = Array.from(resp.headers.entries()) as any;
 
-    const outGoingHeaders: http.OutgoingHttpHeaders =
-      req.method === "GET"
-        ? (Array.from(
-            resp.headers.entries()
-            // ) as any;
-          ).concat([["Access-Control-Allow-Origin", "*"]]) as any)
-        : (Array.from(resp.headers.entries()) as any);
-
-    console.log(outGoingHeaders);
-    console.log(resp.status, resp.statusText);
-    // res.setHeader("Access-Control-Allow-Origin", "*");
-    res.writeHead(resp.status, resp.statusText, outGoingHeaders);
+    res.writeHead(resp.status, resp.statusText, incomingHeaders);
     res.end((await resp.text()) + "\n");
-    // *********************** ADAPTER STUFF : END ***********************
+
+    res.on("finish", () => {
+      console.log(`
+  ${new Date().toLocaleTimeString()}
+  END STATUS -> ${res.statusCode} -> ${req.url}\n
+  \nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+    `);
+      if (
+        res.statusCode === 403 &&
+        res.getHeader("Access-Control-Allow-Origin") === undefined
+      ) {
+        console.log("corsify");
+        corsify(resp);
+      }
+    });
   }
 });
 

@@ -90,23 +90,26 @@ const useFetch = async <T = unknown>(
       const request = new Request(url, init);
 
       // if (import.meta.env.VITE_LOG_LEVEL === "debug") {
-      //   let logObj = escapeNestedKeys({ ...init }, [
-      //     "token",
-      //     "body",
-      //     "Authorization",
-      //   ]);
-      //   console.info(
-      //     `fetching data with init: -> ${JSON.stringify(logObj, null, 2)}`
-      //   );
-      //   console.log("request", request);
+      let logObj = escapeNestedKeys({ ...init }, [
+        "token",
+        "body",
+        "Authorization",
+      ]);
+      console.info(
+        `fetching data with init: -> ${JSON.stringify(logObj, null, 2)}`
+      );
+      console.log("request", request);
       // }
       // console.log(await readBody(request.body));
       const response = await fetch(request, {
         ...init,
       });
+      console.log("response", response);
+
       if (import.meta.env.VITE_LOG_LEVEL === "debug") {
         console.log("response", response);
       }
+
       const ct = response.headers.get("Content-Type");
       if (!response.ok) {
         throw new Error(
