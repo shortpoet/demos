@@ -12,4 +12,10 @@ const isAPiURL = (url: URL) => url.pathname.startsWith("/api/");
 
 const isJsonURL = (url: URL) => url.pathname.endsWith(".json");
 
-const isSSR = (url: URL) => url.pathname.startsWith("/");
+const isSSR = (url: URL, ssrPaths: string[]) => {
+  // url.pathname.replace(/\/$/, "");
+  return (
+    ssrPaths.includes(url.pathname.split("/").at(1) || "") ||
+    url.pathname === "/"
+  );
+};

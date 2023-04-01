@@ -8,7 +8,7 @@ import {
 
 import { Env } from "./types";
 import { Api } from "./api";
-import { isAPiURL, isAssetURL } from "./util";
+import { isAPiURL, isAssetURL, isSSR } from "./util";
 
 const api = Api;
 
@@ -59,6 +59,10 @@ async function handleFetchEvent(
       res = await api.handle(request, env, ctx);
       break;
     default:
+      // this is only logged on page reload due to client routing
+      console.log(
+        `${url.pathname} is SSR ${isSSR(url, env.SSR_BASE_PATHS.split(","))}`
+      );
       res =
         (await handleSsr(request, env, ctx)) ??
         new Response("Not Found", { status: 404 });
