@@ -5,7 +5,7 @@ import querystring from "node:querystring";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-import { Api } from "../worker/api";
+import { Api } from "../worker/api.v1";
 import path, { dirname } from "node:path";
 
 const HOST: string = process.env.HOST || "localhost";

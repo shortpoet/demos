@@ -7,7 +7,7 @@ import {
 } from "@cloudflare/kv-asset-handler/dist/types";
 
 import { Env } from "./types";
-import { Api } from "./api";
+import { Api } from "./api.v1";
 import { isAPiURL, isAssetURL, isSSR } from "./util";
 
 const api = Api;

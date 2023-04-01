@@ -1,5 +1,5 @@
 import http from "http";
-import { Api } from "../worker/api";
+import { Api } from "../worker/api.v1";
 import { corsOpts, useCors } from "../worker/util";
 const { preflight, corsify } = useCors(corsOpts);
 export { preflight, corsify };
