@@ -21,13 +21,15 @@ const { preflight, corsify } = useCors({
 });
 
 Api.use((req) => {
-  console.log(`
+  if (new URL(req.url).port === "3333") {
+    console.log(`
   \nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
   ${new Date().toLocaleTimeString()}
   Api.use -> ${req.method} -> ${req.url} -> content-type: ${req.headers.get(
-    "Content-Type"
-  )}\n
+      "Content-Type"
+    )}\n
 `);
+  }
   return Promise.resolve(undefined);
 });
 

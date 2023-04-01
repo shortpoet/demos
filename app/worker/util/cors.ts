@@ -23,7 +23,7 @@ export const useCors = (options: CorsOptions = {}) => {
     headers = {},
   } = options;
 
-  console.log("useCors", options);
+  // console.log("useCors", options);
 
   let allowOrigin: any;
 

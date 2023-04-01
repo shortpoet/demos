@@ -20,6 +20,11 @@ const vitestConfig: InlineConfig = {
 export default ({ mode }: { mode: string }) => {
   process.env = { ...process.env, ...loadEnv(mode, process.cwd()) };
   return defineConfig({
+    define: {
+      __VUE_OPTIONS_API__: true,
+      __VUE_PROD_DEVTOOLS__: false,
+    },
+
     plugins: [vue(), ssr(), Unocss()],
 
     server: {

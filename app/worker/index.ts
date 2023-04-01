@@ -18,7 +18,18 @@ export default {
     env: Env,
     ctx: ExecutionContext
   ): Promise<Response> {
+    const url = new URL(request.url);
     try {
+      if (!isAssetURL(url)) {
+        console.log(`
+        \nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+        ${new Date().toLocaleTimeString()}
+        worker.fetch -> ${
+          request.method
+        } -> ${url} -> content-type: ${request.headers.get("Content-Type")}\n
+      `);
+      }
+
       return await handleFetchEvent(request, env, ctx);
     } catch (e) {
       console.error(e);
@@ -38,9 +49,6 @@ async function handleFetchEvent(
   env: Env,
   ctx: ExecutionContext
 ): Promise<Response> {
-  if (env.LOG_LEVEL === "debug") {
-    console.log("worker.handleFetchEvent");
-  }
   const url = new URL(request.url);
   let res;
   switch (true) {
@@ -54,6 +62,14 @@ async function handleFetchEvent(
       res =
         (await handleSsr(request, env, ctx)) ??
         new Response("Not Found", { status: 404 });
+  }
+  if (!isAssetURL(url)) {
+    console.log(`
+        worker.END RES -> ${
+          res.status
+        } -> ${url} -> content-type: ${res.headers.get("content-type")}
+        ${new Date().toLocaleTimeString()}\nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+`);
   }
   return res;
 }
