@@ -10,7 +10,7 @@ git push --follow-tags
 ```
 
 ```bash
-git tag -a 1.0-Base_Config -m "Vite + SSR + Typescript + Cloudflare Workers + Vitest/Cypress"
+git tag -a 1.2-Base_Config -m "Vite + SSR + Typescript + Cloudflare Workers + Vitest/Cypress + API"
 git push --follow-tags
 # git tag -d 1.0-Base_Config
 # git push --delete origin 1.0-Base_Config
@@ -40,6 +40,8 @@ npx wrangler kv:namespace create "$namespace" --preview
 ```
 
 - no need for node-fetch these days it's implemented in their engine (find references)
+  - [actually it's in node 18](https://nodejs.org/en/blog/announcements/v18-release-announce)
+
 
 ## SSL
 

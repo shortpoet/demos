@@ -1,8 +1,8 @@
-import crypto from 'crypto';
-import path, { dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { Env } from 'wrangle';
-import { command, readFile, writeFile } from './util';
+import crypto from "crypto";
+import path, { dirname } from "node:path";
+import { fileURLToPath } from "node:url";
+import { Env } from "wrangle";
+import { command, readFile, writeFile } from "./util";
 
 export { writeSecret, generateSecret, passGet, passWrite, setSecretFile };
 
@@ -13,7 +13,7 @@ async function setSecretFile(
   key: string,
   passKey: string,
   env: Env,
-  generateLength?: number,
+  generateLength?: number
 ) {
   let secret;
   if (generateLength) {
@@ -28,9 +28,9 @@ async function setSecretFile(
   await writeSecret(key, secret, env);
   const file = path.join(__dirname, `../../.${env.env}.vars`);
   const existing = await readFile(file);
-  const lines = existing.split('\n').filter((line) => line.trim() !== '');
+  const lines = existing.split("\n").filter((line) => line.trim() !== "");
   const keyValuePairs = lines.map((line) => {
-    const [key, value] = line.trim().split('=');
+    const [key, value] = line.trim().split("=");
     return { key, value };
   });
 
@@ -39,7 +39,7 @@ async function setSecretFile(
     : keyValuePairs.push({ key, value: secret });
   const newLines = keyValuePairs.map(({ key, value }) => `${key}=${value}`);
 
-  await writeFile(file, newLines.join('\n'));
+  await writeFile(file, newLines.join("\n"));
 }
 
 async function writeSecret(key: string, value: string, _env: Env) {
@@ -50,11 +50,11 @@ async function writeSecret(key: string, value: string, _env: Env) {
     console.log(`${cmd}\n`);
   }
   const res = await command(cmd);
-  console.log(res + '\n');
+  console.log(res + "\n");
 }
 
 function generateSecret(length: number) {
-  return crypto.randomBytes(length / 2).toString('hex');
+  return crypto.randomBytes(length / 2).toString("hex");
 }
 
 async function passGet(path: string): Promise<string> {
@@ -69,8 +69,8 @@ EOF`);
 
 function generateSecret1(lenth: number) {
   const chars =
-    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let result = '';
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  let result = "";
   for (let i = lenth; i > 0; --i) {
     result += chars[Math.floor(Math.random() * chars.length)];
   }
@@ -80,31 +80,31 @@ function generateSecret1(lenth: number) {
 const getRanHex = (size) => {
   let result = [];
   let hexRef = [
-    '0',
-    '1',
-    '2',
-    '3',
-    '4',
-    '5',
-    '6',
-    '7',
-    '8',
-    '9',
-    'a',
-    'b',
-    'c',
-    'd',
-    'e',
-    'f',
+    "0",
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6",
+    "7",
+    "8",
+    "9",
+    "a",
+    "b",
+    "c",
+    "d",
+    "e",
+    "f",
   ];
 
   for (let n = 0; n < size; n++) {
     result.push(hexRef[Math.floor(Math.random() * 16)]);
   }
-  return result.join('');
+  return result.join("");
 };
 
 const genRanHex1 = (size) =>
   [...Array(size)]
     .map(() => Math.floor(Math.random() * 16).toString(16))
-    .join('');
+    .join("");

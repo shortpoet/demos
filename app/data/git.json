@@ -1,1 +1,20 @@
-{"shortHash":"5fc2b03","hash":"5fc2b038ad86ca357ffb95cbf5157c235f42f1ee","subject":"corsified 🧙‍♀️","sanitizedSubject":"corsified","body":"","authoredOn":"1680374930","committedOn":"1680374930","author":{"name":"Carlos Soriano","email":"soriano.carlitos@gmail.com"},"committer":{"name":"Carlos Soriano","email":"soriano.carlitos@gmail.com"},"notes":"","branch":"feat-strip-auth","tags":[]}
+{
+  "shortHash": "d6145ea",
+  "hash": "d6145eab5330ef6ba87a2fcada1cbdea08291470",
+  "subject": "🦆ing 🤬 cors 😂",
+  "sanitizedSubject": "ing-cors",
+  "body": "",
+  "authoredOn": "1680378955",
+  "committedOn": "1680378955",
+  "author": {
+    "name": "Carlos Soriano",
+    "email": "soriano.carlitos@gmail.com"
+  },
+  "committer": {
+    "name": "Carlos Soriano",
+    "email": "soriano.carlitos@gmail.com"
+  },
+  "notes": "",
+  "branch": "main",
+  "tags": []
+}
