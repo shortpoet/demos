@@ -6,12 +6,18 @@ const Api = Router();
 
 const { preflight, corsify } = useCors({
   origins: ["*"],
-
-  // allowedHeaders: ["Content-Type", "Authorization"],
-  // exposedHeaders: ["Content-Type", "Authorization"],
-
-  // allowedHeaders: ["Content-Type", "Authorization", "X-Ping"],
-  // exposedHeaders: ["Content-Type", "Authorization", "X-Ping"],
+  allowedHeaders: [
+    "Content-Type",
+    "Authorization",
+    "X-Ping",
+    // ""
+  ],
+  exposedHeaders: [
+    "Content-Type",
+    "Authorization",
+    "X-Ping",
+    // ""
+  ],
 });
 
 Api.use((req) => {
@@ -47,9 +53,11 @@ Api.use((req) => {
   const path = new URL(req.url).pathname;
   if (path === "/api/json-data") {
     return Promise.resolve(
-      new Response(JSON.stringify(data, null, 2), {
-        headers: { "content-type": "application/json" },
-      })
+      corsify(
+        new Response(JSON.stringify(data, null, 2), {
+          headers: { "content-type": "application/json" },
+        })
+      )
     );
   }
   return Promise.resolve(undefined);
