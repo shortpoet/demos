@@ -6,7 +6,7 @@ declare const __STATIC_CONTENT_MANIFEST: AssetManifestType;
 declare const ENVIRONMENT: string;
 declare type LogLevel = "debug" | "info" | "warn" | "error" | "fatal";
 
-interface Env {
+interface WorkerEnv {
   // APP
   ENVIRONMENT: "dev" | "prod";
   LOG_LEVEL: LogLevel;
@@ -19,9 +19,17 @@ interface Env {
 
   // MY_DURABLE_OBJECT: DurableObjectNamespace
   // MY_BUCKET: R2Bucket
+  isWorkerEnv(): void;
 }
 
+interface NodeEnv {
+  [key: string]: string;
+}
+
+type Env = WorkerEnv | NodeEnv;
+
 export {
+  WorkerEnv,
   Env,
   DEMO_CFW_SSR,
   __STATIC_CONTENT,

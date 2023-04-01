@@ -1,24 +1,11 @@
-import { Router } from "./router";
-import data from "./data.json";
-import { useCors } from "../util";
+import { Handler, Router } from "./router";
+import data from "../../data/data.json";
+import { healthCheck, _healthCheck } from "./health";
+import { corsOpts, useCors } from "../util";
+const { preflight, corsify } = useCors(corsOpts);
+export { corsify };
 
 const Api = Router();
-
-const { preflight, corsify } = useCors({
-  origins: ["*"],
-  allowedHeaders: [
-    "Content-Type",
-    "Authorization",
-    "X-Ping",
-    // ""
-  ],
-  exposedHeaders: [
-    "Content-Type",
-    "Authorization",
-    "X-Ping",
-    // ""
-  ],
-});
 
 Api.use((req) => {
   if (new URL(req.url).port === "3333") {
@@ -64,5 +51,25 @@ Api.use((req) => {
   }
   return Promise.resolve(undefined);
 });
+
+// using the origin derived from the preflight call in this file
+// Api.use(async (req, env) => {
+//   const path = new URL(req.url).pathname;
+//   if (path === "/api/health/check") {
+//     const corsified = corsify(await healthCheck(req, env));
+//     console.log(
+//       `about to return allowed ${JSON.stringify(
+//         corsified.headers.get("Access-Control-Allow-Origin"),
+//         null,
+//         2
+//       )}`
+//     );
+//     return Promise.resolve(corsified);
+//   }
+//   return Promise.resolve(undefined);
+// });
+
+// using  the origin derived from the exported corsify function
+Api.use(_healthCheck);
 
 export { Api };

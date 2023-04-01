@@ -1,4 +1,4 @@
-interface Handler {
+export interface Handler {
   (req: Request, ...args: any[]): Promise<Response | undefined>;
 }
 

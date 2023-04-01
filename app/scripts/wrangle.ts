@@ -77,6 +77,7 @@ function getArgs() {
 async function setGitconfig(id, env) {
   const commitStr = await getGitInfo();
   writeKV(id, env, commitStr);
+  writeFile(path.join(__dirname, "../data/git.json"), commitStr);
 }
 
 async function setSecrets(env) {

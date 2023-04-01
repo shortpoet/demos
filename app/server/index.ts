@@ -1,7 +1,8 @@
 import http from "http";
 import { Api } from "../worker/api";
-import { useCors } from "../worker/util";
-const { corsify } = useCors({ origins: ["*"] });
+import { corsOpts, useCors } from "../worker/util";
+const { preflight, corsify } = useCors(corsOpts);
+export { preflight, corsify };
 
 const HOST: string = process.env.HOST || "localhost";
 const PORT: number = parseInt(process.env.PORT || "3333");
@@ -25,14 +26,18 @@ const mapHttpHeaders = (headers: http.IncomingHttpHeaders): HeadersInit => {
 
 const server = http.createServer(async (req, res) => {
   if (req.url) {
+    console.log(`\n\tcreate.server.method -> ${req.method} -> ${req.url}\n`);
+    const apiReq = new Request(new URL(req.url, "http://" + req.headers.host), {
+      method: req.method,
+      headers: mapHttpHeaders(req.headers),
+      // body: req.read(),
+    });
+
+    // // here for passing the preflight
+    // preflight(apiReq);
+
     const resp = await api
-      .handle(
-        new Request(new URL(req.url, "http://" + req.headers.host), {
-          method: req.method,
-          headers: mapHttpHeaders(req.headers),
-          // body: req.read(),
-        })
-      )
+      .handle(apiReq, process.env)
       .catch((err) => new Response(err.message, { status: 500 }));
 
     if (!resp) {
@@ -40,6 +45,7 @@ const server = http.createServer(async (req, res) => {
       res.end("Not Found");
       return;
     }
+
     const incomingHeaders = Array.from(resp.headers.entries()) as any;
 
     res.writeHead(resp.status, resp.statusText, incomingHeaders);
@@ -55,7 +61,7 @@ const server = http.createServer(async (req, res) => {
         res.statusCode === 403 &&
         res.getHeader("Access-Control-Allow-Origin") === undefined
       ) {
-        console.log("corsify");
+        console.log("status.403.corsify");
         corsify(resp);
       }
     });

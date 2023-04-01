@@ -11,6 +11,22 @@ interface CorsOptions {
   headers?: any;
 }
 
+export const corsOpts = {
+  origins: ["*"],
+  allowedHeaders: [
+    "Content-Type",
+    "Authorization",
+    "X-Ping",
+    // ""
+  ],
+  exposedHeaders: [
+    "Content-Type",
+    "Authorization",
+    "X-Ping",
+    // ""
+  ],
+};
+
 export const useCors = (options: CorsOptions = {}) => {
   // @ts-ignore
   const {
@@ -82,7 +98,6 @@ export const useCors = (options: CorsOptions = {}) => {
         };
         return new Response(null, { headers });
       }
-
       return new Response(null, {
         headers: {
           Allow: useMethods.join(", "),
@@ -107,16 +122,17 @@ export const useCors = (options: CorsOptions = {}) => {
       // already has cors headers
       return res;
     }
+    const out = {
+      ...incomingHeaders,
+      ...responseHeaders,
+      ...allowOrigin,
+      "Access-Control-Allow-Credentials": credentials ? "true" : "false",
+      "Access-Control-Expose-Headers": exposed,
+      "content-type": headers.get("content-type"),
+    };
     return new Response(body, {
       status,
-      headers: {
-        ...incomingHeaders,
-        ...responseHeaders,
-        ...allowOrigin,
-        "Access-Control-Allow-Credentials": credentials ? "true" : "false",
-        "Access-Control-Expose-Headers": exposed,
-        "content-type": headers.get("content-type"),
-      },
+      headers: out,
     });
   };
   return { preflight, corsify };
