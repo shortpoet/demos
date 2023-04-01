@@ -26,7 +26,6 @@ const mapHttpHeaders = (headers: http.IncomingHttpHeaders): HeadersInit => {
 
 const server = http.createServer(async (req, res) => {
   if (req.url) {
-    console.log(`\n\tcreate.server.method -> ${req.method} -> ${req.url}\n`);
     const apiReq = new Request(new URL(req.url, "http://" + req.headers.host), {
       method: req.method,
       headers: mapHttpHeaders(req.headers),
@@ -54,8 +53,9 @@ const server = http.createServer(async (req, res) => {
     res.on("finish", () => {
       console.log(`
   ${new Date().toLocaleTimeString()}
-  END STATUS -> ${res.statusCode} -> ${req.url}\n
-  \nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+  END STATUS -> ${res.statusCode} -> ${
+        req.url
+      }\nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     `);
       if (
         res.statusCode === 403 &&
