@@ -40,6 +40,8 @@ npx wrangler kv:namespace create "$namespace" --preview
 ```
 
 - no need for node-fetch these days it's implemented in their engine (find references)
+  - [actually it's in node 18](https://nodejs.org/en/blog/announcements/v18-release-announce)
+
 
 ## SSL
 
