@@ -32,6 +32,7 @@ export default ({ mode }: { mode: string }) => {
       hmr: {
         overlay: false,
       },
+      // to avoid CORS issues
       // proxy: {
       //   "/api": {
       //     target: "http://localhost:3333",

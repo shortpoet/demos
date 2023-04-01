@@ -10,6 +10,7 @@ interface Env {
   // APP
   ENVIRONMENT: "dev" | "prod";
   LOG_LEVEL: LogLevel;
+  SSR_BASE_PATHS: string;
 
   // CLOUDFLARE
   DEMO_CFW_SSR: KVNamespace;
