@@ -26,12 +26,34 @@ const Api = Router({
         },
       ],
     },
+    "/json-data": {
+      get: [jsonData],
+    },
+    "/health/check": {
+      get: [
+        async (req, env) =>
+          Promise.resolve(corsify(await healthCheck(req, env))),
+      ],
+    },
+    "/health/check2": {
+      get: [_healthCheck],
+    },
     // "/users": { get: [getUser], post: [createUser] },
     // "/users/:userId": {
     //   get: [userHandler],
     // },
   },
 });
+
+function jsonData() {
+  return Promise.resolve(
+    corsify(
+      new Response(JSON.stringify(data, null, 2), {
+        headers: { "content-type": "application/json" },
+      })
+    )
+  );
+}
 
 export { Api };
 
