@@ -1,8 +1,9 @@
-interface Request {
-  url: string;
-  params?: { [key: string]: string };
-  body?: any;
-}
+// @ts-nocheck
+// interface Request {
+//   url: string;
+//   params?: { [key: string]: string };
+//   body?: any;
+// }
 
 interface Response {
   status: number;

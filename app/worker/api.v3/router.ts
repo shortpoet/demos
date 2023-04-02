@@ -43,6 +43,8 @@ const getHandlersForRoute = (
   pathname: string,
   method: string
 ): Handler[] => {
+  // console.log("getHandlersForRoute");
+  // console.log("route", routes);
   console.log("pathname", pathname);
   console.log("method", method);
 
@@ -53,12 +55,18 @@ const getHandlersForRoute = (
       }, {} as Routes)
     : routes;
 
+  // console.log("routes", routes);
+
   const allRoutes = base ? routes[`${base}*`] : routes[`*`];
+  // console.log("allRoutes", allRoutes);
   const routeHandlers = routes[pathname] || {};
+  // console.log("routeHandlers", routeHandlers);
   const methodHandlers = routeHandlers[method] || [];
   const allMethod = allRoutes[method] || [];
 
   const allHandlers = allRoutes["all"] || [];
+  // console.log("allHandlers", allHandlers);
+  // console.log("methodHandlers", methodHandlers);
   return [...methodHandlers, ...allHandlers, ...allMethod];
 };
 
@@ -79,85 +87,37 @@ const parseQueryParams = (
   return params;
 };
 
-const loggerMiddleware = async (
-  req: Request,
-  res: Response,
-  next: () => Promise<void>
-) => {
-  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
-  await next();
-};
-
-const errorHandlerMiddleware = async (
-  err: Error,
-  req: any,
-  res: any,
-  next: any
-) => {
-  console.error(`[${new Date().toISOString()}] ERROR: ${err.message}`);
-  res.statusCode = 500;
-  res.end();
-};
-
 export const Router = ({ base = "", routes = {} as Routes }): Router => ({
-  async handle(request: RequestLike, response: Response, ...args: any[]) {
-    try {
-      const url = new URL(request.url);
-      const method = request.method?.toLowerCase() || "get";
-      const pathname = url.pathname.replace(/\/$/, "") || "/";
-      const queryParams = url.searchParams;
-      const query = parseQueryParams(queryParams);
-      const params = request.params || {};
+  async handle(request: RequestLike, ...args: any[]) {
+    // console.log("request", request);
+    const url = new URL(request.url);
+    const method = request.method?.toLowerCase() || "get";
+    const pathname = url.pathname.replace(/\/$/, "") || "/";
+    // console.log(url.pathname);
+    // console.log(url.pathname.replace(/\/$/, ""));
+    // const pathname = base
+    //   ? `${base}/${url.pathname.replace(/\/$/, "")}`
+    //   : url.pathname.replace(/\/$/, "") || "/";
+    // console.log("pathname", pathname);
+    const queryParams = url.searchParams;
+    const query = parseQueryParams(queryParams);
+    const params = request.params || {};
 
-      let handlers = base
-        ? getHandlersForRoute(routes, base, pathname, method)
-        : getHandlersForRoute(routes, base, pathname, method);
+    let handlers = base
+      ? getHandlersForRoute(routes, base, pathname, method)
+      : getHandlersForRoute(routes, base, pathname, method);
 
-      handlers = handlers.map(
-        (handler) =>
-          (req: RequestLike, ...args: any[]) => {
-            const newReq = { ...req, url: req.url };
-            Object.defineProperty(newReq, "query", {
-              value: { ...query },
-              writable: false,
-              enumerable: true,
-              configurable: true,
-            });
-            Object.defineProperty(newReq, "params", {
-              value: { ...params },
-              writable: false,
-              enumerable: true,
-              configurable: true,
-            });
-            return handler(newReq, ...args);
-          }
-      );
+    handlers = handlers.map((handler) => (req: RequestLike, ...args: any[]) => {
+      const newReq = new Request(req.url.replace(base, ""), req);
+      newReq.query = query;
+      newReq.params = params;
+      return handler(newReq, ...args);
+    });
 
-      if (handlers.length > 0) {
-        const next = async (index: number) => {
-          const currentHandler = handlers[index];
-          if (currentHandler) {
-            try {
-              await currentHandler(request, ...args);
-            } catch (err) {
-              await errorHandlerMiddleware(err, request, response, () =>
-                Promise.resolve()
-              );
-            }
-            await next(index + 1);
-          }
-        };
-        await loggerMiddleware(request, response, async () => {
-          await next(0);
-        });
-      } else {
-        response.statusCode = 404;
-        response.end();
-      }
-    } catch (err) {
-      await errorHandlerMiddleware(err, request, response, () =>
-        Promise.resolve()
-      );
+    // console.log("handlers", handlers);
+    for (const handler of handlers) {
+      // console.log("handler", handler);
+      return await handler(request, ...args);
     }
   },
 });
