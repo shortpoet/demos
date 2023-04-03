@@ -112,6 +112,7 @@ const errorHandlerMiddleware = async (
 
 export const Router = ({ base = "", routes = {} as Routes }): Router => ({
   async handle(request: RequestLike, response: ServerResponse, ...args: any[]) {
+    console.log("handle");
     try {
       const url = new URL(request.url);
       const method = request.method?.toLowerCase() || "get";
@@ -164,7 +165,8 @@ export const Router = ({ base = "", routes = {} as Routes }): Router => ({
             if (currentHandler) {
               try {
                 // return Promise.resolve(await currentHandler(request, ...args));
-                return await currentHandler(request, ...args);
+                // console.log("args", args);
+                return await currentHandler(request, response, ...args);
               } catch (err: unknown) {
                 if (err instanceof Error) {
                   await errorHandlerMiddleware(err, request, response, () =>

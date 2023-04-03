@@ -34,8 +34,6 @@ export const _healthCheck = async (
   res: ServerResponse,
   env: Env
 ) => {
-  console.log("healthcheck.req.url", req.url);
-  console.log("env", env);
   const path = new URL(req.url).pathname;
   let gitInfo;
   let version = "";
