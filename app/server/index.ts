@@ -1,13 +1,27 @@
 import http from "http";
-import { Api } from "../worker/api.v1";
 import { corsOpts, useCors } from "../worker/util";
 const { preflight, corsify } = useCors(corsOpts);
 export { preflight, corsify };
+import dotenv from "dotenv";
 
+dotenv.config();
 const HOST: string = process.env.HOST || "localhost";
 const PORT: number = parseInt(process.env.PORT || "3333");
+let api;
 
-const api = Api;
+switch (process.env.API_VERSION) {
+  case "v3":
+    console.log(`API_VERSION: ${process.env.API_VERSION}`);
+    ({ Api: api } = await import("../worker/api.v3"));
+    break;
+  case "v2":
+    console.log(`API_VERSION: ${process.env.API_VERSION}`);
+    ({ Api: api } = await import("../worker/api.v2"));
+  default:
+    console.log(`API_VERSION: ${process.env.API_VERSION}`);
+    ({ Api: api } = await import("../worker/api.v1"));
+    break;
+}
 
 const mapHttpHeaders = (headers: http.IncomingHttpHeaders): HeadersInit => {
   const mappedHeaders: HeadersInit = {};
@@ -32,11 +46,12 @@ const server = http.createServer(async (req, res) => {
       // body: req.read(),
     });
 
-    // // here for passing the preflight
-    // preflight(apiReq);
-
+    //   console.log(`
+    // ${new Date().toLocaleTimeString()}
+    // START -> ${req.method} -> ${req.url}
+    // `);
     const resp = await api
-      .handle(apiReq, process.env)
+      .handle(apiReq, res, process.env)
       .catch((err) => new Response(err.message, { status: 500 }));
 
     if (!resp) {

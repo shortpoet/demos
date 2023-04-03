@@ -4,6 +4,7 @@ declare global {
     interface ProcessEnv {
       NODE_ENV: "development" | "production";
       ENVIRONMENT: "dev" | "prod";
+      API_VERSION: string;
     }
   }
 }

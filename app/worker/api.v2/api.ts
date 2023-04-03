@@ -1,6 +1,6 @@
 import { Handler, RequestLike, Router } from "./router";
 import data from "../../data/data.json";
-import { healthCheck, _healthCheck } from "./health";
+import { healthCheck, _healthCheck } from "../handlers";
 import { corsOpts, useCors } from "../util";
 const { preflight, corsify } = useCors(corsOpts);
 export { corsify };

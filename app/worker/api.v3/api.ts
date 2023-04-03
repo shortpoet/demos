@@ -1,6 +1,6 @@
 import { Handler, RequestLike, Router } from "./router";
 import data from "../../data/data.json";
-import { healthCheck, _healthCheck } from "./health";
+import { healthCheck, _healthCheck } from "../handlers";
 import { corsOpts, useCors } from "../util";
 const { preflight, corsify } = useCors(corsOpts);
 export { corsify };
@@ -16,6 +16,7 @@ const Api = Router({
       get: [
         (req: RequestLike) => {
           // console.log("req", req);
+          console.log(`hello world!`);
           return Promise.resolve(
             corsify(
               new Response(JSON.stringify({ hello: "world" }), {
@@ -29,13 +30,13 @@ const Api = Router({
     "/json-data": {
       get: [jsonData],
     },
-    "/health/check": {
+    "/health/check2": {
       get: [
         async (req, env) =>
           Promise.resolve(corsify(await healthCheck(req, env))),
       ],
     },
-    "/health/check2": {
+    "/health/check": {
       get: [_healthCheck],
     },
     // "/users": { get: [getUser], post: [createUser] },

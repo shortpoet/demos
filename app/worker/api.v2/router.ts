@@ -89,6 +89,7 @@ const parseQueryParams = (
 
 export const Router = ({ base = "", routes = {} as Routes }): Router => ({
   async handle(request: RequestLike, ...args: any[]) {
+    console.log("handle", args);
     // console.log("request", request);
     const url = new URL(request.url);
     const method = request.method?.toLowerCase() || "get";

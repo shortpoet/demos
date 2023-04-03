@@ -11,6 +11,7 @@ interface WorkerEnv {
   ENVIRONMENT: "dev" | "prod";
   LOG_LEVEL: LogLevel;
   SSR_BASE_PATHS: string;
+  API_VERSION: string;
 
   // CLOUDFLARE
   DEMO_CFW_SSR: KVNamespace;

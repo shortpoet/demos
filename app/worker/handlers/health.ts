@@ -1,7 +1,7 @@
 import { HealthCheck } from "../../types";
 import { msToTime } from "../util";
 import { Env, WorkerEnv } from "../types";
-import { corsify } from "./api";
+import { ServerResponse } from "http";
 
 export const healthCheck = async (req: Request, env: Env) => {
   const gitInfo = (<Env>env).isWorkerEnv
@@ -29,7 +29,13 @@ export const healthCheck = async (req: Request, env: Env) => {
   });
 };
 
-export const _healthCheck = async (req: Request, env: Env) => {
+export const _healthCheck = async (
+  req: Request,
+  res: ServerResponse,
+  env: Env
+) => {
+  console.log("healthcheck.req.url", req.url);
+  console.log("env", env);
   const path = new URL(req.url).pathname;
   let gitInfo;
   let version = "";
@@ -44,7 +50,7 @@ export const _healthCheck = async (req: Request, env: Env) => {
       ]
     : "local";
 
-  const res: HealthCheck = {
+  const healthRes: HealthCheck = {
     status: "OK",
     version,
     uptime: msToTime(process.uptime()),
@@ -52,9 +58,21 @@ export const _healthCheck = async (req: Request, env: Env) => {
     timestamp: new Date(Date.now()),
     gitInfo: gitInfo,
   };
+  let corsify;
+  console.log("env.API_VERSION", env.API_VERSION);
+  switch (env.API_VERSION) {
+    case "v3":
+      corsify = (await import("../api.v3")).corsify;
+      break;
+    case "v2":
+      corsify = (await import("../api.v2")).corsify;
+    default:
+      corsify = (await import("../api.v1")).corsify;
+      break;
+  }
   return Promise.resolve(
     corsify(
-      new Response(JSON.stringify(res, null, 2), {
+      new Response(JSON.stringify(healthRes, null, 2), {
         headers: { "content-type": "application/json" },
       })
     )
