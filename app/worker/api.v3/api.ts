@@ -32,8 +32,8 @@ const Api = Router({
     },
     "/health/check2": {
       get: [
-        async (req, env) =>
-          Promise.resolve(corsify(await healthCheck(req, env))),
+        async (req, res, env) =>
+          Promise.resolve(corsify(await healthCheck(req, res, env))),
       ],
     },
     "/health/check": {

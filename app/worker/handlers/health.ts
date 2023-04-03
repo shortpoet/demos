@@ -3,7 +3,11 @@ import { msToTime } from "../util";
 import { Env, WorkerEnv } from "../types";
 import { ServerResponse } from "http";
 
-export const healthCheck = async (req: Request, env: Env) => {
+export const healthCheck = async (
+  req: Request,
+  res: ServerResponse,
+  env: Env
+) => {
   const gitInfo = (<Env>env).isWorkerEnv
     ? JSON.parse((await (env.DEMO_CFW_SSR as KVNamespace).get("gitInfo")) || "")
     : (await import("../../data/git.json")).default;
@@ -15,7 +19,7 @@ export const healthCheck = async (req: Request, env: Env) => {
       ]
     : "local";
 
-  const res: HealthCheck = {
+  const healthRes: HealthCheck = {
     status: "OK",
     version,
     uptime: msToTime(process.uptime()),
@@ -24,7 +28,7 @@ export const healthCheck = async (req: Request, env: Env) => {
     gitInfo: gitInfo,
   };
 
-  return new Response(JSON.stringify(res, null, 2), {
+  return new Response(JSON.stringify(healthRes, null, 2), {
     headers: { "content-type": "application/json" },
   });
 };
