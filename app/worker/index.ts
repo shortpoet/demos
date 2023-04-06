@@ -7,10 +7,9 @@ import {
 } from "@cloudflare/kv-asset-handler/dist/types";
 
 import { Env } from "./types";
-import { Api } from "./api.v1";
 import { isAPiURL, isAssetURL, isSSR } from "./util";
-
-const api = Api;
+// import { Api } from "./api.v1";
+// const api = Api;
 
 export default {
   async fetch(
@@ -56,7 +55,22 @@ async function handleFetchEvent(
       res = await handleStaticAssets(request, env, ctx);
       break;
     case isAPiURL(url):
-      res = await api.handle(request, env, ctx);
+      let api;
+      switch (env.API_VERSION) {
+        case "v3":
+          console.log(`handleFetchEvent.API_VERSION: ${env.API_VERSION}`);
+          ({ Api: api } = await import("../worker/api.v3"));
+          break;
+        case "v2":
+          console.log(`handleFetchEvent.API_VERSION: ${env.API_VERSION}`);
+          ({ Api: api } = await import("../worker/api.v2"));
+        default:
+          console.log(`handleFetchEvent.API_VERSION: ${env.API_VERSION}`);
+          ({ Api: api } = await import("../worker/api.v1"));
+          break;
+      }
+      const resp = new Response();
+      res = await api.handle(request, resp, env, ctx);
       break;
     default:
       // this is only logged on page reload due to client routing

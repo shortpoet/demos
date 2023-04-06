@@ -53,23 +53,24 @@ Api.use((req) => {
 });
 
 // using the origin derived from the preflight call in this file
-// Api.use(async (req, env) => {
-//   const path = new URL(req.url).pathname;
-//   if (path === "/api/health/check") {
-//     const corsified = corsify(await healthCheck(req, env));
-//     console.log(
-//       `about to return allowed ${JSON.stringify(
-//         corsified.headers.get("Access-Control-Allow-Origin"),
-//         null,
-//         2
-//       )}`
-//     );
-//     return Promise.resolve(corsified);
-//   }
-//   return Promise.resolve(undefined);
-// });
+Api.use(async (req, res, env) => {
+  const path = new URL(req.url).pathname;
+  if (path === "/api/health/check") {
+    const corsified = corsify(await healthCheck(req, res, env));
+    console.log(
+      `about to return allowed ${JSON.stringify(
+        corsified.headers.get("Access-Control-Allow-Origin"),
+        null,
+        2
+      )}`
+    );
+    return Promise.resolve(corsified);
+  }
+  return Promise.resolve(undefined);
+});
 
 // using  the origin derived from the exported corsify function
+// has no route will handle all others aka /api/health/check2
 Api.use(_healthCheck);
 
 export { Api };

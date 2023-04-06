@@ -30,13 +30,13 @@ const Api = Router({
     "/json-data": {
       get: [jsonData],
     },
-    "/health/check": {
+    "/health/check2": {
       get: [
         async (req, res, env) =>
           Promise.resolve(corsify(await healthCheck(req, res, env))),
       ],
     },
-    "/health/check2": {
+    "/health/check": {
       get: [_healthCheck],
     },
     // "/users": { get: [getUser], post: [createUser] },

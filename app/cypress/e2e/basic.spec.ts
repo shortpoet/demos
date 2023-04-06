@@ -1,6 +1,6 @@
 context("Basic", () => {
   beforeEach(() => {
-    cy.visit("/");
+    cy.visit("http://localhost:3000");
   });
 
   it("basic nav", () => {

@@ -89,7 +89,7 @@ async function setSecrets(env) {
   );
 }
 
-async function setVars(_env: Env) {
+async function setVars(_env: Env, envVars: Record<string, string>) {
   const env = _env.env;
   const ssrDir = path.join(__dirname, "../src/pages");
   const ssrDirs = fs
@@ -98,11 +98,17 @@ async function setVars(_env: Env) {
     .join(",");
 
   const config = getToml();
+  // const parsed = Object.entries(envVars).reduce((acc, [key, value]) => {
+  //   acc[key] = value;
+  //   return acc;
+  // }, {});
 
   const newVars = {
     ...config["env"][`${env}`]["vars"],
+    ...envVars,
     SSR_BASE_PATHS: ssrDirs,
   };
+  console.log("newVars", newVars);
   writeToml({
     ...config,
     env: {
@@ -159,7 +165,7 @@ async function main(env, debug) {
   await setBindings(bindingName, appName, env, debug);
   await setGitconfig(id, env);
   await setSecrets(env);
-  await setVars(env);
+  await setVars(env, config.parsed);
 }
 
 (async () => {

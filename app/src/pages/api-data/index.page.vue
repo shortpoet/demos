@@ -4,6 +4,7 @@
       <Link btn-purple v-bind="attrsObj" href="/api-data/health">Health</Link>
       <Link btn-purple v-bind="attrsObj" href="/api-data/json-file">Json File</Link>
       <Link btn-purple v-bind="attrsObj" href="/api-data/hello">Hello World</Link>
+      <Link btn-purple v-bind="attrsObj" href="/api-data/healthE">Health-E</Link>
     </nav>
   </div>
 </template>

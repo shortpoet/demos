@@ -36,11 +36,13 @@ export const healthCheck = async (
 export const _healthCheck = async (
   req: Request,
   res: ServerResponse,
-  env: Env
+  env: Env,
+  ctx: ExecutionContext
 ) => {
   const path = new URL(req.url).pathname;
   let gitInfo;
   let version = "";
+
   gitInfo = (<Env>env).isWorkerEnv
     ? JSON.parse((await (env.DEMO_CFW_SSR as KVNamespace).get("gitInfo")) || "")
     : (await import("../../data/git.json")).default;
@@ -62,16 +64,19 @@ export const _healthCheck = async (
   };
   let corsify;
   console.log("env.API_VERSION", env.API_VERSION);
-  switch (env.API_VERSION) {
-    case "v3":
-      corsify = (await import("../api.v3")).corsify;
-      break;
-    case "v2":
-      corsify = (await import("../api.v2")).corsify;
-    default:
-      corsify = (await import("../api.v1")).corsify;
-      break;
-  }
+  // this might not be needed but only seems to work globally with v1
+  // switch (env.API_VERSION) {
+  //   case "v3":
+  //     corsify = (await import("../api.v3")).corsify;
+  //     break;
+  //   case "v2":
+  //     corsify = (await import("../api.v2")).corsify;
+  //   default:
+  //     corsify = (await import("../api.v1")).corsify;
+  //     break;
+  // }
+  corsify = (await import("../api.v1")).corsify;
+
   return Promise.resolve(
     corsify(
       new Response(JSON.stringify(healthRes, null, 2), {
