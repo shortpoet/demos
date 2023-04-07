@@ -9,13 +9,14 @@ port = 3000
 custom_domain = true
 pattern = "demos-dev.shortpoet.com"
 [env.dev.vars]
-API_VERSION = "v5"
+API_VERSION = "v6"
 ENVIRONMENT = "dev"
 LOG_LEVEL = "debug"
 SSR_BASE_PATHS = "about,api-data,index,star-wars"
-VITE_API_URL = "https://demo-cfw-ssr-dev.shortpoet.workers.dev"
+VITE_API_URL = "http://localhost:3333"
 VITE_APP_NAME = "demo-cfw-ssr"
-VITE_APP_URL = "https://demo-cfw-ssr-dev.shortpoet.workers.dev"
-VITE_LOG_LEVEL = "info"
+VITE_APP_URL = "http://localhost:3000"
+VITE_LOG_LEVEL = "debug"
+VITE_PORT = "3000"
 [site]
 bucket = "./app/build/client"

@@ -65,6 +65,7 @@ const route = app
 
 function jsonData(c: any) {
   // TODO figure out typing for c Context
+  // WARN this env has __SECRET__
   console.log(c.env);
   return Promise.resolve(
     corsify(
