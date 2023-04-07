@@ -3,7 +3,7 @@ import { handle } from "hono/cloudflare-pages";
 import { z } from "zod";
 import { zValidator } from "@hono/zod-validator";
 import { Env } from "../types";
-import { _healthCheck, healthCheck } from "../handlers";
+import { __healthCheck, _healthCheck, healthCheck } from "../handlers";
 import data from "../../data/data.json";
 import { corsOpts, useCors } from "../util";
 const { preflight, corsify } = useCors(corsOpts);
@@ -58,9 +58,10 @@ const route = app
   })
   .get("/health/check", async (c) =>
     Promise.resolve(corsify(await healthCheck(c.req, c.res, c.env)))
-  );
-// Also typing for this
-// .get("/health/check2", _healthCheck);
+  )
+  // Also typing for this
+  // using c: any for now
+  .get("/health/check2", __healthCheck);
 
 function jsonData(c: any) {
   // TODO figure out typing for c Context
