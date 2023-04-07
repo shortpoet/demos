@@ -17,6 +17,8 @@ export const Router = (): RouterType => ({
   },
 
   async handle(request: Request, ...args: any[]) {
+    console.log("handle.Api -> v1");
+    // console.log("handle.Api -> v1", args);
     let result = new Response("Not Found", { status: 404 });
     for (const handler of this.handlers) {
       const response = await handler(request, ...args);

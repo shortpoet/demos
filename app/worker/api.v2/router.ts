@@ -44,9 +44,9 @@ const getHandlersForRoute = (
   method: string
 ): Handler[] => {
   // console.log("getHandlersForRoute");
-  // console.log("route", routes);
-  console.log("pathname", pathname);
-  console.log("method", method);
+  // console.log("routes", routes);
+  // console.log("pathname", pathname);
+  // console.log("method", method);
 
   routes = base
     ? Object.keys(routes).reduce((acc, key) => {
@@ -67,6 +67,11 @@ const getHandlersForRoute = (
   const allHandlers = allRoutes["all"] || [];
   // console.log("allHandlers", allHandlers);
   // console.log("methodHandlers", methodHandlers);
+  // console.log("[...methodHandlers, ...allHandlers, ...allMethod]", [
+  //   ...methodHandlers,
+  //   ...allHandlers,
+  //   ...allMethod,
+  // ]);
   return [...methodHandlers, ...allHandlers, ...allMethod];
 };
 
@@ -87,9 +92,12 @@ const parseQueryParams = (
   return params;
 };
 
+// console.log("running router (api.v2) ...");
+
 export const Router = ({ base = "", routes = {} as Routes }): Router => ({
   async handle(request: RequestLike, ...args: any[]) {
-    console.log("handle", args);
+    console.log("handle.Api -> v2");
+    // console.log("handle.Api -> v2", args);
     // console.log("request", request);
     const url = new URL(request.url);
     const method = request.method?.toLowerCase() || "get";

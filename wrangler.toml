@@ -6,11 +6,11 @@ workers_dev = true
 [dev]
 port = 3000
 [env.dev.vars]
-API_VERSION = "v3"
+API_VERSION = "v2"
 ENVIRONMENT = "dev"
 LOG_LEVEL = "debug"
 SSR_BASE_PATHS = "about,api-data,index,star-wars"
-VITE_API_URL = "http://localhost:3000"
+VITE_API_URL = "http://localhost:3333"
 VITE_APP_NAME = "demo-cfw-ssr"
 VITE_APP_URL = "http://localhost:3000"
 VITE_LOG_LEVEL = "debug"

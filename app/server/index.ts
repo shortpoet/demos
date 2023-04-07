@@ -7,21 +7,7 @@ import dotenv from "dotenv";
 dotenv.config();
 const HOST: string = process.env.HOST || "localhost";
 const PORT: number = parseInt(process.env.PORT || "3333");
-let api;
-
-switch (process.env.API_VERSION) {
-  case "v3":
-    console.log(`API_VERSION: ${process.env.API_VERSION}`);
-    ({ Api: api } = await import("../worker/api.v3"));
-    break;
-  case "v2":
-    console.log(`API_VERSION: ${process.env.API_VERSION}`);
-    ({ Api: api } = await import("../worker/api.v2"));
-  default:
-    console.log(`API_VERSION: ${process.env.API_VERSION}`);
-    ({ Api: api } = await import("../worker/api.v1"));
-    break;
-}
+const { Api: api } = await import(`../worker/api.${process.env.API_VERSION}`);
 
 const mapHttpHeaders = (headers: http.IncomingHttpHeaders): HeadersInit => {
   const mappedHeaders: HeadersInit = {};

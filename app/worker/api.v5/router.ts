@@ -79,6 +79,8 @@ export const Router = ({
     }),
     routes,
     async handle(request: RequestLike, ...args) {
+      console.log("handle.Api -> v5");
+      // console.log("handle.Api -> v5", args);
       let response,
         match,
         url = new URL(request.url),

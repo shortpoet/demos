@@ -43,6 +43,21 @@ const Api = Router({
     // "/users/:userId": {
     //   get: [userHandler],
     // },
+    // @ts-expect-error
+    // somehow this still works
+    "*": {
+      all: [
+        (req) =>
+          Promise.resolve(
+            corsify(
+              new Response(JSON.stringify({ error: "Not found" }), {
+                status: 404,
+                headers: { "content-type": "application/json" },
+              })
+            )
+          ),
+      ],
+    },
   },
 });
 

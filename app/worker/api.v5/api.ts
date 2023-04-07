@@ -1,50 +1,58 @@
-import { RequestLike, Router } from "./router";
+import { IRequest, RequestLike, Router } from "./router";
 import data from "../../data/data.json";
 import { healthCheck, _healthCheck } from "../handlers";
 import { corsOpts, useCors } from "../util";
+import { Env } from "../types";
+import { ServerResponse } from "http";
 const { preflight, corsify } = useCors(corsOpts);
 export { corsify };
 
-const Api = Router({
-  base: "/api",
-  // routes: {
-  //   "*": {
-  //     // all: [() => Promise.resolve(undefined)],
-  //     options: [(req) => Promise.resolve(preflight(req))],
-  //   },
-  //   "/hello": {
-  //     get: [
-  //       (req: RequestLike) => {
-  //         // console.log("req", req);
-  //         console.log(`hello world!`);
-  //         return Promise.resolve(
-  //           corsify(
-  //             new Response(JSON.stringify({ hello: "world" }), {
-  //               headers: { "content-type": "application/json" },
-  //             })
-  //           )
-  //         );
-  //       },
-  //     ],
-  //   },
-  //   "/json-data": {
-  //     get: [jsonData],
-  //   },
-  //   "/health/check2": {
-  //     get: [
-  //       async (req, res, env) =>
-  //         Promise.resolve(corsify(await healthCheck(req, res, env))),
-  //     ],
-  //   },
-  //   "/health/check": {
-  //     get: [_healthCheck],
-  //   },
-  //   // "/users": { get: [getUser], post: [createUser] },
-  //   // "/users/:userId": {
-  //   //   get: [userHandler],
-  //   // },
-  // },
-});
+// declare a custom Request type to allow request injection from middleware
+type RequestWithAuthors = {
+  authors?: string[];
+} & IRequest;
+
+// middleware that modifies the request
+const withAuthors = (request: IRequest) => {
+  request.authors = ["foo", "bar"];
+};
+
+const Api = Router({ base: "/api" });
+
+export { Api };
+
+Api.all("*", () => {})
+  .options("*", preflight)
+  .get("/authors", withAuthors, (request: RequestWithAuthors) => {
+    return request.authors?.[0];
+  })
+  .get("/hello", (req: RequestLike) => {
+    // console.log("req", req);
+    console.log(`hello world!`);
+    return Promise.resolve(
+      corsify(
+        new Response(JSON.stringify({ hello: "world" }), {
+          headers: { "content-type": "application/json" },
+        })
+      )
+    );
+  })
+  .get("/json-data", jsonData)
+  .get("/health/check2", async (req: IRequest, res: ServerResponse, env: Env) =>
+    Promise.resolve(corsify(await healthCheck(req, res, env)))
+  )
+  .get("/health/check", _healthCheck);
+// catch-all not found
+// .all("*", (req: RequestLike) => {
+//   return Promise.resolve(
+//     corsify(
+//       new Response(JSON.stringify({ error: "Not found" }), {
+//         status: 404,
+//         headers: { "content-type": "application/json" },
+//       })
+//     )
+//   );
+// });
 
 function jsonData() {
   return Promise.resolve(
@@ -55,8 +63,6 @@ function jsonData() {
     )
   );
 }
-
-export { Api };
 
 // const loggerMiddleware = (req: Request, res: Response, next: () => void) => {
 //   console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);

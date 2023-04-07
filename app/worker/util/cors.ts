@@ -1,3 +1,5 @@
+import { IRequest } from "../api.v5/router";
+
 // https://github.com/kwhitley/itty-cors/blob/2b5811ed21da9bfa9cdac36437a8801a686a1708/src/itty-cors.ts
 interface CorsOptions {
   origins?: string | string[];
@@ -72,7 +74,7 @@ export const useCors = (options: CorsOptions = {}) => {
     responseHeaders["Access-Control-Max-Age"] = maxAge;
   }
 
-  const preflight = (req: Request) => {
+  const preflight = (req: Request | IRequest) => {
     console.log("preflight", "PREEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE");
     const useMethods = [...new Set(["OPTIONS", ...methods])];
     const origin = req.headers.get("Origin") || "";

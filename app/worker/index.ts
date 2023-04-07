@@ -55,8 +55,16 @@ async function handleFetchEvent(
       res = await handleStaticAssets(request, env, ctx);
       break;
     case isAPiURL(url):
+      // this doesn't work because the import fails
+      // Unable to resolve "index.js" dependency "../worker/api.v5": no matching module rules.
+      // If you're trying to import an npm package, you'll need to bundle your Worker first.
+      // const { Api: api } = await import(`../worker/api.${env.API_VERSION}`);
       let api;
       switch (env.API_VERSION) {
+        case "v5":
+          console.log(`handleFetchEvent.API_VERSION: ${env.API_VERSION}`);
+          ({ Api: api } = await import("../worker/api.v5"));
+          break;
         case "v3":
           console.log(`handleFetchEvent.API_VERSION: ${env.API_VERSION}`);
           ({ Api: api } = await import("../worker/api.v3"));
@@ -64,8 +72,9 @@ async function handleFetchEvent(
         case "v2":
           console.log(`handleFetchEvent.API_VERSION: ${env.API_VERSION}`);
           ({ Api: api } = await import("../worker/api.v2"));
+          break;
         default:
-          console.log(`handleFetchEvent.API_VERSION: ${env.API_VERSION}`);
+          // console.log(`handleFetchEvent.API_VERSION: ${env.API_VERSION}`);
           ({ Api: api } = await import("../worker/api.v1"));
           break;
       }
@@ -83,11 +92,11 @@ async function handleFetchEvent(
   }
   if (!isAssetURL(url)) {
     console.log(`
-        worker.END RES -> ${
-          res.status
-        } -> ${url} -> content-type: ${res.headers.get("content-type")}
-        ${new Date().toLocaleTimeString()}\nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-`);
+            worker.END RES -> ${
+              res.status
+            } -> ${url} -> content-type: ${res.headers.get("content-type")}
+            ${new Date().toLocaleTimeString()}\nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+    `);
   }
   return res;
 }

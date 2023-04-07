@@ -2,9 +2,10 @@ import { HealthCheck } from "../../types";
 import { msToTime } from "../util";
 import { Env, WorkerEnv } from "../types";
 import { ServerResponse } from "http";
+import { IRequest } from "../api.v5/router";
 
 export const healthCheck = async (
-  req: Request,
+  req: Request | IRequest,
   res: ServerResponse,
   env: Env
 ) => {
@@ -34,7 +35,7 @@ export const healthCheck = async (
 };
 
 export const _healthCheck = async (
-  req: Request,
+  req: Request | IRequest,
   res: ServerResponse,
   env: Env,
   ctx: ExecutionContext

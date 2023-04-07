@@ -4,7 +4,7 @@ import { healthCheck, _healthCheck } from "../handlers";
 import { corsOpts, useCors } from "../util";
 const { preflight, corsify } = useCors(corsOpts);
 export { corsify };
-
+// console.log("running api v2");
 const Api = Router({
   base: "/api",
   routes: {
@@ -37,6 +37,20 @@ const Api = Router({
     },
     "/health/check2": {
       get: [_healthCheck],
+    },
+    // @ts-expect-error
+    "*": {
+      all: [
+        (req) =>
+          Promise.resolve(
+            corsify(
+              new Response(JSON.stringify({ error: "Not found" }), {
+                status: 404,
+                headers: { "content-type": "application/json" },
+              })
+            )
+          ),
+      ],
     },
     // "/users": { get: [getUser], post: [createUser] },
     // "/users/:userId": {

@@ -112,7 +112,8 @@ const errorHandlerMiddleware = async (
 
 export const Router = ({ base = "", routes = {} as Routes }): Router => ({
   async handle(request: RequestLike, response: ServerResponse, ...args: any[]) {
-    console.log("handle");
+    console.log("handle.Api -> v3");
+    // console.log("handle.Api -> v3", args);
     try {
       const url = new URL(request.url);
       const method = request.method?.toLowerCase() || "get";
