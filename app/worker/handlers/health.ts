@@ -65,7 +65,7 @@ export const _healthCheck = async (
   };
   let corsify;
   console.log("env.API_VERSION", env.API_VERSION);
-  // this might not be needed but only seems to work globally with v1
+  // this might not be needed but only seems to work globally with v5, but before v1?
   // switch (env.API_VERSION) {
   //   case "v3":
   //     corsify = (await import("../api.v3")).corsify;
@@ -76,7 +76,7 @@ export const _healthCheck = async (
   //     corsify = (await import("../api.v1")).corsify;
   //     break;
   // }
-  corsify = (await import("../api.v1")).corsify;
+  corsify = (await import("../api.v5")).corsify;
 
   return Promise.resolve(
     corsify(

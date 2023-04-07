@@ -103,11 +103,14 @@ async function setVars(_env: Env, envVars: Record<string, string>) {
   //   return acc;
   // }, {});
 
+  delete config["__SECRET__"];
+
   const newVars = {
     ...config["env"][`${env}`]["vars"],
     ...envVars,
     SSR_BASE_PATHS: ssrDirs,
   };
+  delete newVars["__SECRET__"];
   console.log("newVars", newVars);
   writeToml({
     ...config,
@@ -177,7 +180,7 @@ async function main(env, debug) {
       ? ".env"
       : env === "preview"
       ? ".env.preview"
-      : env === ".env.uat"
+      : env === "uat"
       ? ".env.uat"
       : ".env.prod";
 

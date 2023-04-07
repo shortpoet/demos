@@ -24,7 +24,14 @@ export { Api };
 Api.all("*", () => {})
   .options("*", preflight)
   .get("/authors", withAuthors, (request: RequestWithAuthors) => {
-    return request.authors?.[0];
+    // return request.authors?.[0];
+    return Promise.resolve(
+      corsify(
+        new Response(JSON.stringify({ authors: request.authors }), {
+          headers: { "content-type": "application/json" },
+        })
+      )
+    );
   })
   .get("/hello", (req: RequestLike) => {
     // console.log("req", req);
@@ -38,21 +45,21 @@ Api.all("*", () => {})
     );
   })
   .get("/json-data", jsonData)
-  .get("/health/check2", async (req: IRequest, res: ServerResponse, env: Env) =>
+  .get("/health/check", async (req: IRequest, res: ServerResponse, env: Env) =>
     Promise.resolve(corsify(await healthCheck(req, res, env)))
   )
-  .get("/health/check", _healthCheck);
-// catch-all not found
-// .all("*", (req: RequestLike) => {
-//   return Promise.resolve(
-//     corsify(
-//       new Response(JSON.stringify({ error: "Not found" }), {
-//         status: 404,
-//         headers: { "content-type": "application/json" },
-//       })
-//     )
-//   );
-// });
+  .get("/health/check2", _healthCheck)
+  // catch-all not found
+  .all("*", (req: RequestLike) => {
+    return Promise.resolve(
+      corsify(
+        new Response(JSON.stringify({ error: "Not found" }), {
+          status: 404,
+          headers: { "content-type": "application/json" },
+        })
+      )
+    );
+  });
 
 function jsonData() {
   return Promise.resolve(
