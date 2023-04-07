@@ -1,6 +1,9 @@
 lockfileVersion: '6.0'
 
 dependencies:
+  '@hono/zod-validator':
+    specifier: ^0.1.2
+    version: 0.1.2(hono@3.1.5)(zod@3.21.4)
   '@unocss/reset':
     specifier: ^0.50.6
     version: 0.50.6
@@ -19,6 +22,9 @@ dependencies:
   '@vueuse/head':
     specifier: ^1.1.23
     version: 1.1.23(vue@3.2.47)
+  hono:
+    specifier: ^3.1.5
+    version: 3.1.5
   vite:
     specifier: ^4.0.3
     version: 4.1.4(@types/node@18.15.2)
@@ -28,6 +34,9 @@ dependencies:
   vue:
     specifier: ^3.2.33
     version: 3.2.47
+  zod:
+    specifier: ^3.21.4
+    version: 3.21.4
 
 devDependencies:
   '@brillout/test-e2e':
@@ -840,6 +849,16 @@ packages:
     os: [win32]
     requiresBuild: true
     optional: true
+
+  /@hono/zod-validator@0.1.2(hono@3.1.5)(zod@3.21.4):
+    resolution: {integrity: sha512-rsAH7TAbpgFfMFNAe8PsjZb3jiHn+fDJvEM7bju0c64MMMKsFOuuzGur/0wyvMOgHDqCx08gAo0GRpoohJXMtQ==}
+    peerDependencies:
+      hono: 3.*
+      zod: ^3.19.1
+    dependencies:
+      hono: 3.1.5
+      zod: 3.21.4
+    dev: false
 
   /@iarna/toml@2.2.5:
     resolution: {integrity: sha512-trnsAYxU3xnS1gPHPyU961coFyLkh4gAD/0zQ5mymY4yOZ+CYvsPqUbOFSw0aDM4y0tV7tiFxL/1XfXPNC6IPg==}
@@ -2702,6 +2721,11 @@ packages:
     engines: {node: '>= 0.4.0'}
     dependencies:
       function-bind: 1.1.1
+
+  /hono@3.1.5:
+    resolution: {integrity: sha512-ypFLhNYoXXtep4I9zJt3VpB5/Ze3p9BLU4dpnAp7fxHOmSg8lu/Wwjs5sTJnb2GwVdfjbt9KFB9alA4Zt/P0jw==}
+    engines: {node: '>=16.0.0'}
+    dev: false
 
   /hookable@5.5.3:
     resolution: {integrity: sha512-Yc+BQe8SvoXH1643Qez1zqLRmbA5rCL+sSmk6TVos0LWVfNIB7PGncdlId77WzLGSIB5KaWgTaNTs2lNVEI6VQ==}
@@ -4627,6 +4651,10 @@ packages:
 
   /zhead@2.0.4:
     resolution: {integrity: sha512-V4R94t3ifk9AURym6OskbKcnowzgp5Z88tkoL/NF67vyryNxC62u6mx5F1Ux4oh4+YN7FFmKYEyWy6m5kfPH6g==}
+    dev: false
+
+  /zod@3.21.4:
+    resolution: {integrity: sha512-m46AKbrzKVzOzs/DZgVnG5H55N1sv1M8qZU3A8RIKbs3mrACDNeIOeilDymVb2HdmP8uwshOCF4uJ8uM9rCqJw==}
     dev: false
 
   file:../../../oss/test-e2e:

@@ -60,7 +60,12 @@ async function handleFetchEvent(
       // If you're trying to import an npm package, you'll need to bundle your Worker first.
       // const { Api: api } = await import(`../worker/api.${env.API_VERSION}`);
       let api;
+      const resp = new Response();
       switch (env.API_VERSION) {
+        case "v6":
+          console.log(`handleFetchEvent.API_VERSION: ${env.API_VERSION}`);
+          ({ Api: api } = await import("../worker/api.v6"));
+          break;
         case "v5":
           console.log(`handleFetchEvent.API_VERSION: ${env.API_VERSION}`);
           ({ Api: api } = await import("../worker/api.v5"));
@@ -74,11 +79,10 @@ async function handleFetchEvent(
           ({ Api: api } = await import("../worker/api.v2"));
           break;
         default:
-          // console.log(`handleFetchEvent.API_VERSION: ${env.API_VERSION}`);
           ({ Api: api } = await import("../worker/api.v1"));
+          res = await api.handle(request, resp, env, ctx);
           break;
       }
-      const resp = new Response();
       res = await api.handle(request, resp, env, ctx);
       break;
     default:

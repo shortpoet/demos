@@ -22,15 +22,18 @@
     "w:test:e2e": "ts-node ./test/.test-wrangler.test.ts"
   },
   "dependencies": {
+    "@hono/zod-validator": "^0.1.2",
     "@unocss/reset": "^0.50.6",
     "@vitejs/plugin-vue": "^4.0.0",
     "@vue/compiler-sfc": "^3.2.33",
     "@vue/server-renderer": "^3.2.33",
     "@vueuse/core": "^9.13.0",
     "@vueuse/head": "^1.1.23",
+    "hono": "^3.1.5",
     "vite": "^4.0.3",
     "vite-plugin-ssr": "^0.4.93",
-    "vue": "^3.2.33"
+    "vue": "^3.2.33",
+    "zod": "^3.21.4"
   },
   "type": "module",
   "devDependencies": {

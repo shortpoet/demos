@@ -1,14 +1,21 @@
 import { HealthCheck } from "../../types";
 import { msToTime } from "../util";
-import { Env, WorkerEnv } from "../types";
+import { Bindings, Env, WorkerEnv } from "../types";
 import { ServerResponse } from "http";
 import { IRequest } from "../api.v5/router";
+import type { HonoRequest } from "hono";
 
 export const healthCheck = async (
-  req: Request | IRequest,
-  res: ServerResponse,
-  env: Env
+  req: any,
+  // hono is tricky to type
+  // req: Request | IRequest | HonoRequest,
+  res: ServerResponse | Response,
+  env: any
+  // env: Env | Bindings
 ) => {
+  if (!env) {
+    throw new Error("env is undefined");
+  }
   const gitInfo = (<Env>env).isWorkerEnv
     ? JSON.parse((await (env.DEMO_CFW_SSR as KVNamespace).get("gitInfo")) || "")
     : (await import("../../data/git.json")).default;
@@ -40,7 +47,6 @@ export const _healthCheck = async (
   env: Env,
   ctx: ExecutionContext
 ) => {
-  const path = new URL(req.url).pathname;
   let gitInfo;
   let version = "";
 
