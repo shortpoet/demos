@@ -1,6 +1,5 @@
 compatibility_date = "2023-04-08"
 main = "./app/build/worker/worker.mjs"
-# main = "./app/worker/index.ts"
 name = "demo-cfw-ssr"
 node_compat = true
 workers_dev = true
