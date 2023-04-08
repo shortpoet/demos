@@ -1,3 +1,4 @@
+// https://github.com/honojs/hono/blob/3317ca128a7ae4a83cecea09f2d7ff647b577a3b/src/adapter/cloudflare-pages/handler.ts
 import { Hono } from "hono";
 import { handle } from "hono/cloudflare-pages";
 import { z } from "zod";

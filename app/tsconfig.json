@@ -7,7 +7,8 @@
     "lib": [
       "DOM",
       "DOM.Iterable",
-      "ESNext"
+      "ESNext",
+      "WebWorker"
     ],
     "strict": true,
     "esModuleInterop": true,

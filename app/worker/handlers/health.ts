@@ -13,6 +13,9 @@ export const healthCheck = async (
   env: any
   // env: Env | Bindings
 ) => {
+  // console.log("healthCheck -> req", req);
+  // console.log("healthCheck -> res", res);
+  // console.log("healthCheck -> env", env);
   if (!env) {
     throw new Error("env is undefined");
   }
@@ -39,6 +42,42 @@ export const healthCheck = async (
   return new Response(JSON.stringify(healthRes, null, 2), {
     headers: { "content-type": "application/json" },
   });
+};
+export const healthCheckH3 = async (
+  req: any,
+  // hono is tricky to type
+  // req: Request | IRequest | HonoRequest,
+  res: ServerResponse | Response,
+  env: any
+  // env: Env | Bindings
+) => {
+  // console.log("healthCheck -> req", req);
+  // console.log("healthCheck -> res", res);
+  // console.log("healthCheck -> env", env);
+  if (!env) {
+    throw new Error("env is undefined");
+  }
+  const gitInfo = (<Env>env).isWorkerEnv
+    ? JSON.parse((await (env.DEMO_CFW_SSR as KVNamespace).get("gitInfo")) || "")
+    : (await import("../../data/git.json")).default;
+
+  const version = (<Env>env).isWorkerEnv
+    ? // @ts-expect-error
+      JSON.parse((await import("__STATIC_CONTENT_MANIFEST")) || "")[
+        "__STATIC_CONTENT_MANIFEST"
+      ]
+    : "local";
+
+  const healthRes: HealthCheck = {
+    status: "OK",
+    version,
+    uptime: msToTime(process.uptime()),
+    env: env.ENVIRONMENT,
+    timestamp: new Date(Date.now()),
+    gitInfo: gitInfo,
+  };
+
+  return healthRes;
 };
 
 export const _healthCheck = async (

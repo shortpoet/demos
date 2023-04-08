@@ -1,3 +1,4 @@
+import { H3Event } from "h3";
 import { IRequest } from "../api.v5/router";
 import type { HonoRequest } from "hono";
 
@@ -75,7 +76,17 @@ export const useCors = (options: CorsOptions = {}) => {
     responseHeaders["Access-Control-Max-Age"] = maxAge;
   }
 
-  const preflight = (req: Request | IRequest | HonoRequest<any, any>) => {
+  const preflight = (
+    req:
+      | Request
+      | IRequest
+      | HonoRequest<any, any>
+      | H3Event
+      | H3Event["node"]["req"]
+  ) => {
+    if (req instanceof H3Event) {
+      req = req.node.req;
+    }
     console.log("preflight", "PREEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE");
     const useMethods = [...new Set(["OPTIONS", ...methods])];
     const origin = req.headers.get("Origin") || "";

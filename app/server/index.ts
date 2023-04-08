@@ -36,9 +36,10 @@ const server = http.createServer(async (req, res) => {
     // ${new Date().toLocaleTimeString()}
     // START -> ${req.method} -> ${req.url}
     // `);
-    const resp = await api
-      .handle(apiReq, res, process.env)
-      .catch((err) => new Response(err.message, { status: 500 }));
+    const resp = await api.handle(apiReq, res, process.env).catch((err) => {
+      console.error(err);
+      return new Response(err.message, { status: 500 });
+    });
 
     if (!resp) {
       res.statusCode = 404;
@@ -47,6 +48,7 @@ const server = http.createServer(async (req, res) => {
     }
 
     const incomingHeaders = Array.from(resp.headers.entries()) as any;
+    console.log("incomingHeaders", incomingHeaders);
 
     res.writeHead(resp.status, resp.statusText, incomingHeaders);
     res.end((await resp.text()) + "\n");

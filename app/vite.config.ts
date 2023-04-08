@@ -6,6 +6,10 @@ import { defineConfig, loadEnv, UserConfig } from "vite";
 import { InlineConfig } from "vitest";
 import { fileURLToPath } from "node:url";
 
+import { NodeGlobalsPolyfillPlugin } from "@esbuild-plugins/node-globals-polyfill";
+import { NodeModulesPolyfillPlugin } from "@esbuild-plugins/node-modules-polyfill";
+import rollupNodePolyFill from "rollup-plugin-polyfill-node";
+
 interface VitestConfigExport extends UserConfig {
   test: InlineConfig;
 }
@@ -45,8 +49,27 @@ export default ({ mode }: { mode: string }) => {
     build: {
       outDir: "build",
       target: "esnext",
+      rollupOptions: {
+        plugins: [rollupNodePolyFill()],
+      },
     },
-
+    optimizeDeps: {
+      esbuildOptions: {
+        platform: "node",
+        // Node.js global to browser globalThis
+        define: {
+          global: "globalThis",
+        },
+        // Enable esbuild polyfill plugins
+        plugins: [
+          NodeGlobalsPolyfillPlugin({
+            process: true,
+            buffer: true,
+          }),
+          NodeModulesPolyfillPlugin(),
+        ],
+      },
+    },
     resolve: {
       alias: {
         "~": fileURLToPath(new URL(".", import.meta.url)),

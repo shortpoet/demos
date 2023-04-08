@@ -15,7 +15,10 @@
     "allowJs": true,
     "forceConsistentCasingInFileNames": true,
     "lib": [
-      "esnext"
+      "DOM",
+      "DOM.Iterable",
+      "ESNext",
+      "WebWorker"
     ],
     "types": [
       "@cloudflare/workers-types"

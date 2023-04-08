@@ -62,6 +62,10 @@ async function handleFetchEvent(
       let api;
       const resp = new Response();
       switch (env.API_VERSION) {
+        case "v7":
+          console.log(`handleFetchEvent.API_VERSION: ${env.API_VERSION}`);
+          ({ Api: api } = await import("../worker/api.v7"));
+          break;
         case "v6":
           console.log(`handleFetchEvent.API_VERSION: ${env.API_VERSION}`);
           ({ Api: api } = await import("../worker/api.v6"));

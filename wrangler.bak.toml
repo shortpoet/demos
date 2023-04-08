@@ -1,4 +1,5 @@
-compatibility_date = "2023-02-28"
+compatibility_date = "2023-04-08"
+# main = "./app/build/worker/worker.mjs"
 main = "./app/worker/index.ts"
 name = "demo-cfw-ssr"
 node_compat = true
@@ -9,7 +10,7 @@ port = 3000
 custom_domain = true
 pattern = "demos-dev.shortpoet.com"
 [env.dev.vars]
-API_VERSION = "v5"
+API_VERSION = "v7"
 ENVIRONMENT = "dev"
 LOG_LEVEL = "debug"
 SSR_BASE_PATHS = "about,api-data,index,star-wars"
@@ -17,5 +18,6 @@ VITE_API_URL = "https://demo-cfw-ssr-dev.shortpoet.workers.dev"
 VITE_APP_NAME = "demo-cfw-ssr"
 VITE_APP_URL = "https://demo-cfw-ssr-dev.shortpoet.workers.dev"
 VITE_LOG_LEVEL = "info"
+VITE_PORT = "3000"
 [site]
 bucket = "./app/build/client"
