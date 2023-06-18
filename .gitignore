@@ -1,4 +1,16 @@
+# Env / Vars
 !**/*.env*
+.dev.vars
+.prod.vars
+
+# Certs
+**/*.crt
+**/*.key
+**/*.pem
+
+
+# Cloudflare / Miniflare
+**/*.mf
 
 # Local .terraform directories
 **/.terraform/*
