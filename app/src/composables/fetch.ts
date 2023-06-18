@@ -47,6 +47,7 @@ const useFetch = async <T = unknown>(
   // errorRef: Ref<any> = ref(null),
 ): Promise<UseFetchResult<T>> => {
   const urlBase = `${import.meta.env.VITE_API_URL}`;
+  console.info(`fetch.fetching data from: -> ${urlBase}`);
   const url = path.startsWith("http") ? path : `${urlBase}/${path}`;
 
   const dataLoading = ref(true);
