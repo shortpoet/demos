@@ -1,4 +1,8 @@
-lockfileVersion: '6.0'
+lockfileVersion: '6.1'
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
 
 dependencies:
   '@auth/core':
@@ -5182,7 +5186,7 @@ packages:
   file:../../../oss/test-e2e:
     resolution: {directory: ../../../oss/test-e2e, type: directory}
     name: '@brillout/test-e2e'
-    version: 0.4.17
+    version: 0.5.1
     hasBin: true
     dependencies:
       '@brillout/part-regex': 0.1.2
