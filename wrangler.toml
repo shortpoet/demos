@@ -4,7 +4,7 @@ name = "demo-cfw-ssr"
 node_compat = true
 workers_dev = true
 [dev]
-port = 3000
+port = 8888
 [[env.dev.kv_namespaces]]
 binding = "DEMO_CFW_SSR"
 id = "3740e85e3b174682964efa26066fa5c4"
